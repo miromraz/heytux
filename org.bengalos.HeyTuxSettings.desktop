@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Hey Tux
+Comment=Configure the offline voice assistant
+Exec=python3 /home/miro/heytux/heytux_settings.py
+Icon=audio-input-microphone-symbolic
+Terminal=false
+Categories=GTK;Settings;
+Keywords=voice;assistant;heytux;wake;
+X-Purism-FormFactor=Workstation;Mobile;

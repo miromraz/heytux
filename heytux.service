@@ -1,0 +1,17 @@
+[Unit]
+Description=Hey Tux offline voice assistant
+After=pipewire.service wireplumber.service heytux-llm.service
+Wants=heytux-llm.service
+
+[Service]
+Type=simple
+Environment=PYTHONPATH=/home/miro/heytux/pylib
+Environment=LD_LIBRARY_PATH=/home/miro/sherpa/sherpa-onnx-v1.13.8-linux-aarch64-shared-cpu/lib
+Environment=NEEDLE_TELEMETRY=0
+Environment=DO_NOT_TRACK=1
+ExecStart=/usr/bin/python3 /home/miro/heytux/heytux.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=Hey Tux chat LLM (llama.cpp, Qwen3-0.6B Q4_K_M)
+
+[Service]
+Type=simple
+Environment=LD_LIBRARY_PATH=/home/miro/llm/root/usr/lib/aarch64-linux-gnu:/home/miro/llm/root/usr/lib/aarch64-linux-gnu/llama:/home/miro/stt/root/usr/lib/aarch64-linux-gnu
+ExecStart=/home/miro/llm/root/usr/bin/llama-server -m /home/miro/llm/models/Qwen3-0.6B-Q4_K_M.gguf -t 2 -c 512 --host 127.0.0.1 --port 8771 --log-disable
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "KPlugin": {
+        "Id": "org.bengalos.heytux",
+        "Name": "Hey Tux",
+        "Description": "Offline push-to-talk voice assistant",
+        "Icon": "audio-input-microphone",
+        "Category": "Utilities",
+        "License": "MIT",
+        "Version": "1.0",
+        "Authors": [
+            { "Name": "Miroslav Mraz", "Email": "mraz.miro@seznam.cz" }
+        ]
+    }
+}
