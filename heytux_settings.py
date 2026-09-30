@@ -82,11 +82,11 @@ class Window(Adw.ApplicationWindow):
         # --- daemon-down page ---
         self.down = Adw.StatusPage(icon_name="network-offline-symbolic",
                                    title="Hey Tux is not running",
-                                   description="Start it with:\nsystemctl --user start heytux")
-        retry = Gtk.Button(label="Retry", halign=Gtk.Align.CENTER,
-                           css_classes=["pill", "suggested-action"])
-        retry.connect("clicked", lambda *_: self.refresh())
-        self.down.set_child(retry)
+                                   description="It does not start by itself")
+        self.start_btn = Gtk.Button(label="Start", halign=Gtk.Align.CENTER,
+                                    css_classes=["pill", "suggested-action"])
+        self.start_btn.connect("clicked", self._on_start)
+        self.down.set_child(self.start_btn)
         self.stack.add_named(self.down, "down")
 
         # --- main preferences page ---
@@ -142,6 +142,11 @@ class Window(Adw.ApplicationWindow):
         g.add(self.wake_row)
         self.hits_row = Adw.ActionRow(title="Wake hits", subtitle="–")
         g.add(self.hits_row)
+        run_row = Adw.ActionRow(title="Running", subtitle="Stop the assistant and its chat model")
+        stop = Gtk.Button(label="Stop", valign=Gtk.Align.CENTER, css_classes=["destructive-action"])
+        stop.connect("clicked", self._on_stop)
+        run_row.add_suffix(stop)
+        g.add(run_row)
         self.page.add(g)
 
         # Try it
@@ -408,21 +413,48 @@ class Window(Adw.ApplicationWindow):
 
         def work():
             subprocess.run(["systemctl", "--user", "restart", "heytux"], timeout=20)
-            deadline = time.time() + 60
-            while time.time() < deadline:
-                try:
-                    if http("GET", "/config", timeout=3)[0] == 200:
-                        return True
-                except Exception:
-                    pass
-                time.sleep(2)
-            return False
+            return wait_up()
         self._bg(work, self._on_restarted)
 
     def _on_restarted(self, ok):
         self.banner.set_button_label("Restart")
         self.toast("Hey Tux restarted" if ok is True else "Restart timed out")
         self.refresh()
+
+    # ---------- start / stop (the units are not enabled, so nothing starts at login) ----------
+    def _on_start(self, *_):
+        self.start_btn.set_sensitive(False)
+        self.start_btn.set_label("Starting…")
+
+        def work():
+            # heytux.service Wants= heytux-llm.service, so this brings up both
+            subprocess.run(["systemctl", "--user", "start", "heytux"], timeout=20)
+            return wait_up()
+        self._bg(work, self._on_started)
+
+    def _on_started(self, ok):
+        self.start_btn.set_sensitive(True)
+        self.start_btn.set_label("Start")
+        if ok is not True:
+            self.toast("Hey Tux did not start")
+        self.refresh()
+
+    def _on_stop(self, *_):
+        self._bg(lambda: subprocess.run(["systemctl", "--user", "stop", "heytux", "heytux-llm"],
+                                        timeout=30),
+                 lambda res: self.refresh())
+
+
+def wait_up(timeout=60):
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        try:
+            if http("GET", "/config", timeout=3)[0] == 200:
+                return True
+        except Exception:
+            pass
+        time.sleep(2)
+    return False
 
 
 class HeyTuxApp(Adw.Application):

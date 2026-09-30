@@ -23,8 +23,8 @@ $SSH 'chown -R miro:miro /home/miro/heytux /home/miro/.config/systemd/user /home
 
 echo "== (re)start services =="
 $SSH "$RU systemctl --user daemon-reload"
-$SSH "$RU systemctl --user enable --now heytux-llm"
-$SSH "$RU systemctl --user enable --now heytux"
+# not enabled: the user starts/stops it from the Hey Tux app (it costs ~1/3 of a core listening)
+$SSH "$RU systemctl --user disable heytux-llm heytux 2>/dev/null || true"
 $SSH "$RU systemctl --user restart heytux-llm heytux"
 
 echo "== wait for load =="
