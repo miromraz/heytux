@@ -79,6 +79,10 @@ SCHEMA = [
        "Keep this many of the most recent wake/listen recordings (wav + json transcript) under "
        "/home/miro/heytux/captures, for debugging transcription. 0 disables.",
        "wake", "live", min=0, max=200, step=1),
+    _f("FOLLOWUP_S", "float", 5.0, "Follow-up window",
+       "After a chat answer, keep listening this long for a follow-up question without the wake "
+       "word. Ends silently if you say nothing, or after any phone command. 0 disables.",
+       "wake", "live", min=0.0, max=15.0, step=0.5),
     _f("CONF_FLOOR", "float", 0.5, "Confidence floor",
        "Below this the router's answer is discarded and the question goes to the chat model.",
        "routing", "live", min=0.0, max=1.0, step=0.05),
@@ -89,10 +93,17 @@ SCHEMA = [
        "You are a voice assistant running on a phone. Reply in one or two short spoken "
        "sentences, no lists, no markdown, no emoji.",
        "Chat instructions", "System prompt given to the local chat model.", "routing", "live"),
-    _f("KWS_TEXT", "text", "▁HE Y ▁T U X @HEY_TUX\n", "Wake word",
-       "Keyword tokens for the spotter. The plain tokens + @label form scores 6 of 9; the "
-       "':0.25 #1.5' threshold form scores 0 of 9 and gives no sign it is broken. Test before "
-       "saving.", "wake", "model"),
+    _f("CHAT_HISTORY_TURNS", "int", 4, "Chat memory",
+       "How many previous question/answer pairs the chat model sees, so \"explain it\" follows "
+       "\"tell me a joke\". 0 makes every question stand alone.", "routing", "live",
+       min=0, max=8, step=1),
+    _f("CHAT_MEMORY_S", "float", 60.0, "Chat memory timeout",
+       "Forget the conversation when the last chat answer is older than this.", "routing", "live",
+       min=5.0, max=600.0, step=5.0),
+    _f("KWS_TEXT", "text", "▁HE Y ▁LI N U X @HEY_LINUX\n", "Wake word",
+       "Keyword tokens for the spotter, plain tokens + @label. Per-keyword ':boost #threshold' "
+       "is optional; '#' must be a small probability (e.g. #0.15) - the old ':0.25 #1.5' "
+       "could never fire. Test before saving.", "wake", "model"),
     _f("TTS_DIR", "enum", "/home/miro/sherpa/tts/vits-piper-en_US-lessac-low-int8", "Voice",
        "Speech synthesis voice. Only vits-shaped models are listed.", "voice", "model", values=[]),
     _f("STT_DIR", "enum",

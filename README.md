@@ -155,7 +155,7 @@ Mic tuning is live via `POST /config`: `VAD_THRESHOLD` (Silero, default 0.3), `S
 energy-fallback thresholds `VAD_RMS`/`VAD_CONT_RMS`/`VAD_ONSET_FRAMES`, and the rest of the schema
 (`GET /config` lists it with defaults).
 
-## Wake word ("hey tux")
+## Wake word ("hey linux")
 
 Always-on keyword spotting via the sherpa-onnx zipformer KWS model. A background thread owns the
 mic while idle; on a hit it plays a rising two-note cue (660 -> 990 Hz, no TTS), runs the exact
@@ -174,11 +174,19 @@ clock, so blocking cue playback cannot desynchronise it. It is paused while `/li
 while an ack plays (so it never hears itself), and ignores a hit within `WAKE_COOLDOWN_S` of the
 previous pipeline finishing.
 
-- Keyword file: `hey.txt` = `▁HE Y ▁T U X @HEY_TUX` (deployed to `/home/miro/heytux/`).
-  NOTE: the `:0.25 #1.5` threshold/boost form detects 0/9 in this sherpa build (the `:`/`#` values
-  invert and suppress it); the plain tokens + `@label` form gave 6/9 US positives, 0/15 false
-  alarms for the old "hey linux" phrase; "hey tux" (BPE-checked against the model's `bpe.model`)
-  is not yet measured. Do not add a bare single-word keyword (false alarms).
+- Keyword file: `hey.txt` = `▁HE Y ▁LI N U X @HEY_LINUX` (deployed to `/home/miro/heytux/`).
+  In sherpa-onnx `:` is the boost and `#` the trigger probability, so the old `:0.25 #1.5` could
+  never fire (threshold > 1). Spotter: `max_active_paths=8, keywords_threshold=0.15,
+  keywords_score=1.5`. Host bench (same int8 model, 40 libritts_r TTS speakers, 100 ms chunks):
+
+  | config | loud (peak 0.5) | quiet (peak 0.08) | false alarms, 5.6 min near-misses |
+  |-|-|-|-|
+  | "hey tux", defaults | 27/40 | 23/40 | – |
+  | "hey linux", defaults | 36/40 | 28/40 | 1 |
+  | "hey linux", tuned | 37/40 | 35/40 | 1 |
+
+  More active paths (12/16/32) gain little and raise false alarms to 3/7/18. Do not add a bare
+  single-word keyword (false alarms).
 - Control: `POST /wake {"on":bool}`; `GET /wake` → `{"on":bool,"hits":n}`; also the `WAKE_ON`
   setting in `POST /config`. `wake`/`wake_hits` are in `GET /status`. Every hit is logged with a
   timestamp. Idle cost ~28 % of one core.
@@ -188,7 +196,7 @@ previous pipeline finishing.
 
 Chatter (questions, facts, jokes, greetings, small talk) is answered by a small local LLM —
 `heytux-llm.service`, a llama.cpp `llama-server` serving Qwen3-0.6B Q4_K_M on 127.0.0.1:8771
-(`-t 2 -c 512 --log-disable`, Restart=on-failure). `heytux.service` has `Wants=`/`After=` it.
+(`-t 2 -c 2048 --log-disable`, Restart=on-failure; 2048 so the chat memory below fits). `heytux.service` has `Wants=`/`After=` it.
 `deploy.sh` installs and enables both units.
 
 Routing (Needle3 + a 15th `ask_question` tool):
@@ -208,6 +216,18 @@ facts), `max_tokens=60`, `temperature=0.7`, `enable_thinking=false` (thinking MU
 takes 10 s+). 10 s timeout; on any error/timeout the daemon speaks "I can't answer that right now."
 LLM output is sanitized before TTS (strip emoji/non-ASCII, markdown, collapse whitespace, first 2
 sentences, ≤220 chars). The response JSON carries `route` and `ms.llm`.
+
+**Chat memory.** The request also carries the last `CHAT_HISTORY_TURNS` (default 4, 0 = stateless)
+question/answer pairs of chat turns, so "tell me a joke" → "explain it" works. Tool turns are not
+remembered, a failed answer is not remembered, `dry` /text never changes it, and the whole memory
+is dropped once the last chat answer is older than `CHAT_MEMORY_S` (default 60).
+
+**Follow-up window.** After a wake turn that went to chat, `kws_loop` waits for the spoken answer
+to finish, drains the still-open mic stream (it heard our own reply), plays the wake cue and records
+again on the same stream — no wake word needed — for up to `FOLLOWUP_S` (default 5.0, 0 = off) of
+audio waiting for speech to start. It repeats while follow-ups keep going to chat; a tool turn,
+silence (ends quietly: no "I didn't catch that", no capture saved) or the wake word switched off
+returns to keyword spotting. Follow-up turns go through the same routing gates as any other turn.
 
 Known routing limits (Needle3, deterministic): "who are you" → `phone_info` and "explain how a
 battery works" → `battery_status` at confidence 1.0 — they collide with those tools and route

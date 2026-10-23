@@ -164,8 +164,8 @@ PlasmoidItem {
             }
             QQC2.Label {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.wakeKnown ? (root.wakeOn ? i18n("hey tux: on") : i18n("hey tux: off"))
-                                     : i18n("hey tux: …")
+                text: root.wakeKnown ? (root.wakeOn ? i18n("hey linux: on") : i18n("hey linux: off"))
+                                     : i18n("hey linux: …")
                 color: root.wakeOn ? Kirigami.Theme.positiveTextColor : Kirigami.Theme.disabledTextColor
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.toggleWake() }
             }

@@ -2,7 +2,7 @@
 # test_heytux.py - offline unit checks for heytux.py. Plain asserts, no pytest, no phone, no models.
 # Imports heytux WITHOUT loading models (sherpa_onnx is only imported inside Models.__init__).
 # Run:  python3 test_heytux.py
-import os, sys
+import io, json, os, sys, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 import heytux as J
@@ -182,6 +182,82 @@ def t_dry_run_does_not_execute_or_speak():
     assert res["calls"] == [{"name": "flashlight_on", "arguments": {}}], res["calls"]
     assert called == [], "execute() must not run in a dry route"
     assert fake.spoke == [], "nothing must be spoken in a dry route"
+
+# --- chat memory: chat_llm with urlopen faked; the request body is what the LLM would see ---
+def _chat(transcripts, turns=4, memory_s=60.0, remember=True):
+    """Run chat_llm over transcripts from an empty memory; returns the sent messages lists."""
+    sent = []
+    def fake_urlopen(req, timeout=0):
+        msgs = json.loads(req.data)["messages"]
+        sent.append(msgs)
+        return io.BytesIO(json.dumps(
+            {"choices": [{"message": {"content": "answer %d." % len(sent)}}]}).encode())
+    saved = (urllib.request.urlopen, J.CFG["CHAT_HISTORY_TURNS"], J.CFG["CHAT_MEMORY_S"])
+    urllib.request.urlopen = fake_urlopen
+    J.CFG["CHAT_HISTORY_TURNS"], J.CFG["CHAT_MEMORY_S"] = turns, memory_s
+    J.CHAT_HISTORY.clear()
+    try:
+        for t in transcripts:
+            J.chat_llm(t, remember=remember)
+    finally:
+        urllib.request.urlopen, J.CFG["CHAT_HISTORY_TURNS"], J.CFG["CHAT_MEMORY_S"] = saved
+    return sent
+
+def _pairs(msgs):
+    return [(m["role"], m["content"]) for m in msgs[1:]]
+
+def t_chat_messages_order():
+    msgs = J.chat_messages("SYS", [("q1", "a1"), ("q2", "a2")], "q3")
+    assert [(m["role"], m["content"]) for m in msgs] == [
+        ("system", "SYS"), ("user", "q1"), ("assistant", "a1"),
+        ("user", "q2"), ("assistant", "a2"), ("user", "q3")], msgs
+
+def t_chat_history_carries_context():
+    sent = _chat(["tell me a joke", "explain it"])
+    assert sent[1][0]["role"] == "system"
+    assert _pairs(sent[1]) == [("user", "tell me a joke"), ("assistant", "answer 1."),
+                               ("user", "explain it")], sent[1]
+
+def t_chat_history_capped():
+    sent = _chat(["q1", "q2", "q3", "q4"], turns=2)
+    assert _pairs(sent[3]) == [("user", "q2"), ("assistant", "answer 2."),
+                               ("user", "q3"), ("assistant", "answer 3."), ("user", "q4")], sent[3]
+    assert len(J.CHAT_HISTORY) == 2, J.CHAT_HISTORY
+
+def t_chat_history_zero_is_stateless():
+    sent = _chat(["q1", "q2"], turns=0)
+    assert _pairs(sent[1]) == [("user", "q2")], sent[1]
+    assert J.CHAT_HISTORY == []
+
+def t_chat_history_expires():
+    _chat(["q1"])
+    J.chat_last -= 61                     # last answer now older than CHAT_MEMORY_S=60
+    saved = urllib.request.urlopen
+    sent = []
+    urllib.request.urlopen = lambda req, timeout=0: (sent.append(json.loads(req.data)["messages"])
+        or io.BytesIO(b'{"choices":[{"message":{"content":"x."}}]}'))
+    try:
+        J.chat_llm("q2")
+    finally:
+        urllib.request.urlopen = saved
+    assert _pairs(sent[0]) == [("user", "q2")], sent[0]
+
+def t_chat_dry_does_not_remember():
+    _chat(["q1", "q2"], remember=False)
+    assert J.CHAT_HISTORY == []
+
+# --- follow-up onset timeout: silence ends the capture after onset_s of audio, no speech ---
+def t_record_onset_timeout_on_silence():
+    class FakeModels:
+        def vad_detector(self): return None          # energy VAD fallback path
+        def play_end_cue(self): raise AssertionError("end cue must not play on no speech")
+    orig_M, J.M = J.M, FakeModels()
+    try:
+        pcm, speech, stats = J.record(io.BytesIO(bytes(J.SR * 2 * 10)), onset_s=1.0)  # 10 s silence
+    finally:
+        J.M = orig_M
+    assert speech is False and stats["vad_speech"] is False, stats
+    assert abs(len(pcm) - J.SR) <= J.FRAME, "gave up after %.2f s, want 1.0" % (len(pcm) / J.SR)
 
 for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
     check(name[2:], fn)

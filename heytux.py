@@ -23,7 +23,7 @@ BATTERY = "/sys/class/power_supply/qcom_qg"
 WIFI_DEV = "wld0"
 
 KWS_DIR = "/home/miro/kws/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01"
-KWS_KEYWORDS = "/home/miro/heytux/hey.txt"     # deployed with the daemon; "▁HE Y ▁T U X @HEY_TUX"
+KWS_KEYWORDS = "/home/miro/heytux/hey.txt"     # deployed with the daemon; "▁HE Y ▁LI N U X @HEY_LINUX"
 KWS_CHUNK = 3200                               # bytes = 100 ms s16 mono @ 16 kHz
 CAPTURE_DIR = "/home/miro/heytux/captures"     # fixed location; only the ring size (CAPTURE_KEEP) is configurable
 SILERO_VAD = "/home/miro/sherpa/silero_vad.onnx"   # copied to the phone out-of-band; absent => energy VAD fallback
@@ -552,21 +552,47 @@ def _live_facts():
         time.strftime("%A, %B %-d, %Y, %H:%M"), _read(BATTERY + "/capacity", "?"),
         _read(BATTERY + "/status", "?").lower())
 
-def chat_llm(transcript):
-    """Ask the local LLM; return a cleaned spoken answer, or None on any error/timeout."""
+# Rolling chat memory so "explain it" follows "tell me a joke": (user, answer) pairs of CHAT turns
+# only (a tool turn isn't conversation). Only touched via pipeline(), whose every caller (wake,
+# /listen, /text) holds LOCK, so no lock of its own.
+CHAT_HISTORY = []
+chat_last = 0.0                  # when the last remembered chat answer arrived
+
+def chat_messages(sys_prompt, history, transcript):
+    """system, then the history pairs oldest first, then the current question."""
+    msgs = [{"role": "system", "content": sys_prompt}]
+    for u, a in history:
+        msgs += [{"role": "user", "content": u}, {"role": "assistant", "content": a}]
+    return msgs + [{"role": "user", "content": transcript}]
+
+def _chat_history():
+    """The pairs to send: none when memory is off or the last answer is older than CHAT_MEMORY_S
+    (a new topic, not a follow-up), else the last CHAT_HISTORY_TURNS (it may be lowered live)."""
+    n = CFG["CHAT_HISTORY_TURNS"]
+    if n <= 0 or time.time() - chat_last > CFG["CHAT_MEMORY_S"]:
+        CHAT_HISTORY.clear()
+    return CHAT_HISTORY[-n:] if n > 0 else []
+
+def chat_llm(transcript, remember=True):
+    """Ask the local LLM; return a cleaned spoken answer, or None on any error/timeout. A good
+    answer is added to the chat memory unless remember=False (dry /text must not change it)."""
+    global chat_last
     body = json.dumps({
-        "messages": [{"role": "system", "content": CFG["LLM_SYS"] + " " + _live_facts()},
-                     {"role": "user", "content": transcript}],
+        "messages": chat_messages(CFG["LLM_SYS"] + " " + _live_facts(), _chat_history(), transcript),
         "max_tokens": 60, "temperature": 0.7,
         "chat_template_kwargs": {"enable_thinking": False}}).encode()
     try:
         req = urllib.request.Request(LLM_URL, data=body, headers={"Content-Type": "application/json"})
         r = json.load(urllib.request.urlopen(req, timeout=10))
         ans = clean_spoken(r["choices"][0]["message"]["content"])
-        return ans or None
     except Exception as e:
         log("chat_llm error:", repr(e))
         return None
+    if ans and remember and CFG["CHAT_HISTORY_TURNS"] > 0:
+        CHAT_HISTORY.append((transcript, ans))
+        del CHAT_HISTORY[:-CFG["CHAT_HISTORY_TURNS"]]
+        chat_last = time.time()
+    return ans or None
 
 # ---------- off-topic / grounding gates ----------
 # Needle3 ALWAYS emits the closest tool for a full toolset (it says so in `reasoning`, e.g.
@@ -730,7 +756,10 @@ class Models:
             encoder=KWS_DIR + "/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
             decoder=KWS_DIR + "/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
             joiner=KWS_DIR + "/joiner-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
-            num_threads=1, keywords_file=KWS_KEYWORDS, provider="cpu")
+            num_threads=1, keywords_file=KWS_KEYWORDS, provider="cpu",
+            # host bench, 40 TTS speakers, quiet (peak 0.08): 28/40 at the defaults (4, 0.25, 1.0)
+            # -> 35/40 here, near-miss false alarms unchanged; more paths raises false alarms
+            max_active_paths=8, keywords_threshold=0.15, keywords_score=1.5)
         log("KWS (zipformer wake word) loaded in %d ms" % (1000 * (time.time() - t)))
         self.play_proc = None       # last detached ack playback, awaited before the next mic capture
 
@@ -856,7 +885,7 @@ def drain_stream(src):
     """Discard everything already buffered in the mic pipe so capture starts from NOW.
 
     The KWS thread holds this pw-record open continuously (~28 % of a little core) and can fall
-    behind real time; at a wake hit the pipe may still hold the tail of "hey tux". A fixed skip
+    behind real time; at a wake hit the pipe may still hold the tail of "hey linux". A fixed skip
     can't know how much: guess low and the wake word lands in the transcript, guess high and it eats
     the command's first word. Draining to empty needs no guess. Returns bytes discarded (for the log)."""
     fd = src.fileno()
@@ -886,7 +915,7 @@ def _close_rec(p):
     except Exception:
         p.kill()
 
-def record(src=None, skip_s=0.0):
+def record(src=None, skip_s=0.0, onset_s=0.0):
     """Capture one utterance. Returns (audio_f32, speech, stats).
 
     Speech detection is the Silero VAD when its model is staged (M.vad_detector()), else the energy
@@ -900,7 +929,9 @@ def record(src=None, skip_s=0.0):
     the KWS thread already has open. The mic is never closed across the wake->capture handoff, which
     is what stopped the first word being eaten (closing/respawning pw-record left the mic shut ~1 s
     while the user was still talking). skip_s discards that many seconds up front, by SAMPLE COUNT,
-    so blocking cue playback into the room never reaches the VAD/STT."""
+    so blocking cue playback into the room never reaches the VAD/STT. onset_s > 0 (a follow-up turn)
+    gives up with no speech if none starts within that much audio, also by sample count; until
+    then HARD_CAP_S is not applied, so a late start still gets a full-length utterance."""
     p = None
     if src is None:
         M.await_playback()      # don't capture the tail of the previous spoken ack
@@ -917,7 +948,7 @@ def record(src=None, skip_s=0.0):
             if not chunk:
                 break
             drop -= len(chunk)
-        while time.time() - start < CFG["HARD_CAP_S"]:
+        while time.time() - start < CFG["HARD_CAP_S"] or (onset_s and not speech):
             buf = src.read(nbytes)
             if len(buf) < nbytes:
                 break
@@ -931,6 +962,8 @@ def record(src=None, skip_s=0.0):
                 rms = math.sqrt(float(np.mean(x * x)) + 1e-9)
                 voiced = rms > (CFG["VAD_CONT_RMS"] if speech else CFG["VAD_RMS"])
             vad_speech = vad_speech or voiced
+            if onset_s and not speech and len(frames) * FRAME >= onset_s * SR:
+                break                       # follow-up window lapsed with no speech onset
             if speech:
                 if voiced:
                     silence_ms = 0
@@ -945,6 +978,8 @@ def record(src=None, skip_s=0.0):
                     voiced_run += 1
                     if voiced_run >= CFG["VAD_ONSET_FRAMES"]:   # sustained -> real speech, not a spike
                         speech = True
+                if speech and onset_s:
+                    start = time.time()     # HARD_CAP_S/MIN_S count from a follow-up's late onset
             else:
                 voiced_run = 0
     finally:
@@ -1010,7 +1045,7 @@ def pipeline(transcript, ms, overlay=False, notif_id=0, dry=False):
                                                 for c in calls) if a)
         else:
             with timed(ms, "llm"):
-                ans = chat_llm(transcript)      # always the ORIGINAL transcript, not needle's arg
+                ans = chat_llm(transcript, remember=not dry)   # ORIGINAL transcript, not needle's arg
             said, calls = (ans if ans else CHAT_FAIL), []
         log("route=%s conf=%.2f transcript=%r said=%r" % (route, conf, transcript, said))
         if overlay and CFG["OVERLAY_ON"]:
@@ -1071,14 +1106,20 @@ def save_capture(pcm_f32, result, drained_bytes, stats):
             log("capture save error (further failures suppressed):", repr(e))
             _capture_err_logged = True
 
-def listen_and_run(src=None, skip_s=0.0, notif_id=0, drained_bytes=0):
+def listen_and_run(src=None, skip_s=0.0, notif_id=0, drained_bytes=0, followup_s=0.0):
     """Record, transcribe, run the pipeline. Shared by /listen and wake hits (which hand over the
-    still-open KWS stream via src/skip_s; /listen passes neither). A raise anywhere here would
-    otherwise leave the 'Listening...' banner (expire_ms=0) on screen forever, so clear it and re-raise."""
+    still-open KWS stream via src/skip_s; /listen passes neither). followup_s > 0 is a no-wake-word
+    follow-up turn: silence for that long ends it quietly (route "none", nothing spoken or saved -
+    it's the normal end of a conversation, not a miss). A raise anywhere here would otherwise leave
+    the 'Listening...' banner (expire_ms=0) on screen forever, so clear it and re-raise."""
     ms = {}
     try:
         with timed(ms, "record"):
-            pcm, speech, stats = record(src, skip_s)
+            pcm, speech, stats = record(src, skip_s, followup_s)
+        if not speech and followup_s:
+            overlay_clear(notif_id)
+            return {"transcript": "", "calls": [], "said": "", "confidence": 0.0,
+                    "route": "none", "ms": ms}
         if not speech:
             ms["stt"] = 0
             res = pipeline("", ms, overlay=True, notif_id=notif_id)   # "I didn't catch that"
@@ -1166,6 +1207,20 @@ def kws_loop():
                     # skip_s is 0 in haptic/off mode; in sound/both it skips the tone's own length by
                     # SAMPLE COUNT, so not blocking on playback here is harmless.
                     res = listen_and_run(rec.stdout, wake_skip_s(), notif_id, drained_bytes=n)
+                    # Follow-up window: after a chat answer, listen again without the wake word on
+                    # the SAME open stream (closing it ate the first word). A tool turn, silence for
+                    # FOLLOWUP_S, or the wake word being switched off ends it -> back to spotting.
+                    while (res["route"].startswith("chat") and CFG["FOLLOWUP_S"] > 0
+                           and WAKE_ON.is_set()):
+                        log("wake pipeline: transcript=%r said=%r" % (res.get("transcript"), res.get("said")))
+                        M.await_playback()          # let our spoken answer finish...
+                        if not WAKE_ON.is_set():       # switched off while the answer played
+                            break
+                        n = drain_stream(rec.stdout)   # ...and discard it: the open mic heard it
+                        notif_id = overlay_listening()
+                        M.play_wake_cue()
+                        res = listen_and_run(rec.stdout, wake_skip_s(), notif_id, drained_bytes=n,
+                                             followup_s=CFG["FOLLOWUP_S"])
                 log("wake pipeline: transcript=%r said=%r" % (res.get("transcript"), res.get("said")))
             except Exception:
                 log("wake pipeline error:\n" + traceback.format_exc())

@@ -137,7 +137,7 @@ class Window(Adw.ApplicationWindow):
         # status group (wake switch + hit count) at the top
         g = Adw.PreferencesGroup(title="Status")
         self.wake_row = Adw.SwitchRow(title="Wake word",
-                                      subtitle="Listen for “hey tux”")
+                                      subtitle="Listen for “hey linux”")
         self._wake_h = self.wake_row.connect("notify::active", self._on_wake)
         g.add(self.wake_row)
         self.hits_row = Adw.ActionRow(title="Wake hits", subtitle="–")
