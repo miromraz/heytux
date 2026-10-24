@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "Tokyo.",
+    "ttft_s": 0.7521798610687256,
+    "tok_s": 14.93,
+    "n": 4
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "A spider has eight legs, though most of them are jointed and used to grasp, while only six are functional legs for walking.",
+    "ttft_s": 0.3825240135192871,
+    "tok_s": 14.51,
+    "n": 28
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "Why did the programmer get fired? Because he couldn't explain why the code was looping forever.",
+    "ttft_s": 0.39816808700561523,
+    "tok_s": 15.02,
+    "n": 20
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "Water boils at 100\u00b0C.",
+    "ttft_s": 0.44487547874450684,
+    "tok_s": 14.59,
+    "n": 10
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "Giovanni Boccaccio wrote *Romeo and Juliet*.",
+    "ttft_s": 0.39836692810058594,
+    "tok_s": 14.99,
+    "n": 15
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Try to keep your bedroom cool and dark for the best sleep quality.",
+    "ttft_s": 0.40717005729675293,
+    "tok_s": 14.9,
+    "n": 15
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "Dobra den anglicky je \"A good day\".",
+    "ttft_s": 0.4599494934082031,
+    "tok_s": 14.91,
+    "n": 13
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "17 plus 25 equals 42.",
+    "ttft_s": 0.4592301845550537,
+    "tok_s": 14.97,
+    "n": 12
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "Venus.",
+    "ttft_s": 0.4056105613708496,
+    "tok_s": 14.83,
+    "n": 4
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Today is October 24, 2026, at 11:39 AM.",
+    "ttft_s": 1.3219425678253174,
+    "tok_s": 14.91,
+    "n": 23
+  }
+]

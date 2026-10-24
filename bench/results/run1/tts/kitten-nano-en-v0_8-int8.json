@@ -1,0 +1,13 @@
+{
+  "id": "kitten-nano-en-v0_8-int8",
+  "slot": "tts",
+  "family": "KittenTTS",
+  "params": "nano",
+  "quant": "int8",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "status": "failed",
+  "error": "worker exit rc=255",
+  "stderr": "/project/sherpa-onnx/csrc/offline-tts-kokoro-model.cc:Init:175 style_dim should be 3-d, given: 2\n",
+  "ts": "2026-10-23T21:20:32"
+}

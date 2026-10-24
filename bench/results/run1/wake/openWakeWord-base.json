@@ -1,0 +1,29 @@
+{
+  "id": "openWakeWord-base",
+  "slot": "wake",
+  "family": "openWakeWord",
+  "params": "-",
+  "quant": "fp32",
+  "runtime": "onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:21:59",
+  "status": "skipped",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4705232,
+    "MemAvailable": 4680620,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499068
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742105088,
+      "compr_bytes": 56486602
+    }
+  ],
+  "note": "wake slot skipped for now (brief)"
+}

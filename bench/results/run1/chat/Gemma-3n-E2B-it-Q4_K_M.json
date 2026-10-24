@@ -1,0 +1,62 @@
+{
+  "id": "Gemma-3n-E2B-it-Q4_K_M",
+  "slot": "chat",
+  "family": "Gemma-3n",
+  "params": "E2B",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T12:58:34",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4996368,
+    "MemAvailable": 4966120,
+    "SwapTotal": 2823676,
+    "SwapFree": 1280688
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 992821248,
+      "compr_bytes": 67911953
+    }
+  ],
+  "cold_load_s": 19.672,
+  "warm_load_s": 9.16,
+  "ttft_s_median": 1.923,
+  "tok_s_median": 6.8,
+  "mem": {
+    "rss_kb": 4412776,
+    "hwm_kb": 4519316,
+    "pss_kb": 4411046
+  },
+  "resolved_model": "gemma-3n-E2B-it-Q4_K_M.gguf",
+  "llama_bench": {
+    "pp64": 17.68,
+    "tg64": 6.81
+  },
+  "load_s_no_warmup": 8.117,
+  "mem_variants": {
+    "nommap": {
+      "rss_kb": 3488312,
+      "hwm_kb": 3488312,
+      "pss_kb": 3486563
+    },
+    "kv_q8_0": {
+      "rss_kb": 4563660,
+      "hwm_kb": 4563660,
+      "pss_kb": 4561900
+    }
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 2030864,
+    "MemAvailable": 4946728,
+    "SwapTotal": 2823676,
+    "SwapFree": 1278756
+  }
+}

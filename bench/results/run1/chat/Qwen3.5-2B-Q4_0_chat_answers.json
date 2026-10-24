@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "The capital of Japan is Tokyo.",
+    "ttft_s": 1.271904706954956,
+    "tok_s": 7.8,
+    "n": 8
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "A spider has eight legs.",
+    "ttft_s": 0.7228908538818359,
+    "tok_s": 7.74,
+    "n": 7
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "Why don't scientists trust atoms? Because they make up everything!",
+    "ttft_s": 0.700913667678833,
+    "tok_s": 7.68,
+    "n": 14
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "212\u00b0F (100\u00b0C).",
+    "ttft_s": 0.8438293933868408,
+    "tok_s": 7.69,
+    "n": 11
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "William Shakespeare wrote \"Romeo and Juliet.\"",
+    "ttft_s": 0.7330358028411865,
+    "tok_s": 7.7,
+    "n": 11
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Avoid screens an hour before bed to block out blue light and improve your sleep quality.",
+    "ttft_s": 0.7379257678985596,
+    "tok_s": 7.67,
+    "n": 18
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "How do you say \"good day\" in English?",
+    "ttft_s": 0.847679853439331,
+    "tok_s": 7.65,
+    "n": 12
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "Forty-two.",
+    "ttft_s": 0.8758494853973389,
+    "tok_s": 7.65,
+    "n": 5
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "Earth is our only known planet in our solar system.",
+    "ttft_s": 0.7461187839508057,
+    "tok_s": 7.67,
+    "n": 12
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Saturday, October 24, 2026, at 13:04.",
+    "ttft_s": 2.5386171340942383,
+    "tok_s": 7.6,
+    "n": 22
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "id": "ten-vad",
+  "slot": "vad",
+  "family": "TEN-VAD",
+  "params": "-",
+  "quant": "fp32",
+  "runtime": "onnx",
+  "scenario": "desktop",
+  "status": "failed",
+  "error": "worker exit rc=255",
+  "stderr": "/project/sherpa-onnx/csrc/ten-vad-model.cc:Check:285 Please download ten-vad.onnx or ten-vad.int8.onnx from\nhttps://github.com/k2-fsa/sherpa-onnx/releases/tag/asr-models\nWe have added meta data to the original ten-vad.onnx from\nhttps://github.com/TEN-framework/ten-vad\n",
+  "ts": "2026-10-23T21:21:11"
+}

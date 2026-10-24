@@ -1,0 +1,51 @@
+{
+  "id": "bge-m3-Q4_K_M",
+  "slot": "embedding",
+  "family": "BGE-M3",
+  "params": "0.57B",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:36:05",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4709704,
+    "MemAvailable": 4683048,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742539264,
+      "compr_bytes": 56569933
+    }
+  ],
+  "cold_load_s": 6.514,
+  "warm_load_s": 4.678,
+  "embed_latency_ms_median": 111.5,
+  "mem": {
+    "rss_kb": 807032,
+    "hwm_kb": 807032,
+    "pss_kb": 805105
+  },
+  "embedding_router": {
+    "n": 56,
+    "accuracy": 0.446,
+    "none_recall": 0.0,
+    "none_precision": null,
+    "latency_ms_median": 99.7,
+    "threshold": 0.5
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3882136,
+    "MemAvailable": 4286112,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  }
+}

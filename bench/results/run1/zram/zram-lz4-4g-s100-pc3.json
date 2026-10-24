@@ -1,0 +1,7 @@
+[
+  {
+    "label": "zram-lz4-4g-s100-pc3",
+    "status": "skipped",
+    "reason": "RuntimeError(\"algo lz4 not supported (have ['zstd'])\")"
+  }
+]

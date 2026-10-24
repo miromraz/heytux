@@ -1,0 +1,29 @@
+{
+  "id": "embeddinggemma-300m-ONNX-q4",
+  "slot": "embedding",
+  "family": "EmbeddingGemma",
+  "params": "300M",
+  "quant": "q4",
+  "runtime": "onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:35:40",
+  "status": "skipped",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4698848,
+    "MemAvailable": 4672148,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742539264,
+      "compr_bytes": 56569933
+    }
+  ],
+  "note": "embedding runtime onnx needs onnxruntime, no adapter (id=embeddinggemma-300m-ONNX-q4)"
+}

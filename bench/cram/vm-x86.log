@@ -1,0 +1,135 @@
+c[?7l[2J[0mSeaBIOS (version 1.16.3-debian-1.16.3-2)
+
+
+iPXE (https://ipxe.org) 00:02.0 CA00 PCI2.10 PnP PMM+7EFC6850+7EF06850 CA00
+Press Ctrl-B to configure iPXE (PCI 00:02.0)...                                                                               
+
+
+Booting from ROM...
+c[?7l[2J===VM-BEGIN===
+7.2.0-rc2
+--- numa topology ---
+/sys/devices/system/node/node0/meminfo:Node 0 MemTotal:        4015576 kB
+--- nvdimm regions ---
+[
+  {
+    "dev":"region0",
+    "size":3204448256,
+    "align":16777216,
+    "available_size":0,
+    "max_available_extent":0,
+    "type":"pmem",
+    "persistence_domain":"unknown"
+  }
+]
+--- node possible/has_memory ---
+0-1
+0
+--- region numa + create devdax ---
+    "dev":"region0",
+  "dev":"namespace0.0",
+  "map":"dev",
+--- dax devices + target_node ---
+dax0.0 target_node=1
+--- zram(zstd) swap setup ---
+comp=[zstd] 
+Filename				Type		Size		Used		Priority
+--- block devices ---
+brw-------    1 0        0         253,   0 Oct 23 18:05 /dev/vda
+brw-------    1 0        0         253,  16 Oct 23 18:05 /dev/vdb
+########## cram_node_basic.sh ##########
+TAP version 13
+# using dax0.0 on memoryless node 1
+1..10
+ok 1 cram=1 accepted while unplugged
+ok 2 online: node 1 is private + cram-managed (present=720896)
+ok 3 cram toggle rejected while online
+ok 4 inflate 8192: balloon 0->8192, free 720896->710906
+not ok 5 deflate did not release: balloon 8192->0, free 710906->710906
+ok 6 cutoff: balloon 719587 <= present 720896 (no DRAM spill), free 710906->25
+ok 7 cutoff stable: further inflate added 0 pages
+ok 8 deflate-all restored: balloon=0, free 25->718861 (base 710906)
+ok 9 unplug: node 1 unregistered + removed
+ok 10 online/unplug cycle 3x: clean register/unregister each time
+# Totals: pass:9 fail:1 xfail:0 xpass:0 skip:0 error:0
+## cram_node_basic.sh rc=1 ##
+########## cram_perf.sh ##########
+TAP version 13
+# cram node 1 online
+1..1
+clock=mono samples=4096 batch=512 cram_nid=1
+RESULT cram-fault sequential mean=3012 p50=2950 p90=3010 p99=4150 min=2870 max=15861 n=4096
+RESULT cram-fault random mean=3018 p50=2970 p90=3020 p99=3870 min=2880 max=25440 n=4096
+RESULT swap-fault sequential mean=7307 p50=7140 p90=7520 p99=11270 min=6840 max=28380 n=4096
+RESULT swap-fault random mean=7503 p50=7371 p90=7800 p99=11370 min=6901 max=16791 n=4096
+RESULT cram-read sequential mean=33 p50=30 p90=40 p99=40 min=19 max=4480 n=4096
+
+fault       order            mean       p50       p90       p99       min       max       n   (ns)
+cram-fault  sequential       3012      2950      3010      4150      2870     15861    4096
+cram-fault  random           3018      2970      3020      3870      2880     25440    4096
+swap-fault  sequential       7307      7140      7520     11270      6840     28380    4096
+swap-fault  random           7503      7371      7800     11370      6901     16791    4096
+cram-read   sequential         33        30        40        40        19      4480    4096
+RESULT cram-fault sequential mean=3012 p50=2950 p90=3010 p99=4150 min=2870 max=15861 n=4096
+RESULT cram-fault random mean=3018 p50=2970 p90=3020 p99=3870 min=2880 max=25440 n=4096
+RESULT swap-fault sequential mean=7307 p50=7140 p90=7520 p99=11270 min=6840 max=28380 n=4096
+RESULT swap-fault random mean=7503 p50=7371 p90=7800 p99=11370 min=6901 max=16791 n=4096
+RESULT cram-read sequential mean=33 p50=30 p90=40 p99=40 min=19 max=4480 n=4096
+ok 1 cram-fault vs swap-fault benchmark completed (see RESULT lines / /tmp/cram_perf.out)
+# Totals: pass:1 fail:0 xfail:0 xpass:0 skip:0 error:0
+## cram_perf.sh rc=0 ##
+########## cram_ratio.sh ##########
+TAP version 13
+# cram node 1 online, zratio=2000 perceived=720896
+1..3
+ok 1 baseline: balloon empty at configured ratio (target=0 balloon=0)
+ok 2 worse ratio 1500 inflates balloon (target=180224 balloon=57344)
+ok 3 restored ratio deflates balloon (balloon=0)
+# Totals: pass:3 fail:0 xfail:0 xpass:0 skip:0 error:0
+## cram_ratio.sh rc=0 ##
+########## cram_readable.sh ##########
+TAP version 13
+# cram node 1 online
+1..2
+diag: demote 6292992->6293056 present=1 swapped=0 on_cram=64 pfn=0x18803f read_ok=1
+on_cram 64->63 pfn 0x18803f->0x10450c present=1 swapped=0 read_ok=1 write_ok=1
+ok 1 read-only tier: demote present-RO on cram 1, read zero-copy, write promoted
+ok 2 no KASAN/BUG/UAF/WARN during read-only tier round trip
+# Totals: pass:2 fail:0 xfail:0 xpass:0 skip:0 error:0
+## cram_readable.sh rc=0 ##
+########## cram_file_perf.sh ##########
+TAP version 13
+# cram node 1 online; file FS at /tmp/tmp.zMtzdw
+1..1
+# --- cram file-tier latency (node 1, 128MB) ---
+RESULT setup MB=128 pages=32768 on_cram=32768 present0=1
+RESULT file-read samples=32768 mean_ns=19 p50_ns=20 p90_ns=21 p99_ns=40
+RESULT file-xproc child_read_all_ns=1001185 pages=32768
+RESULT file-write samples=32768 mean_ns=769 p50_ns=20 p90_ns=2221 p99_ns=4160
+RESULT after_write on_cram=0
+ok 1 cram file-tier latency probe
+# Totals: pass:1 fail:0 xfail:0 xpass:0 skip:0 error:0
+## cram_file_perf.sh rc=0 ##
+########## cram_pgcache.sh ##########
+TAP version 13
+# cram node 1 online, ext4 on /dev/vda
+1..2
+T1 resident-read: resident=64 oncram 63->64 present=1 ok
+T2 shared-write-promote: pfn 188078->102696 oncram 64->63 ok
+T3 write2-promote: byte=0xcd oncram 64->63 ok
+T4 drop-caches-evicts: resident=64 oncram_after=0 ok
+ok 1 resident file tier: mmap read in place, write promotes off CRAM on ext4
+ok 2 no KASAN/BUG/UAF/WARN during resident file tier round trip
+# Totals: pass:2 fail:0 xfail:0 xpass:0 skip:0 error:0
+## cram_pgcache.sh rc=0 ##
+--- cram/nodes (balloon = simulated DRAM freed) ---
+node zratio current_ratio perceived balloon target blocked allowed free present
+--- demote/promote counters ---
+demote_count=6326080
+promote_count=1752
+--- meminfo ---
+MemTotal:        4015576 kB
+MemFree:         3916424 kB
+MemAvailable:    3793284 kB
+===VM-END===
+[   36.377737] reboot: Power down

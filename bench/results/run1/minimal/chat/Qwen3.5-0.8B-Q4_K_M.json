@@ -1,0 +1,59 @@
+{
+  "id": "Qwen3.5-0.8B-Q4_K_M",
+  "slot": "chat",
+  "family": "Qwen3.5",
+  "params": "0.8B",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "minimal",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T11:07:55",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4411872,
+    "MemAvailable": 4438884,
+    "SwapTotal": 2823676,
+    "SwapFree": 1985964
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 501796864,
+      "compr_bytes": 29755031
+    }
+  ],
+  "cold_load_s": 9.289,
+  "warm_load_s": 7.166,
+  "llama_bench": {
+    "pp64": 59.92,
+    "tg64": 15.52
+  },
+  "ttft_s_median": 0.434,
+  "tok_s_median": 14.92,
+  "mem": {
+    "rss_kb": 1851788,
+    "hwm_kb": 1851788,
+    "pss_kb": 1849847
+  },
+  "load_s_no_warmup": 7.169,
+  "mem_variants": {
+    "nommap": {
+      "error": "RuntimeError('llama-server exited rc=1, log tail:\\nerror: invalid argument: --no-mmap\\n')"
+    },
+    "kv_q8_0": {
+      "rss_kb": 1375024,
+      "hwm_kb": 1375024,
+      "pss_kb": 1111520
+    }
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 2505276,
+    "MemAvailable": 3080308,
+    "SwapTotal": 2823676,
+    "SwapFree": 1986096
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "id": "Qwen3.5-0.8B-mmproj",
+  "slot": "vision",
+  "family": "Qwen3.5-VL",
+  "params": "0.8B",
+  "quant": "F16",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:21:19",
+  "status": "skipped",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4679028,
+    "MemAvailable": 4656564,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499068
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742105088,
+      "compr_bytes": 56486602
+    }
+  ],
+  "note": "vision: Qwen3.5-0.8B-mmproj is an mmproj projector; benchmark with its base chat gguf"
+}

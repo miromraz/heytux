@@ -1,0 +1,38 @@
+[
+  {
+    "label": "zram-zstd-2.7g-s100-pc3",
+    "model": "Qwen3.5-4B-Q4_K_M",
+    "load_s": 41.61,
+    "ttft_s": 2.373,
+    "tg_tok_s": 3.35,
+    "mem_avail_mb": 811,
+    "swap_used_mb": 828,
+    "pswpin_delta": 508377,
+    "pswpout_delta": 642607,
+    "zram": {
+      "orig_bytes": 549785600,
+      "compr_bytes": 61995052,
+      "ratio": 8.87
+    },
+    "status": "ok",
+    "oom": null
+  },
+  {
+    "label": "zram-zstd-2.7g-s100-pc3",
+    "model": "Gemma-4-E2B-it-Q4_K_M",
+    "load_s": 24.4,
+    "ttft_s": 1.143,
+    "tg_tok_s": 6.48,
+    "mem_avail_mb": 2664,
+    "swap_used_mb": 862,
+    "pswpin_delta": 19,
+    "pswpout_delta": 13349,
+    "zram": {
+      "orig_bytes": 527233024,
+      "compr_bytes": 40580533,
+      "ratio": 12.99
+    },
+    "status": "ok",
+    "oom": null
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "id": "Granite-4.0-1B-Q4_K_M",
+  "slot": "chat",
+  "family": "Granite-4.0",
+  "params": "1B",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T11:53:10",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4955376,
+    "MemAvailable": 4929564,
+    "SwapTotal": 2823676,
+    "SwapFree": 1356116
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 930439168,
+      "compr_bytes": 63190245
+    }
+  ],
+  "cold_load_s": 10.952,
+  "warm_load_s": 6.958,
+  "ttft_s_median": 0.572,
+  "tok_s_median": 10.27,
+  "mem": {
+    "rss_kb": 2333976,
+    "hwm_kb": 2333976,
+    "pss_kb": 2332059
+  },
+  "resolved_model": "granite-4.0-1b-Q4_K_M.gguf",
+  "llama_bench": {
+    "pp64": 27.1,
+    "tg64": 10.41
+  },
+  "load_s_no_warmup": 7.276,
+  "mem_variants": {
+    "nommap": {
+      "error": "RuntimeError('llama-server exited rc=1, log tail:\\nerror: invalid argument: --no-mmap\\n')"
+    },
+    "kv_q8_0": {
+      "rss_kb": 2245320,
+      "hwm_kb": 2245320,
+      "pss_kb": 2243403
+    }
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3889904,
+    "MemAvailable": 4872268,
+    "SwapTotal": 2823676,
+    "SwapFree": 1356128
+  }
+}

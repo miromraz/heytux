@@ -1,0 +1,56 @@
+{
+  "id": "LFM2.5-230M-Q8_0",
+  "slot": "router",
+  "family": "LFM2.5",
+  "params": "230M",
+  "quant": "Q8_0",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:30:53",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4700340,
+    "MemAvailable": 4675468,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498588
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742596608,
+      "compr_bytes": 56584474
+    }
+  ],
+  "cold_load_s": 4.215,
+  "warm_load_s": 2.911,
+  "gguf_router": {
+    "n": 56,
+    "accuracy": 0.929,
+    "none_recall": 1.0,
+    "none_precision": 0.939,
+    "latency_ms_median": 3145.3
+  },
+  "mem": {
+    "rss_kb": 594140,
+    "hwm_kb": 594140,
+    "pss_kb": 592213
+  },
+  "needle3_baseline": {
+    "n": 56,
+    "accuracy": 0.589,
+    "none_recall": 0.29,
+    "none_precision": 1.0,
+    "latency_ms_median": 242.8
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3983856,
+    "MemAvailable": 4248320,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498636
+  }
+}

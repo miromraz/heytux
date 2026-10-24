@@ -1,0 +1,13 @@
+{
+  "id": "streaming-zipformer-kroko",
+  "slot": "asr",
+  "family": "Zipformer",
+  "params": "-",
+  "quant": "fp32",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "status": "failed",
+  "error": "worker exit rc=255",
+  "stderr": "/project/sherpa-onnx/csrc/offline-transducer-model.cc:ValidateIntTensorType:86 offline transducer encoder input 1 should be int32 or int64. Given 1\n",
+  "ts": "2026-10-24T12:46:20"
+}

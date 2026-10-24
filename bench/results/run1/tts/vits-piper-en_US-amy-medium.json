@@ -1,0 +1,46 @@
+{
+  "id": "vits-piper-en_US-amy-medium",
+  "slot": "tts",
+  "family": "Piper-VITS",
+  "params": "medium",
+  "quant": "fp32",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:19:46",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4695476,
+    "MemAvailable": 4671664,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499024
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742150144,
+      "compr_bytes": 56496636
+    }
+  ],
+  "cold_load_s": 3.387,
+  "warm_load_s": 2.368,
+  "rtf_median": 0.169,
+  "ttfa_s_median": 0.445,
+  "ttfa_note": "offline synth (no streaming); time to first audio == full synth time",
+  "wavs_dir": "/home/miro/heytux/bench/results/run1/tts/vits-piper-en_US-amy-medium",
+  "mem": {
+    "rss_kb": 234508,
+    "hwm_kb": 234508,
+    "pss_kb": 223298
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 4425876,
+    "MemAvailable": 4468664,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499024
+  }
+}

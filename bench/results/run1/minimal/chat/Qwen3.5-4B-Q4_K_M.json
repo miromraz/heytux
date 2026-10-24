@@ -1,0 +1,36 @@
+{
+  "id": "Qwen3.5-4B-Q4_K_M",
+  "slot": "chat",
+  "family": "Qwen3.5",
+  "params": "4B",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "minimal",
+  "quick": true,
+  "threads": 2,
+  "ts": "2026-10-24T11:20:21",
+  "status": "failed",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 3897936,
+    "MemAvailable": 4633756,
+    "SwapTotal": 2823676,
+    "SwapFree": 1790528
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 606191616,
+      "compr_bytes": 32619204
+    }
+  ],
+  "cold_load_s": 42.599,
+  "warm_load_s": 42.599,
+  "llama_bench": {
+    "pp64": 9.94,
+    "tg64": 3.28
+  },
+  "error": "URLError(ConnectionRefusedError(111, 'Connection refused'))",
+  "traceback": "/bench/run.py\", line 496, in run_one\n    SLOT_FN[entry[\"slot\"]](entry, be, args, rec, outdir)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/miro/heytux/bench/run.py\", line 239, in measure_chat\n    r = be.chat([{\"role\": \"user\", \"content\": q}], max_tokens=60, system=sysp)\n  File \"/home/miro/heytux/bench/backends.py\", line 129, in chat\n    resp = self._post(\"/v1/chat/completions\", body, stream=True)\n  File \"/home/miro/heytux/bench/backends.py\", line 116, in _post\n    return urllib.request.urlopen(req, timeout=timeout) if stream \\\n           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 187, in urlopen\n    return opener.open(url, data, timeout)\n           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 487, in open\n    response = self._open(req, data)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 504, in _open\n    result = self._call_chain(self.handle_open, protocol, protocol +\n                              '_open', req)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 464, in _call_chain\n    result = func(*args)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 1362, in http_open\n    return self.do_open(http.client.HTTPConnection, req)\n           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 1336, in do_open\n    raise URLError(err)\nurllib.error.URLError: <urlopen error [Errno 111] Connection refused>\n"
+}

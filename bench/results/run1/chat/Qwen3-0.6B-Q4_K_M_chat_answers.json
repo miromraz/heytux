@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "The capital of Japan is Tokyo.",
+    "ttft_s": 0.462719202041626,
+    "tok_s": 24.07,
+    "n": 8
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "A spider has 8 legs.",
+    "ttft_s": 0.24150919914245605,
+    "tok_s": 24.01,
+    "n": 8
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "A teacher in a classroom, a student, and a teacher.",
+    "ttft_s": 0.23312616348266602,
+    "tok_s": 24.26,
+    "n": 14
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "The boiling point of water is 100\u00b0C.",
+    "ttft_s": 0.23807024955749512,
+    "tok_s": 24.15,
+    "n": 13
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "Romeo and Juliet was written by William Shakespeare.",
+    "ttft_s": 0.2425980567932129,
+    "tok_s": 23.79,
+    "n": 12
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Get 7-9 hours of sleep to improve your sleep quality.",
+    "ttft_s": 0.25498223304748535,
+    "tok_s": 24.07,
+    "n": 15
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "Ahh, I'm sorry! I'm a language model and can't be a human. But in English, a \"good day\" is \"Good day!\" or \"Good evening\" depending on the time of day.",
+    "ttft_s": 0.29021191596984863,
+    "tok_s": 23.52,
+    "n": 46
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "17 plus 25 is 42.",
+    "ttft_s": 0.2566957473754883,
+    "tok_s": 23.87,
+    "n": 12
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "Saturn.",
+    "ttft_s": 0.2563910484313965,
+    "tok_s": 23.85,
+    "n": 4
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Today's date is October 24, 2026, at 12:03.",
+    "ttft_s": 0.7566940784454346,
+    "tok_s": 22.92,
+    "n": 24
+  }
+]

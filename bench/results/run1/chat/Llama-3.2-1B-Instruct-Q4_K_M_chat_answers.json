@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "Tokyo.",
+    "ttft_s": 1.292041540145874,
+    "tok_s": 12.89,
+    "n": 4
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "Eight.",
+    "ttft_s": 0.3802342414855957,
+    "tok_s": 12.87,
+    "n": 3
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "A man walked into a library and asked the librarian, \"Do you have any books on Pavlov's dogs and Schr\u00f6dinger's cat?\"",
+    "ttft_s": 0.34025025367736816,
+    "tok_s": 12.68,
+    "n": 32
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "212 degrees Celsius.",
+    "ttft_s": 0.46331000328063965,
+    "tok_s": 12.75,
+    "n": 5
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "William Shakespeare wrote Romeo and Juliet.",
+    "ttft_s": 0.34574389457702637,
+    "tok_s": 12.81,
+    "n": 8
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Establish a consistent sleep schedule and create a relaxing bedtime routine.",
+    "ttft_s": 0.3983464241027832,
+    "tok_s": 12.84,
+    "n": 13
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "To call you back: *tapping virtual keyboard*",
+    "ttft_s": 0.43270158767700195,
+    "tok_s": 12.85,
+    "n": 12
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "17 + 25 = 42.",
+    "ttft_s": 0.4009060859680176,
+    "tok_s": 12.81,
+    "n": 9
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "Jupiter.",
+    "ttft_s": 0.3932309150695801,
+    "tok_s": 12.8,
+    "n": 4
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Today's date is Saturday, October 24, 2026.",
+    "ttft_s": 1.2015459537506104,
+    "tok_s": 12.72,
+    "n": 15
+  }
+]

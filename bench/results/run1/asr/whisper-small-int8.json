@@ -1,0 +1,143 @@
+{
+  "id": "whisper-small-int8",
+  "slot": "asr",
+  "family": "Whisper",
+  "params": "small",
+  "quant": "int8",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T13:21:00",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 3526520,
+    "MemAvailable": 3510640,
+    "SwapTotal": 2823676,
+    "SwapFree": 2823676
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 4096,
+      "compr_bytes": 59
+    }
+  ],
+  "cold_load_s": 5.034,
+  "warm_load_s": 2.738,
+  "mem": {
+    "rss_kb": 546852,
+    "hwm_kb": 639148,
+    "pss_kb": 534778
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 2645096,
+    "MemAvailable": 3010176,
+    "SwapTotal": 2823676,
+    "SwapFree": 2823676
+  },
+  "resolved_files": [
+    "small-encoder.int8.onnx",
+    "small-decoder.int8.onnx"
+  ],
+  "wer": {
+    "clean": 0.077,
+    "quiet": 0.07,
+    "noise": 0.081
+  },
+  "wer_samples": {
+    "clean": [
+      {
+        "ref": "turn on the flashlight",
+        "hyp": "Turn on the flashlight.",
+        "wer": 0.0
+      },
+      {
+        "ref": "turn off wifi",
+        "hyp": "Turn off Wi-Fi.",
+        "wer": 0.667
+      },
+      {
+        "ref": "enable bluetooth",
+        "hyp": "enable Bluetooth",
+        "wer": 0.0
+      }
+    ],
+    "quiet": [
+      {
+        "ref": "turn on the flashlight",
+        "hyp": "Turn on the flashlight.",
+        "wer": 0.0
+      },
+      {
+        "ref": "turn off wifi",
+        "hyp": "Turn off Wi-Fi.",
+        "wer": 0.667
+      },
+      {
+        "ref": "enable bluetooth",
+        "hyp": "enable bluechip",
+        "wer": 0.5
+      }
+    ],
+    "noise": [
+      {
+        "ref": "turn on the flashlight",
+        "hyp": "Turn on the flashlight.",
+        "wer": 0.0
+      },
+      {
+        "ref": "turn off wifi",
+        "hyp": "Turn off Wi-Fi.",
+        "wer": 0.667
+      },
+      {
+        "ref": "enable bluetooth",
+        "hyp": "Enable Bluetooth.",
+        "wer": 0.0
+      }
+    ]
+  },
+  "noise_snr_db": 10.0,
+  "noise_provenance": "room noise from 20 capture wavs @ 10 dB SNR",
+  "rtf_median": 1.583,
+  "mem_note": "RSS/PSS sampled before TTS voices were loaded; VmHWM includes synth peak",
+  "wer_cs": 1.083,
+  "captures": [
+    {
+      "file": "20261004-104617-775.wav",
+      "hyp": "turn on the flashlight"
+    },
+    {
+      "file": "20261004-104626-343.wav",
+      "hyp": "Then on the flash drive."
+    },
+    {
+      "file": "20261004-104636-295.wav",
+      "hyp": "Can you tell me what is the capital city of Brno?"
+    },
+    {
+      "file": "20261004-105446-093.wav",
+      "hyp": "and turn on the flashlight"
+    },
+    {
+      "file": "20261004-105454-238.wav",
+      "hyp": "Turn off the flashlight"
+    },
+    {
+      "file": "20261004-110654-831.wav",
+      "hyp": "Linux."
+    },
+    {
+      "file": "20261004-110705-791.wav",
+      "hyp": "Yeah, I'll get you some of the keys you got in keyboard."
+    },
+    {
+      "file": "20261004-114822-756.wav",
+      "hyp": "What time it is?"
+    }
+  ]
+}

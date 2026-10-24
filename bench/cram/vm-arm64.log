@@ -1,0 +1,48 @@
+arm64 initramfs: 993K
+[    0.000000] Linux version 7.2.0-rc2 (root@82b959dfc83d) (aarch64-linux-gnu-gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44) #1 SMP PREEMPT Fri Oct 23 17:40:33 UTC 2026
+[    0.000000] random: crng init done
+[    0.000000] Kernel command line: console=ttyAMA0 panic=-1 rdinit=/init loglevel=6
+[    0.047934] cacheinfo: Unable to detect cache hierarchy for CPU 0
+[    0.171702] audit: type=2000 audit(0.148:1): state=initialized audit_enabled=0 res=1
+[    0.244084] SCSI subsystem initialized
+[    0.257885] VFS: Disk quotas dquot_6.6.0
+[    0.335688] Initialise system trusted keyrings
+[    0.341358] NFS: Registering the id_resolver key type
+[    0.341668] Key type id_resolver registered
+[    0.341713] Key type id_legacy registered
+[    0.345504] Key type asymmetric registered
+[    0.345576] Asymmetric key parser 'x509' registered
+[    0.376985] pci-host-generic 4010000000.pcie: Memory resource size exceeds max for 32 bits
+[    0.378464] pci_bus 0000:00: Unknown NUMA node; performance will be reduced
+[    0.491173] physmap-flash 0.flash: physmap platform flash device: [mem 0x00000000-0x03ffffff]
+[    0.493615] physmap-flash 0.flash: physmap platform flash device: [mem 0x04000000-0x07ffffff]
+[    0.494920] Concatenating MTD devices:
+[    0.494936] (0): "0.flash"
+[    0.494942] (1): "0.flash"
+[    0.494948] into device "0.flash"
+[    0.581220] Key type dns_resolver registered
+[    0.608215] Loading compiled-in X.509 certificates
+===ARM-VM-BEGIN===
+Linux (none) 7.2.0-rc2 #1 SMP PREEMPT Fri Oct 23 17:40:33 UTC 2026 aarch64 GNU/Linux
+--- nodes ---
+node0
+node1
+--- CRAM debugfs present? ---
+/sys/kernel/debug/cram
+CRAM-DEBUGFS-OK
+--- dmesg cram/private ---
+===ARM-VM-END===
+[    0.800540] Flash device refused suspend due to active operation (state 20)
+[    0.800637] Flash device refused suspend due to active operation (state 20)
+[    0.802007] reboot: Power down
+=================== ARM64 BOOT RESULT ===================
+===ARM-VM-BEGIN===
+Linux (none) 7.2.0-rc2 #1 SMP PREEMPT Fri Oct 23 17:40:33 UTC 2026 aarch64 GNU/Linux
+--- nodes ---
+node0
+node1
+--- CRAM debugfs present? ---
+/sys/kernel/debug/cram
+CRAM-DEBUGFS-OK
+--- dmesg cram/private ---
+===ARM-VM-END===

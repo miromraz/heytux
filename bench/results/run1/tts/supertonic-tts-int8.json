@@ -1,0 +1,13 @@
+{
+  "id": "supertonic-tts-int8",
+  "slot": "tts",
+  "family": "Supertonic",
+  "params": "-",
+  "quant": "int8",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "status": "failed",
+  "error": "worker exit rc=255",
+  "stderr": "/project/sherpa-onnx/csrc/offline-tts-vits-model.cc:Init:169 'sample_rate' does not exist in the metadata\n",
+  "ts": "2026-10-23T21:20:43"
+}

@@ -1,0 +1,46 @@
+{
+  "id": "vits-piper-cs_CZ-jirka-medium",
+  "slot": "tts",
+  "family": "Piper-VITS",
+  "params": "medium",
+  "quant": "fp32",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:19:36",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4703204,
+    "MemAvailable": 4678340,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499024
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742150144,
+      "compr_bytes": 56496636
+    }
+  ],
+  "cold_load_s": 2.455,
+  "warm_load_s": 1.47,
+  "rtf_median": 0.17,
+  "ttfa_s_median": 0.514,
+  "ttfa_note": "offline synth (no streaming); time to first audio == full synth time",
+  "wavs_dir": "/home/miro/heytux/bench/results/run1/tts/vits-piper-cs_CZ-jirka-medium",
+  "mem": {
+    "rss_kb": 251860,
+    "hwm_kb": 251860,
+    "pss_kb": 240646
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 4394064,
+    "MemAvailable": 4436368,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499024
+  }
+}

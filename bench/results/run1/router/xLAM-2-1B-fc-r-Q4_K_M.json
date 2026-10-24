@@ -1,0 +1,32 @@
+{
+  "id": "xLAM-2-1B-fc-r-Q4_K_M",
+  "slot": "router",
+  "family": "xLAM-2",
+  "params": "1B",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:33:56",
+  "status": "failed",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4719984,
+    "MemAvailable": 4693768,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498636
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742547456,
+      "compr_bytes": 56572345
+    }
+  ],
+  "cold_load_s": 12.509,
+  "warm_load_s": 8.21,
+  "error": "<HTTPError 500: 'Internal Server Error'>",
+  "traceback": "                    ~~~~~~~~~~~~^^^^^^^^^\n  File \"/home/miro/heytux/bench/run.py\", line 287, in _router_eval\n    t = time.time(); pred = predict(phrase); lats.append(1000 * (time.time() - t))\n                            ~~~~~~~^^^^^^^^\n  File \"/home/miro/heytux/bench/run.py\", line 304, in predict\n    r = be.route(phrase, tools)\n  File \"/home/miro/heytux/bench/backends.py\", line 166, in route\n    r = self._post(\"/v1/chat/completions\", body, timeout=120)\n  File \"/home/miro/heytux/bench/backends.py\", line 117, in _post\n    else json.load(urllib.request.urlopen(req, timeout=timeout))\n                   ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 187, in urlopen\n    return opener.open(url, data, timeout)\n           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 493, in open\n    response = meth(req, response)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 602, in http_response\n    response = self.parent.error(\n        'http', request, response, code, msg, hdrs)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 531, in error\n    return self._call_chain(*args)\n           ~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/usr/lib/python3.14/urllib/request.py\", line 464, in _call_chain\n    result = func(*args)\n  File \"/usr/lib/python3.14/urllib/request.py\", line 611, in http_error_default\n    raise HTTPError(req.full_url, code, msg, hdrs, fp)\nurllib.error.HTTPError: HTTP Error 500: Internal Server Error\n"
+}

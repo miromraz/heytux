@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "The capital of Japan is Tokyo.",
+    "ttft_s": 1.4358234405517578,
+    "tok_s": 8.68,
+    "n": 8
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "Spiders have eight legs.",
+    "ttft_s": 0.7400546073913574,
+    "tok_s": 8.89,
+    "n": 7
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "Why don't scientists trust atoms? Because they make up everything!",
+    "ttft_s": 0.6924552917480469,
+    "tok_s": 8.88,
+    "n": 14
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "The boiling point of water is 100 degrees Celsius.",
+    "ttft_s": 0.91544508934021,
+    "tok_s": 8.86,
+    "n": 12
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "William Shakespeare wrote Romeo and Juliet.",
+    "ttft_s": 0.7518386840820312,
+    "tok_s": 8.88,
+    "n": 8
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Try maintaining a consistent sleep schedule.",
+    "ttft_s": 0.7599978446960449,
+    "tok_s": 8.86,
+    "n": 8
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "Hello. Good morning.",
+    "ttft_s": 0.922062873840332,
+    "tok_s": 8.82,
+    "n": 6
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "43.",
+    "ttft_s": 0.7754473686218262,
+    "tok_s": 8.81,
+    "n": 3
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "Our solar system has eight planets, including Earth.",
+    "ttft_s": 0.7758300304412842,
+    "tok_s": 8.86,
+    "n": 11
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Today's date is Saturday, October 24, 2026.",
+    "ttft_s": 2.6793770790100098,
+    "tok_s": 8.85,
+    "n": 15
+  }
+]

@@ -1,0 +1,51 @@
+{
+  "id": "Qwen3-Embedding-0.6B-Q8_0",
+  "slot": "embedding",
+  "family": "Qwen3-Embedding",
+  "params": "0.6B",
+  "quant": "Q8_0",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:35:41",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4711644,
+    "MemAvailable": 4684972,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742539264,
+      "compr_bytes": 56569933
+    }
+  ],
+  "cold_load_s": 9.713,
+  "warm_load_s": 7.069,
+  "embed_latency_ms_median": 78.5,
+  "mem": {
+    "rss_kb": 1572164,
+    "hwm_kb": 1572164,
+    "pss_kb": 1570237
+  },
+  "embedding_router": {
+    "n": 56,
+    "accuracy": 0.446,
+    "none_recall": 0.0,
+    "none_precision": null,
+    "latency_ms_median": 59.4,
+    "threshold": 0.5
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3096440,
+    "MemAvailable": 3700560,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  }
+}

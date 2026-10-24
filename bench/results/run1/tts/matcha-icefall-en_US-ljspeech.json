@@ -1,0 +1,13 @@
+{
+  "id": "matcha-icefall-en_US-ljspeech",
+  "slot": "tts",
+  "family": "Matcha",
+  "params": "-",
+  "quant": "fp32",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "status": "failed",
+  "error": "worker exit rc=255",
+  "stderr": "/project/sherpa-onnx/csrc/offline-tts-vits-model.cc:Init:198 'comment' does not exist in the metadata\n",
+  "ts": "2026-10-23T21:20:41"
+}

@@ -1,0 +1,62 @@
+{
+  "id": "Qwen3.5-2B-Q4_0",
+  "slot": "chat",
+  "family": "Qwen3.5",
+  "params": "2B",
+  "quant": "Q4_0",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T13:03:46",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 5005292,
+    "MemAvailable": 4977288,
+    "SwapTotal": 2823676,
+    "SwapFree": 1279932
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 993513472,
+      "compr_bytes": 68064377
+    }
+  ],
+  "cold_load_s": 13.766,
+  "warm_load_s": 9.046,
+  "ttft_s_median": 0.795,
+  "tok_s_median": 7.67,
+  "mem": {
+    "rss_kb": 3185308,
+    "hwm_kb": 3185308,
+    "pss_kb": 3183579
+  },
+  "resolved_model": "Qwen3.5-2B-Q4_0.gguf",
+  "llama_bench": {
+    "pp64": 31.49,
+    "tg64": 7.69
+  },
+  "load_s_no_warmup": 9.146,
+  "mem_variants": {
+    "nommap": {
+      "rss_kb": 1992552,
+      "hwm_kb": 1992552,
+      "pss_kb": 1990811
+    },
+    "kv_q8_0": {
+      "rss_kb": 2717900,
+      "hwm_kb": 2717900,
+      "pss_kb": 2716163
+    }
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3770660,
+    "MemAvailable": 4940600,
+    "SwapTotal": 2823676,
+    "SwapFree": 1279940
+  }
+}

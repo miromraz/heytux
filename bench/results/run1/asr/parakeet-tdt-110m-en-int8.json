@@ -1,0 +1,143 @@
+{
+  "id": "parakeet-tdt-110m-en-int8",
+  "slot": "asr",
+  "family": "NeMo-Parakeet-TDT",
+  "params": "110M",
+  "quant": "int8",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T12:35:34",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4950924,
+    "MemAvailable": 4927212,
+    "SwapTotal": 2823676,
+    "SwapFree": 1347028
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 930766848,
+      "compr_bytes": 59582691
+    }
+  ],
+  "cold_load_s": 3.238,
+  "warm_load_s": 1.822,
+  "mem": {
+    "rss_kb": 285132,
+    "hwm_kb": 285132,
+    "pss_kb": 273236
+  },
+  "resolved_files": [
+    "encoder.int8.onnx",
+    "decoder.int8.onnx",
+    "joiner.int8.onnx"
+  ],
+  "wer": {
+    "clean": 0.388,
+    "quiet": 0.366,
+    "noise": 0.377
+  },
+  "wer_samples": {
+    "clean": [
+      {
+        "ref": "turn on the flashlight",
+        "hyp": "Turn on the flashlight.",
+        "wer": 0.0
+      },
+      {
+        "ref": "turn off wifi",
+        "hyp": "Turn off Wi Fi.",
+        "wer": 0.667
+      },
+      {
+        "ref": "enable bluetooth",
+        "hyp": "Enable Bluetooth",
+        "wer": 0.0
+      }
+    ],
+    "quiet": [
+      {
+        "ref": "turn on the flashlight",
+        "hyp": "Turn on the flashlight.",
+        "wer": 0.0
+      },
+      {
+        "ref": "turn off wifi",
+        "hyp": "Turn off Wi Fi",
+        "wer": 0.667
+      },
+      {
+        "ref": "enable bluetooth",
+        "hyp": "enable Bluetooth.",
+        "wer": 0.0
+      }
+    ],
+    "noise": [
+      {
+        "ref": "turn on the flashlight",
+        "hyp": "Turn on the flashlight.",
+        "wer": 0.0
+      },
+      {
+        "ref": "turn off wifi",
+        "hyp": "Turn off Wi Fi.",
+        "wer": 0.667
+      },
+      {
+        "ref": "enable bluetooth",
+        "hyp": "Enable Bluetooth",
+        "wer": 0.0
+      }
+    ]
+  },
+  "noise_snr_db": 10.0,
+  "noise_provenance": "room noise from 20 capture wavs @ 10 dB SNR",
+  "rtf_median": 0.066,
+  "mem_note": "RSS/PSS sampled before TTS voices were loaded; VmHWM includes synth peak",
+  "captures": [
+    {
+      "file": "20261004-104617-775.wav",
+      "hyp": "Turn on the flashlight."
+    },
+    {
+      "file": "20261004-104626-343.wav",
+      "hyp": "Then obviously flashlight."
+    },
+    {
+      "file": "20261004-104636-295.wav",
+      "hyp": "Can you tell me what is the capital city of Bernot?"
+    },
+    {
+      "file": "20261004-105446-093.wav",
+      "hyp": "Turn on the flashlight."
+    },
+    {
+      "file": "20261004-105454-238.wav",
+      "hyp": "Turn on the flashlight."
+    },
+    {
+      "file": "20261004-110654-831.wav",
+      "hyp": "Linuxita."
+    },
+    {
+      "file": "20261004-110705-791.wav",
+      "hyp": "That's the consecutive."
+    },
+    {
+      "file": "20261004-114822-756.wav",
+      "hyp": "What time it is"
+    }
+  ],
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3935340,
+    "MemAvailable": 4454224,
+    "SwapTotal": 2823676,
+    "SwapFree": 1347076
+  }
+}

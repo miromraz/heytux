@@ -1,0 +1,38 @@
+[
+  {
+    "label": "zram-zstd-4g-s60-pc0",
+    "model": "Qwen3.5-4B-Q4_K_M",
+    "load_s": 45.68,
+    "ttft_s": 2.402,
+    "tg_tok_s": 3.32,
+    "mem_avail_mb": 1005,
+    "swap_used_mb": 1019,
+    "pswpin_delta": 719654,
+    "pswpout_delta": 864749,
+    "zram": {
+      "orig_bytes": 594309120,
+      "compr_bytes": 73304402,
+      "ratio": 8.11
+    },
+    "status": "ok",
+    "oom": null
+  },
+  {
+    "label": "zram-zstd-4g-s60-pc0",
+    "model": "Gemma-4-E2B-it-Q4_K_M",
+    "load_s": 23.15,
+    "ttft_s": 1.143,
+    "tg_tok_s": 6.69,
+    "mem_avail_mb": 2750,
+    "swap_used_mb": 947,
+    "pswpin_delta": 3,
+    "pswpout_delta": 512,
+    "zram": {
+      "orig_bytes": 521723904,
+      "compr_bytes": 46076026,
+      "ratio": 11.32
+    },
+    "status": "ok",
+    "oom": null
+  }
+]

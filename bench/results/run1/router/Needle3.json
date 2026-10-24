@@ -1,0 +1,30 @@
+{
+  "id": "Needle3",
+  "slot": "router",
+  "family": "Needle3",
+  "params": "-",
+  "quant": "-",
+  "runtime": "needle",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:35:21",
+  "status": "failed",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4693680,
+    "MemAvailable": 4670292,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742539264,
+      "compr_bytes": 56569933
+    }
+  ],
+  "error": "RuntimeError(\"llama-server exited rc=1, log tail:\\narams_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)\\n0.00.031.537 I srv  init_listene: The UI is disabled\\n0.00.031.570 I srv  init_listene: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable\\n0.00.032.094 W srv  lla",
+  "traceback": "rams_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)\n0.00.031.537 I srv  init_listene: The UI is disabled\n0.00.031.570 I srv  init_listene: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable\n0.00.032.094 W srv  llama_server: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)\n0.00.036.953 I srv    load_model: loading model '/home/miro/needle-arm64/needle3.cact'\n0.00.045.123 E gguf_init_from_reader: invalid magic characters: '?*??', expected 'GGUF'\n0.00.049.740 E llama_model_load: error loading model: llama_model_loader: failed to load model from /home/miro/needle-arm64/needle3.cact\n0.00.049.811 E llama_model_load_from_file_impl: failed to load model\n0.00.053.671 E common_fit_params: encountered an error while trying to fit params to free device memory: failed to load model\n0.00.053.925 E gguf_init_from_reader: invalid magic characters: '?*??', expected 'GGUF'\n0.00.054.165 E llama_model_load: error loading model: llama_model_loader: failed to load model from /home/miro/needle-arm64/needle3.cact\n0.00.054.234 E llama_model_load_from_file_impl: failed to load model\n0.00.054.324 E cmn  common_init_: failed to load model '/home/miro/needle-arm64/needle3.cact'\n0.00.054.351 E srv    load_model: failed to load model, '/home/miro/needle-arm64/needle3.cact'\n0.00.054.357 I srv    operator(): operator(): cleaning up before exit...\n0.00.056.394 E srv  llama_server: exiting due to model loading error\n\n"
+}

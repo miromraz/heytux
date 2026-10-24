@@ -1,0 +1,30 @@
+{
+  "id": "silero_vad",
+  "slot": "vad",
+  "family": "Silero-VAD",
+  "params": "-",
+  "quant": "int8",
+  "runtime": "onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:21:16",
+  "status": "failed",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4685420,
+    "MemAvailable": 4662784,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499068
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742105088,
+      "compr_bytes": 56486602
+    }
+  ],
+  "error": "FileNotFoundError(\"/home/miro/sherpa/silero_vad.onnx: none of ('*int8.onnx', '*.onnx')\")",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/miro/heytux/bench/run.py\", line 484, in run_one\n    t = time.time(); be = backends.load(entry, threads=THREADS)\n                          ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/miro/heytux/bench/backends.py\", line 331, in load\n    return SherpaVAD(entry, **opts)\n  File \"/home/miro/heytux/bench/backends.py\", line 283, in __init__\n    model=_one(d, \"*int8.onnx\", \"*.onnx\"), threshold=threshold,\n          ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/miro/heytux/bench/backends.py\", line 211, in _one\n    raise FileNotFoundError(\"%s: none of %s\" % (d, globs))\nFileNotFoundError: /home/miro/sherpa/silero_vad.onnx: none of ('*int8.onnx', '*.onnx')\n"
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "Tokyo.",
+    "ttft_s": 0.6120834350585938,
+    "tok_s": 15.28,
+    "n": 4
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "Spiders have 8 legs.",
+    "ttft_s": 0.3088507652282715,
+    "tok_s": 15.28,
+    "n": 8
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "What do you call a fake noodle that doesn't stick together? An **Anteflaak**.",
+    "ttft_s": 0.3369026184082031,
+    "tok_s": 15.69,
+    "n": 22
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "The boiling point of water is 100 degrees Celsius.",
+    "ttft_s": 0.3875429630279541,
+    "tok_s": 15.66,
+    "n": 14
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "Giacomo Leopardi wrote \"Romeo and Juliet\".",
+    "ttft_s": 0.3370194435119629,
+    "tok_s": 15.67,
+    "n": 14
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Try to keep your eyes open for 10 minutes before bed.",
+    "ttft_s": 0.34082579612731934,
+    "tok_s": 15.64,
+    "n": 15
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "It is a good day.",
+    "ttft_s": 0.38681602478027344,
+    "tok_s": 15.52,
+    "n": 7
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "It equals 42.",
+    "ttft_s": 0.37319254875183105,
+    "tok_s": 15.43,
+    "n": 7
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "It's not possible to name a planet in our solar system.",
+    "ttft_s": 0.3412623405456543,
+    "tok_s": 15.39,
+    "n": 14
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Today is Saturday, October 24, 2026, 11:40.",
+    "ttft_s": 1.059096336364746,
+    "tok_s": 15.63,
+    "n": 23
+  }
+]

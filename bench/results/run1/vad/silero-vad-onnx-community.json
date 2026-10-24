@@ -1,0 +1,45 @@
+{
+  "id": "silero-vad-onnx-community",
+  "slot": "vad",
+  "family": "Silero-VAD",
+  "params": "-",
+  "quant": "fp32/int8",
+  "runtime": "onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:21:12",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4698104,
+    "MemAvailable": 4675168,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499044
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742129664,
+      "compr_bytes": 56493762
+    }
+  ],
+  "cold_load_s": 0.689,
+  "warm_load_s": 0.045,
+  "mem": {
+    "rss_kb": 78040,
+    "hwm_kb": 79068,
+    "pss_kb": 66332
+  },
+  "speed_x_realtime_median": 110.9,
+  "silero_agreement": 1.0,
+  "is_silero": true,
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 4630876,
+    "MemAvailable": 4624464,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499068
+  }
+}

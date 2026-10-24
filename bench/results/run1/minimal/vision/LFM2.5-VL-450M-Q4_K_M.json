@@ -1,0 +1,45 @@
+{
+  "id": "LFM2.5-VL-450M-Q4_K_M",
+  "slot": "vision",
+  "family": "LFM2.5-VL",
+  "params": "450M",
+  "quant": "Q4_K_M",
+  "runtime": "llama.cpp",
+  "scenario": "minimal",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T11:17:28",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4798412,
+    "MemAvailable": 4777748,
+    "SwapTotal": 2823676,
+    "SwapFree": 1667464
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 701878272,
+      "compr_bytes": 43640355
+    }
+  ],
+  "cold_load_s": 4.242,
+  "warm_load_s": 2.294,
+  "answer": "A square with four different colored squares inside it.",
+  "ttft_s": 1.711,
+  "tok_s": 42.31,
+  "mem": {
+    "rss_kb": 707392,
+    "hwm_kb": 707392,
+    "pss_kb": 705470
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3963132,
+    "MemAvailable": 4262596,
+    "SwapTotal": 2823676,
+    "SwapFree": 1667464
+  }
+}

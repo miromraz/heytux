@@ -1,0 +1,45 @@
+{
+  "id": "SmolVLM2-500M-Q8_0",
+  "slot": "vision",
+  "family": "SmolVLM2",
+  "params": "500M",
+  "quant": "Q8_0",
+  "runtime": "llama.cpp",
+  "scenario": "minimal",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T11:17:38",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4768580,
+    "MemAvailable": 4747412,
+    "SwapTotal": 2823676,
+    "SwapFree": 1667496
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 701849600,
+      "compr_bytes": 43636449
+    }
+  ],
+  "cold_load_s": 6.496,
+  "warm_load_s": 4.777,
+  "answer": "A colorful grid of squares with a gradient of colors, creating a visually appealing pattern.",
+  "ttft_s": 12.07,
+  "tok_s": 28.52,
+  "mem": {
+    "rss_kb": 1076440,
+    "hwm_kb": 1076440,
+    "pss_kb": 1074514
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3540464,
+    "MemAvailable": 4051712,
+    "SwapTotal": 2823676,
+    "SwapFree": 1667924
+  }
+}

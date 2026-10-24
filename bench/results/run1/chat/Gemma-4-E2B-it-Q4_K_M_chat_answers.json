@@ -1,0 +1,72 @@
+[
+  {
+    "q": "What is the capital of Japan?",
+    "a": "Tokyo is the capital of Japan.",
+    "ttft_s": 2.511068105697632,
+    "tok_s": 6.55,
+    "n": 8
+  },
+  {
+    "q": "How many legs does a spider have?",
+    "a": "A spider has eight legs.",
+    "ttft_s": 1.261873722076416,
+    "tok_s": 6.48,
+    "n": 7
+  },
+  {
+    "q": "Tell me a short joke.",
+    "a": "Why did the scarecrow win an award? Because he was outstanding in his field.",
+    "ttft_s": 1.1960701942443848,
+    "tok_s": 6.43,
+    "n": 18
+  },
+  {
+    "q": "What is the boiling point of water in Celsius?",
+    "a": "The boiling point of water in Celsius is 100 degrees.",
+    "ttft_s": 1.5017125606536865,
+    "tok_s": 6.44,
+    "n": 15
+  },
+  {
+    "q": "Who wrote Romeo and Juliet?",
+    "a": "William Shakespeare wrote Romeo and Juliet.",
+    "ttft_s": 1.229203462600708,
+    "tok_s": 6.41,
+    "n": 8
+  },
+  {
+    "q": "Give me one tip for better sleep.",
+    "a": "Maintain a consistent sleep schedule.",
+    "ttft_s": 1.3237574100494385,
+    "tok_s": 6.4,
+    "n": 7
+  },
+  {
+    "q": "Jak se rekne dobry den anglicky?",
+    "a": "Have a good day.",
+    "ttft_s": 1.4297587871551514,
+    "tok_s": 6.37,
+    "n": 6
+  },
+  {
+    "q": "What is 17 plus 25?",
+    "a": "Seventeen plus twenty-five equals forty-two.",
+    "ttft_s": 1.5119354724884033,
+    "tok_s": 6.34,
+    "n": 13
+  },
+  {
+    "q": "Name a planet in our solar system.",
+    "a": "Jupiter is a planet in our solar system.",
+    "ttft_s": 1.3546316623687744,
+    "tok_s": 6.42,
+    "n": 10
+  },
+  {
+    "q": "What is today's date?",
+    "a": "Today is Saturday, October 24, 2026.",
+    "ttft_s": 3.7697298526763916,
+    "tok_s": 6.36,
+    "n": 16
+  }
+]

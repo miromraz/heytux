@@ -1,0 +1,29 @@
+{
+  "id": "Gemma-4-E2B-mmproj",
+  "slot": "vision",
+  "family": "Gemma-4-VL",
+  "params": "E2B",
+  "quant": "Q8_0",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T21:21:18",
+  "status": "skipped",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4679400,
+    "MemAvailable": 4657964,
+    "SwapTotal": 2823676,
+    "SwapFree": 1499068
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742105088,
+      "compr_bytes": 56486602
+    }
+  ],
+  "note": "vision: Gemma-4-E2B-mmproj is an mmproj projector; benchmark with its base chat gguf"
+}

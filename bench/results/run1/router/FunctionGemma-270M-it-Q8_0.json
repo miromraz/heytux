@@ -1,0 +1,56 @@
+{
+  "id": "FunctionGemma-270M-it-Q8_0",
+  "slot": "router",
+  "family": "FunctionGemma",
+  "params": "270M",
+  "quant": "Q8_0",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:22:46",
+  "status": "ok",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4714348,
+    "MemAvailable": 4686424,
+    "SwapTotal": 2823676,
+    "SwapFree": 1497960
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 743202816,
+      "compr_bytes": 56735079
+    }
+  ],
+  "cold_load_s": 6.378,
+  "warm_load_s": 4.871,
+  "gguf_router": {
+    "n": 56,
+    "accuracy": 0.554,
+    "none_recall": 1.0,
+    "none_precision": 0.554,
+    "latency_ms_median": 1817.0
+  },
+  "mem": {
+    "rss_kb": 616788,
+    "hwm_kb": 749512,
+    "pss_kb": 614867
+  },
+  "needle3_baseline": {
+    "n": 56,
+    "accuracy": 0.589,
+    "none_recall": 0.29,
+    "none_precision": 1.0,
+    "latency_ms_median": 246.1
+  },
+  "meminfo_during": {
+    "MemTotal": 5648268,
+    "MemFree": 3834956,
+    "MemAvailable": 4145768,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498364
+  }
+}

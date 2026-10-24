@@ -1,0 +1,42 @@
+{
+  "id": "streaming-zipformer-en-20M",
+  "slot": "asr",
+  "family": "Zipformer",
+  "params": "20M",
+  "quant": "fp32",
+  "runtime": "sherpa-onnx",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-24T12:46:05",
+  "status": "failed",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4942256,
+    "MemAvailable": 4917844,
+    "SwapTotal": 2823676,
+    "SwapFree": 1347112
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 930680832,
+      "compr_bytes": 59568312
+    }
+  ],
+  "cold_load_s": 1.214,
+  "warm_load_s": 0.313,
+  "mem": {
+    "rss_kb": 136796,
+    "hwm_kb": 138248,
+    "pss_kb": 124861
+  },
+  "resolved_files": [
+    "encoder-epoch-99-avg-1.int8.onnx",
+    "decoder-epoch-99-avg-1.onnx",
+    "joiner-epoch-99-avg-1.int8.onnx"
+  ],
+  "error": "RuntimeError('Got invalid dimensions for input: x for the following indices\\n index: 1 Got: 140 Expected: 39\\n Please fix either the inputs/outputs or the model.')",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/miro/heytux/bench/run.py\", line 520, in run_one\n    SLOT_FN_MANIFEST[entry[\"slot\"]](entry, be, args, rec, outdir, manifest)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/miro/heytux/bench/run.py\", line 388, in measure_asr\n    t = time.time(); hyp = be.transcribe(sig)\n                           ~~~~~~~~~~~~~^^^^^\n  File \"/home/miro/heytux/bench/backends.py\", line 251, in transcribe\n    self.rec.decode_stream(s)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^\n  File \"/home/miro/heytux/pylib/sherpa_onnx/offline_recognizer.py\", line 1880, in decode_stream\n    self.recognizer.decode_stream(s)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^\nRuntimeError: Got invalid dimensions for input: x for the following indices\n index: 1 Got: 140 Expected: 39\n Please fix either the inputs/outputs or the model.\n"
+}

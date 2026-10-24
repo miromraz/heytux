@@ -1,0 +1,30 @@
+{
+  "id": "multilingual-e5-small-Q8_0",
+  "slot": "embedding",
+  "family": "multilingual-e5",
+  "params": "0.12B",
+  "quant": "Q8_0",
+  "runtime": "llama.cpp",
+  "scenario": "desktop",
+  "quick": false,
+  "threads": 2,
+  "ts": "2026-10-23T20:36:27",
+  "status": "failed",
+  "meminfo_before": {
+    "MemTotal": 5648268,
+    "MemFree": 4708772,
+    "MemAvailable": 4682204,
+    "SwapTotal": 2823676,
+    "SwapFree": 1498644
+  },
+  "zram": [
+    {
+      "dev": "zram0",
+      "algo": "zstd",
+      "orig_bytes": 742539264,
+      "compr_bytes": 56569933
+    }
+  ],
+  "error": "RuntimeError(\"llama-server exited rc=1, log tail:\\ning n_batch = n_ubatch = 512 to avoid assertion failure\\n0.00.039.156 I srv  init_listene: The UI is disabled\\n0.00.039.216 I srv  init_listene: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable\\n0.00.040.161 W srv  llama_server:",
+  "traceback": "ng n_batch = n_ubatch = 512 to avoid assertion failure\n0.00.039.156 I srv  init_listene: The UI is disabled\n0.00.039.216 I srv  init_listene: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable\n0.00.040.161 W srv  llama_server: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)\n0.00.046.726 I srv    load_model: loading model '/home/miro/models/embedding/multilingual-e5-small-Q8_0/multilingual-e5-small-q8_0.gguf'\n0.01.385.661 E llama_model_load: error loading model: bert model needs to define token type count\n0.01.385.680 E llama_model_load_from_file_impl: failed to load model\n0.01.390.239 E common_fit_params: encountered an error while trying to fit params to free device memory: failed to load model\n0.01.994.295 W load: SPM vocabulary, but newline token not found: unordered_map::at! Using special_pad_id instead.0.02.637.258 E llama_model_load: error loading model: bert model needs to define token type count\n0.02.637.276 E llama_model_load_from_file_impl: failed to load model\n0.02.637.287 E cmn  common_init_: failed to load model '/home/miro/models/embedding/multilingual-e5-small-Q8_0/multilingual-e5-small-q8_0.gguf'\n0.02.637.295 E srv    load_model: failed to load model, '/home/miro/models/embedding/multilingual-e5-small-Q8_0/multilingual-e5-small-q8_0.gguf'\n0.02.637.299 I srv    operator(): operator(): cleaning up before exit...\n0.02.682.013 E srv  llama_server: exiting due to model loading error\n\n"
+}
