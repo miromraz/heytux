@@ -84,7 +84,9 @@ SCHEMA = [
        "word. Ends silently if you say nothing, or after any phone command. 0 disables.",
        "wake", "live", min=0.0, max=15.0, step=0.5),
     _f("CONF_FLOOR", "float", 0.5, "Confidence floor",
-       "Below this the router's answer is discarded and the question goes to the chat model.",
+       "Below this the Needle router's answer is discarded and the question goes to the chat model. "
+       "Applies only to Needle3: the embedding router uses its own similarity floor, and a "
+       "function-calling router decides per tool call, so neither is affected by this value.",
        "routing", "live", min=0.0, max=1.0, step=0.05),
     _f("GROUNDING_ON", "bool", True, "Require lexical grounding",
        "Reject a tool call that shares no meaningful word with what you said (the router "
@@ -104,15 +106,29 @@ SCHEMA = [
        "Keyword tokens for the spotter, plain tokens + @label. Per-keyword ':boost #threshold' "
        "is optional; '#' must be a small probability (e.g. #0.15) - the old ':0.25 #1.5' "
        "could never fire. Test before saving.", "wake", "model"),
-    _f("TTS_DIR", "enum", "/home/miro/sherpa/tts/vits-piper-en_US-lessac-low-int8", "Voice",
-       "Speech synthesis voice. Only vits-shaped models are listed.", "voice", "model", values=[]),
-    _f("STT_DIR", "enum",
-       "/home/miro/sherpa/sherpa-onnx-nemo-parakeet_tdt_transducer_110m-en-36000-int8",
-       "Speech recognition model",
-       "Which model turns your voice into text. The default (parakeet) is the most accurate that "
-       "stays fast on this phone (~130 ms); moonshine-tiny is faster but mishears quiet speech. "
-       "Needs a heytux restart.",
-       "voice", "restart", values=[]),
+    # Live per-slot model pickers. Values (manifest ids) are filled at startup from the registry,
+    # listing only models actually staged on disk; "live" means POST /config hot-swaps the model in
+    # place (close old, load new) with no daemon restart. See heytux.py: discover_models / swap_*.
+    _f("CHAT_MODEL", "enum", "Qwen3-0.6B-Q4_K_M", "Chat model",
+       "The local LLM that answers anything not handled by a phone command. The daemon hosts it on "
+       "127.0.0.1:8771. Bigger models answer better but load slower and use more RAM.",
+       "models", "live", values=[]),
+    _f("ROUTER_MODEL", "enum", "all-MiniLM-L6-v2-Q8_0", "Router model",
+       "Decides which phone command (if any) a request maps to. \"Needle3\" is the tuned baseline; "
+       "an embedding model routes by sentence similarity; a function-calling GGUF routes by tool "
+       "call. The confidence floor and grounding apply to all three.",
+       "models", "live", values=[]),
+    _f("ASR_MODEL", "enum", "moonshine-base-en-quantized", "Speech recognition model",
+       "Which model turns your voice into text. moonshine-base is a good accuracy/speed balance; "
+       "parakeet is more accurate on quiet speech; moonshine-tiny is fastest.",
+       "models", "live", values=[]),
+    _f("TTS_MODEL", "enum", "vits-piper-en_US-lessac-low-int8", "Voice",
+       "Speech synthesis voice used for spoken answers and acknowledgements.",
+       "models", "live", values=[]),
+    _f("VAD_MODEL", "enum", "silero_vad", "Voice activity detector",
+       "The model that decides, frame by frame, when you are speaking. Silero is the baseline; "
+       "TEN is an alternative. Takes effect from the next recording on.",
+       "models", "live", values=[]),
     _f("PORT", "int", 8770, "HTTP port",
        "Port the daemon listens on. Changing this restarts heytux.",
        "advanced", "restart", min=1024, max=65535, step=1),
@@ -204,17 +220,21 @@ def _read_json(path, want_type):
     return data
 
 
-def load(path=CONFIG_PATH):
-    """Defaults overlaid with the stored file. Never raises; bad values fall back to defaults."""
+def overlay(stored):
+    """Defaults overlaid with an already-parsed stored dict (validated; bad values logged and
+    dropped). Separated from load() so the daemon can migrate the raw dict - e.g. an old STT_DIR/
+    TTS_DIR path to a model id - before it is validated against the current schema."""
     vals = defaults()
-    stored = _read_json(path, dict)
-    if stored is None:
-        return vals
-    clean, errors = validate(stored)
+    clean, errors = validate(stored or {})
     for k, msg in errors.items():
         log("ignoring %s (%s)" % (k, msg))
     vals.update(clean)
     return vals
+
+
+def load(path=CONFIG_PATH):
+    """Defaults overlaid with the stored file. Never raises; bad values fall back to defaults."""
+    return overlay(_read_json(path, dict))
 
 
 def _write_json(path, data):

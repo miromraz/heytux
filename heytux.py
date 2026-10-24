@@ -8,6 +8,7 @@ import contextlib, ctypes, fcntl, glob, hashlib, json, math, os, queue, re, subp
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import numpy as np
 import heytux_config as JC
+import heytux_backends as HB
 
 # ---------- paths / constants (config-tunable values live in CFG, not here) ----------
 NEEDLE_DIR = "/home/miro/needle-arm64"
@@ -26,7 +27,14 @@ KWS_DIR = "/home/miro/kws/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01"
 KWS_KEYWORDS = "/home/miro/heytux/hey.txt"     # deployed with the daemon; "▁HE Y ▁LI N U X @HEY_LINUX"
 KWS_CHUNK = 3200                               # bytes = 100 ms s16 mono @ 16 kHz
 CAPTURE_DIR = "/home/miro/heytux/captures"     # fixed location; only the ring size (CAPTURE_KEEP) is configurable
-SILERO_VAD = "/home/miro/sherpa/silero_vad.onnx"   # copied to the phone out-of-band; absent => energy VAD fallback
+MANIFEST_PATH = os.environ.get("HEYTUX_MANIFEST", "/home/miro/heytux/bench/manifest.json")  # model registry
+
+# The five live-swappable model slots and the config field that selects each.
+MODEL_FIELDS = {"CHAT_MODEL": "chat", "ROUTER_MODEL": "router", "ASR_MODEL": "asr",
+                "TTS_MODEL": "tts", "VAD_MODEL": "vad"}
+FIELD_FOR_SLOT = {v: k for k, v in MODEL_FIELDS.items()}
+SWAP_BUSY = threading.Event()                   # set while a hot model swap is in progress (for /models)
+SWAP_LOCK = threading.Lock()                    # serialises swaps; a second request gets 409, not a queue
 
 WAKE_ON = threading.Event()
 WAKE_ON.set()
@@ -57,34 +65,111 @@ def set_wake(on):
     CFG["WAKE_ON"] = on
     WAKE_ON.set() if on else WAKE_ON.clear()
 
-def _stt_kind(d):
-    """'moonshine' / 'transducer' (NeMo parakeet-tdt) for an STT dir Models() can load, else None."""
-    if not os.path.isfile(d + "/tokens.txt"):
-        return None
-    if os.path.isfile(d + "/encoder_model.ort") and os.path.isfile(d + "/decoder_model_merged.ort"):
-        return "moonshine"
-    if all(os.path.isfile("%s/%s.int8.onnx" % (d, n)) for n in ("encoder", "decoder", "joiner")):
-        return "transducer"
+# ---------- model registry: the manifest, filtered to what is actually staged on disk ----------
+REGISTRY = {}        # id -> manifest entry, present-on-disk only
+SLOT_IDS = {}        # slot -> [ids] (manifest order), present-on-disk only
+
+def _model_base(entry):
+    """The directory a manifest entry's `files` are listed relative to: the path itself when it is a
+    directory, else the path's parent (gguf entries point at the .gguf file inside a model dir)."""
+    p = entry["path"]
+    return p if os.path.isdir(p) else os.path.dirname(p)
+
+def _entry_present(entry):
+    """True if the model's path and every file it lists exist on disk."""
+    if not os.path.exists(entry["path"]):
+        return False
+    base = _model_base(entry)
+    return all(os.path.exists(os.path.join(base, f)) for f in entry.get("files", []))
+
+def load_registry():
+    """Read the manifest and index only the entries actually staged on disk. Never raises: a missing
+    or malformed manifest leaves REGISTRY/SLOT_IDS empty and model building falls back accordingly."""
+    global REGISTRY, SLOT_IDS
+    REGISTRY, SLOT_IDS = {}, {}
+    try:
+        entries = json.load(open(MANIFEST_PATH))
+    except Exception as e:
+        log("manifest %s unreadable (%s); model registry empty" % (MANIFEST_PATH, e))
+        return
+    for e in entries:
+        if not isinstance(e, dict) or "id" not in e or not _entry_present(e):
+            continue
+        REGISTRY[e["id"]] = e
+        SLOT_IDS.setdefault(e.get("slot"), []).append(e["id"])
+
+# Only families the sherpa adapters (heytux_backends) actually load are offered - run1 recorded the
+# others crashing the worker (kitten/matcha/supertonic TTS, streaming zipformer ASR, TEN VAD all
+# failed, some rc 255). Offering them would let a swap hard-fail or brick the daemon.
+SUPPORTED_FAMILY = {"asr": {"Moonshine", "NeMo-Parakeet-TDT", "Whisper"},
+                    "tts": {"Piper-VITS", "Kokoro"},
+                    "vad": {"Silero-VAD"}}
+
+def slot_ids(slot):
+    """Installed ids for a slot, filtered to the architectures the adapters support (asr/tts/vad);
+    chat/embedding/router are llama.cpp and pass through."""
+    ids = SLOT_IDS.get(slot, [])
+    fams = SUPPORTED_FAMILY.get(slot)
+    return ids if fams is None else [i for i in ids if REGISTRY[i].get("family") in fams]
+
+def router_ids():
+    """ROUTER_MODEL candidates: every present router-slot entry (Needle3 and the function-calling
+    GGUFs) plus every present llama.cpp embedding entry (each usable as an embedding-classifier
+    router). ONNX embeddings are skipped - there is no in-daemon adapter to host them."""
+    emb = [i for i in SLOT_IDS.get("embedding", []) if REGISTRY[i].get("runtime") == "llama.cpp"]
+    return SLOT_IDS.get("router", []) + emb
+
+def _id_for_path(path):
+    """The id of the installed manifest entry whose path matches, for migrating an old STT_DIR/TTS_DIR."""
+    p = (path or "").rstrip("/")
+    for e in REGISTRY.values():
+        if e["path"].rstrip("/") == p:
+            return e["id"]
+    return None
+
+def resolve_id(field, ids):
+    """The id to actually load for a model field: the configured id if installed, else the schema
+    default if installed, else the first installed candidate; any substitution is logged. None when
+    nothing for the slot is on disk."""
+    want = CFG.get(field)
+    if want in ids:
+        return want
+    dflt = JC.FIELDS[field]["default"]
+    if dflt in ids:
+        log("model %s: %r not installed, using default %r" % (field, want, dflt))
+        return dflt
+    if ids:
+        log("model %s: neither %r nor default %r installed, using %r" % (field, want, dflt, ids[0]))
+        return ids[0]
+    log("model %s: no installed candidate (wanted %r)" % (field, want))
     return None
 
 def discover_models():
-    """Fill the enum fields' value lists from what is actually staged on disk. A TTS dir is usable
-    only if it has the vits shape Models() builds (one *.onnx + tokens.txt + espeak-ng-data/);
-    an STT dir only if _stt_kind() recognizes its export shape - offering any other shape would
-    brick the daemon on the next restart."""
-    tts = []
-    for d in sorted(glob.glob("/home/miro/sherpa/tts/*/")):
-        d = d.rstrip("/")
-        onnx = glob.glob(d + "/*.onnx")
-        if len(onnx) == 1 and os.path.isfile(d + "/tokens.txt") and os.path.isdir(d + "/espeak-ng-data"):
-            tts.append(d)
-    JC.FIELDS["TTS_DIR"]["values"] = tts
-    stt = []
-    for d in sorted(glob.glob("/home/miro/sherpa/*/")):
-        d = d.rstrip("/")
-        if _stt_kind(d):
-            stt.append(d)
-    JC.FIELDS["STT_DIR"]["values"] = stt
+    """(Re)load the registry and fill the model enum fields' value lists from what is staged on disk,
+    so the settings app only ever offers installed models and validate() rejects uninstalled ids."""
+    load_registry()
+    JC.FIELDS["CHAT_MODEL"]["values"] = slot_ids("chat")
+    JC.FIELDS["ASR_MODEL"]["values"] = slot_ids("asr")
+    JC.FIELDS["TTS_MODEL"]["values"] = slot_ids("tts")
+    JC.FIELDS["VAD_MODEL"]["values"] = slot_ids("vad")
+    JC.FIELDS["ROUTER_MODEL"]["values"] = router_ids()
+
+def migrate_config(stored):
+    """Map a pre-registry config.json onto the new fields: an old STT_DIR/TTS_DIR path becomes the
+    ASR_MODEL/TTS_MODEL id of the installed manifest entry with that path; an unmapped path is
+    dropped (the field then defaults). Returns a new dict with the old keys removed."""
+    s = dict(stored or {})
+    for old, field in (("STT_DIR", "ASR_MODEL"), ("TTS_DIR", "TTS_MODEL")):
+        path = s.pop(old, None)
+        if field in s or not isinstance(path, str):
+            continue
+        mid = _id_for_path(path)
+        if mid:
+            s[field] = mid
+            log("migrated %s=%s -> %s=%s" % (old, path, field, mid))
+        else:
+            log("migrated %s=%s: no installed manifest entry, %s will default" % (old, path, field))
+    return s
 
 def sync_kws_text(text):
     """Persist KWS_TEXT to the keyword file the spotter loads. model-class: only takes effect on
@@ -100,7 +185,7 @@ def sync_kws_text(text):
 def load_config():
     global CFG, MERGED_TOOLS, TOOL_VOCAB
     discover_models()
-    CFG = JC.load(JC.CONFIG_PATH)
+    CFG = JC.overlay(migrate_config(JC._read_json(JC.CONFIG_PATH, dict)))
     set_wake(CFG["WAKE_ON"])
     sync_kws_text(CFG["KWS_TEXT"])
     MERGED_TOOLS = merged_tools()
@@ -111,7 +196,7 @@ def load_config():
 def pending_restart():
     """Keys whose saved value differs from what this process started with. Covers both apply
     classes that need a restart: 'restart' (a new global takes effect only at startup) and
-    'model' (KWS_TEXT/TTS_DIR - takes effect only when the model is rebuilt)."""
+    'model' (KWS_TEXT - takes effect only when the spotter is rebuilt)."""
     return [k for k, f in JC.FIELDS.items()
             if f["apply"] in ("restart", "model") and CFG.get(k) != _STARTED_WITH.get(k)]
 
@@ -573,21 +658,36 @@ def _chat_history():
         CHAT_HISTORY.clear()
     return CHAT_HISTORY[-n:] if n > 0 else []
 
+def _llm_once(body):
+    req = urllib.request.Request(LLM_URL, data=body, headers={"Content-Type": "application/json"})
+    # 60 s: a big slow model (Qwen3.5-4B ~3.2 t/s) needs ~19 s for 60 tokens; 10 s timed out valid replies.
+    r = json.load(urllib.request.urlopen(req, timeout=60))
+    return clean_spoken(r["choices"][0]["message"]["content"])
+
 def chat_llm(transcript, remember=True):
     """Ask the local LLM; return a cleaned spoken answer, or None on any error/timeout. A good
-    answer is added to the chat memory unless remember=False (dry /text must not change it)."""
+    answer is added to the chat memory unless remember=False (dry /text must not change it). The
+    daemon owns the chat server now, so if the request fails ONLY because the process has actually
+    died, reload it once (the old unit's Restart=on-failure) and retry; a live-but-slow server is left
+    alone (no pointless second wait). Callers already hold LOCK, which ensure_chat needs."""
     global chat_last
     body = json.dumps({
         "messages": chat_messages(CFG["LLM_SYS"] + " " + _live_facts(), _chat_history(), transcript),
         "max_tokens": 60, "temperature": 0.7,
         "chat_template_kwargs": {"enable_thinking": False}}).encode()
     try:
-        req = urllib.request.Request(LLM_URL, data=body, headers={"Content-Type": "application/json"})
-        r = json.load(urllib.request.urlopen(req, timeout=10))
-        ans = clean_spoken(r["choices"][0]["message"]["content"])
+        ans = _llm_once(body)
     except Exception as e:
         log("chat_llm error:", repr(e))
-        return None
+        if M is None or M._slot_alive("chat"):
+            return None                     # server alive (just slow/other error) - don't reload/retry
+        try:
+            with LOCK:
+                M.ensure_chat()
+            ans = _llm_once(body)
+        except Exception as e2:
+            log("chat_llm retry failed:", repr(e2))
+            return None
     if ans and remember and CFG["CHAT_HISTORY_TURNS"] > 0:
         CHAT_HISTORY.append((transcript, ans))
         del CHAT_HISTORY[:-CFG["CHAT_HISTORY_TURNS"]]
@@ -718,40 +818,170 @@ class Needle:
         self.lib.needle_reset()
         return r
 
+    def close(self):
+        pass        # ctypes model with no unload API; dropping the reference is all we can do
+
+# ---------- model registry -> router/rss helpers ----------
+def make_router(mid):
+    """Build the router backend for a ROUTER_MODEL id. Each returns .complete(transcript) in Needle's
+    dict shape (function_calls/confidence/reasoning) and .close(): Needle3 -> the ctypes model; an
+    embedding entry -> an embedding-classifier router; any other router-slot entry -> a GGUF
+    function-caller. The grounding/CONF_FLOOR/NOMATCH gates in decide_route apply to all three."""
+    e = REGISTRY[mid]
+    if e.get("runtime") == "needle" or mid == "Needle3":
+        # ponytail: Needle3 is a process-global ctypes model with no unload API, so switching away
+        # can't free its RAM (close() is a no-op) and /models reports its startup delta, not a live
+        # figure. Upgrade path: host it in its own worker process if per-swap RAM reclaim is needed.
+        return Needle(MERGED_TOOLS)
+    # Both router kinds route over the ENABLED merged tools (a disabled/re-described tool is honored),
+    # and the started llama-server is closed if wrapper construction throws, never leaked.
+    if e.get("slot") == "embedding":
+        srv = HB.LlamaServer(e, embeddings=True, threads=2, ctx=2048)
+        try:
+            return HB.EmbeddingRouter(srv, MERGED_TOOLS, threshold=HB.EMB_ROUTER_FLOOR)
+        except Exception:
+            srv.close(); raise
+    g = dict(e); g["path"] = HB.resolve_gguf(e["path"], "router")
+    srv = HB.LlamaServer(g, threads=2, ctx=2048)
+    try:
+        return HB.GgufRouter(srv, MERGED_TOOLS)
+    except Exception:
+        srv.close(); raise
+
+def _daemon_rss_mb():
+    try:
+        for line in open("/proc/self/status"):
+            if line.startswith("VmRSS:"):
+                return int(line.split()[1]) / 1024.0
+    except OSError:
+        pass
+    return None
+
+def _rss_delta(before):
+    after = _daemon_rss_mb()
+    return None if (before is None or after is None) else round(max(after - before, 0))
+
+def _proc_rss_mb(pid):
+    try:
+        for line in open("/proc/%d/status" % pid):
+            if line.startswith("VmRSS:"):
+                return round(int(line.split()[1]) / 1024)
+    except OSError:
+        pass
+    return None
+
+def _obj_proc(obj):
+    """The llama-server Popen behind a backend (chat/asr are the object; router wrappers hold it on
+    .server), or None for in-process models (Needle, sherpa)."""
+    return getattr(obj, "proc", None) or getattr(getattr(obj, "server", None), "proc", None)
+
+def _obj_pid(obj):
+    return getattr(obj, "pid", None) or getattr(getattr(obj, "server", None), "pid", None)
+
+def _obj_alive(obj):
+    """True if the backend exists and, when it is a subprocess, that process is still running."""
+    if obj is None:
+        return False
+    proc = _obj_proc(obj)
+    return (proc.poll() is None) if proc is not None else True
+
 # ---------- models ----------
 class Models:
     def __init__(self):
         import sherpa_onnx as so
-        self.so = so                 # kept so vad_detector() can build the VAD lazily, still only inside Models
-        self.vad = None              # one Silero VAD instance, reset per capture; rebuilt when the threshold changes
+        self.so = so                 # kept so _vad_build()/build_kws() build sherpa models inside Models
+        self.vad = None              # one VAD instance, reset per capture; rebuilt on threshold/model change
         self._vad_threshold = None
+        self._vad_id = None
+        self._vad_entry = None
         self._vad_warned = False
-        t = time.time()
-        d, kind = CFG["STT_DIR"], _stt_kind(CFG["STT_DIR"])
-        if kind == "transducer":     # parakeet-tdt: ~40 % lower WER than moonshine-tiny on quiet speech
-            self.stt = so.OfflineRecognizer.from_transducer(
-                encoder=d + "/encoder.int8.onnx", decoder=d + "/decoder.int8.onnx",
-                joiner=d + "/joiner.int8.onnx", tokens=d + "/tokens.txt",
-                num_threads=THREADS, model_type="nemo_transducer")
+        self.loaded = {}             # slot -> actually-loaded manifest id (None = not loaded); /models truth
+        self.rss_mb = {}             # slot -> best-effort RSS MB (daemon delta for in-process sherpa)
+        self.chat = self.router = self.asr = self.tts = None
+        self.play_proc = None        # last detached ack playback, awaited before the next mic capture
+        for slot in ("chat", "router", "asr", "tts", "vad"):
+            self._load_slot(slot, self._resolve(slot))
+        self.build_kws()
+
+    def _resolve(self, slot):
+        """The id to load for a slot (configured -> default -> first installed). Raises if a required
+        slot has nothing installed; VAD may resolve to None (the energy-VAD fallback)."""
+        ids = router_ids() if slot == "router" else slot_ids(slot)
+        mid = resolve_id(FIELD_FOR_SLOT[slot], ids)
+        if mid is None and slot != "vad":
+            raise RuntimeError("no %s model installed for %s" % (slot, FIELD_FOR_SLOT[slot]))
+        return mid
+
+    def _vad_build(self, entry, th):
+        """A sherpa VoiceActivityDetector for a VAD entry at threshold th (silero or TEN). Called at
+        swap time so a broken model fails the swap, and lazily in vad_detector() when th changes."""
+        so = self.so
+        path = entry["path"]
+        onnx = path if (os.path.isfile(path) and path.endswith(".onnx")) \
+            else HB._one(path, "*int8.onnx", "*.onnx")
+        if "ten" in entry["id"].lower():
+            cfg = so.VadModelConfig(ten_vad=so.TenVadModelConfig(
+                model=onnx, threshold=th, min_silence_duration=0.1,
+                min_speech_duration=0.05, window_size=256), sample_rate=SR, num_threads=1)
         else:
-            self.stt = so.OfflineRecognizer.from_moonshine_v2(
-                encoder=d + "/encoder_model.ort", decoder=d + "/decoder_model_merged.ort",
-                tokens=d + "/tokens.txt", num_threads=THREADS)
-        log("STT (%s, %s) loaded in %d ms" % (kind, os.path.basename(d), 1000 * (time.time() - t)))
+            cfg = so.VadModelConfig(silero_vad=so.SileroVadModelConfig(
+                model=onnx, threshold=th, min_silence_duration=0.1,
+                min_speech_duration=0.05, window_size=512, max_speech_duration=20),
+                sample_rate=SR, num_threads=1)
+        return so.VoiceActivityDetector(cfg, buffer_size_in_seconds=30)
+
+    # ---------- per-slot load/close (used by __init__ and swap()) ----------
+    def _load_slot(self, slot, mid):
+        """Build the backend for `mid` and publish it (self.<slot>, loaded[slot], rss). Raises on
+        failure with nothing published, so loaded[slot] is only set once the model is really up.
+        mid None is valid only for vad (energy-VAD fallback)."""
+        t = time.time(); before = _daemon_rss_mb()
+        if slot == "vad":
+            if mid is None:
+                self.vad = self._vad_entry = self._vad_id = self._vad_threshold = None
+            else:
+                entry = REGISTRY[mid]; th = CFG["VAD_THRESHOLD"]
+                self.vad = self._vad_build(entry, th)          # build NOW: a broken model fails the swap
+                self._vad_entry = entry; self._vad_id = entry["id"]; self._vad_threshold = th
+                self.rss_mb["vad"] = _rss_delta(before)
+        elif slot == "chat":
+            # The chat LLM, hosted by the daemon on 127.0.0.1:8771 so LLM_URL stays valid (retires
+            # heytux-llm.service). -t 2, ctx 2048 per the brief.
+            e = dict(REGISTRY[mid]); e["path"] = HB.resolve_gguf(e["path"], "chat")
+            self.chat = HB.LlamaServer(e, threads=2, ctx=2048, port=8771)
+        elif slot == "router":
+            r = make_router(mid)
+            try:                                               # probe: reject a router that errors
+                r.complete("turn on the flashlight")           # (e.g. xLAM 500'd in run1)
+            except Exception as e:
+                try: r.close()
+                except Exception: pass
+                raise RuntimeError("router probe failed: %s" % e)
+            self.router = r
+            if getattr(self.router, "pid", None) is None:      # in-process (Needle): daemon delta
+                self.rss_mb["router"] = _rss_delta(before)
+        elif slot in ("asr", "tts"):
+            setattr(self, slot, HB.load(REGISTRY[mid], threads=THREADS))
+            self.rss_mb[slot] = _rss_delta(before)
+        self.loaded[slot] = mid
+        log("%s (%s) loaded in %d ms%s" % (slot, mid, 1000 * (time.time() - t),
+                                           " on :8771" if slot == "chat" else ""))
+
+    def _close_slot(self, slot):
+        if slot == "vad":
+            self.vad = self._vad_entry = self._vad_id = self._vad_threshold = None
+            return
+        obj = getattr(self, slot, None)
+        if obj is not None:
+            try:
+                obj.close()
+            except Exception:
+                log("closing old %s failed:\n" % slot + traceback.format_exc())
+        setattr(self, slot, None)
+
+    def build_kws(self):
         t = time.time()
-        # discover_models() only lists TTS dirs with exactly one *.onnx, so this always resolves;
-        # the onnx filename varies per voice (never assume lessac-low's).
-        tts_onnx = glob.glob(CFG["TTS_DIR"] + "/*.onnx")[0]
-        self.tts = so.OfflineTts(so.OfflineTtsConfig(model=so.OfflineTtsModelConfig(
-            vits=so.OfflineTtsVitsModelConfig(model=tts_onnx, lexicon="",
-                tokens=CFG["TTS_DIR"] + "/tokens.txt", data_dir=CFG["TTS_DIR"] + "/espeak-ng-data"),
-            num_threads=THREADS)))
-        log("TTS (piper lessac-low) loaded in %d ms" % (1000 * (time.time() - t)))
-        t = time.time()
-        self.needle = Needle(MERGED_TOOLS)
-        log("Needle3 loaded in %d ms" % (1000 * (time.time() - t)))
-        t = time.time()
-        self.kws = so.KeywordSpotter(
+        self.kws = self.so.KeywordSpotter(
             tokens=KWS_DIR + "/tokens.txt",
             encoder=KWS_DIR + "/encoder-epoch-12-avg-2-chunk-16-left-64.int8.onnx",
             decoder=KWS_DIR + "/decoder-epoch-12-avg-2-chunk-16-left-64.onnx",
@@ -761,7 +991,71 @@ class Models:
             # -> 35/40 here, near-miss false alarms unchanged; more paths raises false alarms
             max_active_paths=8, keywords_threshold=0.15, keywords_score=1.5)
         log("KWS (zipformer wake word) loaded in %d ms" % (1000 * (time.time() - t)))
-        self.play_proc = None       # last detached ack playback, awaited before the next mic capture
+
+    def swap(self, slot, new_id):
+        """Load new_id into `slot`, RAM-safe (close the old backend first - 6 GB can't hold both).
+        Does NOT touch CFG: the caller publishes CFG and persists only after this returns cleanly. On
+        failure, restores whatever was loaded before and re-raises; self.loaded tracks the real state,
+        so a slot left down by a doubly-failed swap is loaded=None and the same id can be retried.
+        The caller holds LOCK and SWAP_BUSY, which serialise swaps."""
+        prev = self.loaded.get(slot)
+        self._close_slot(slot)
+        self.loaded[slot] = None                 # not loaded until proven
+        try:
+            self._load_slot(slot, new_id)
+        except Exception:
+            log("swap %s -> %s failed:\n%s" % (slot, new_id, traceback.format_exc()))
+            if prev and prev != new_id:
+                try:
+                    self._load_slot(slot, prev)
+                except Exception:
+                    log("CRITICAL: could not restore %s=%s:\n%s"
+                        % (slot, prev, traceback.format_exc()))
+            raise
+
+    def _slot_obj(self, slot):
+        return {"chat": self.chat, "router": self.router, "asr": self.asr,
+                "tts": self.tts, "vad": self._vad_entry}[slot]
+
+    def _slot_alive(self, slot):
+        """True if the slot is loaded AND (for subprocess slots) its process is still running. The one
+        liveness definition shared by /models, swap eligibility and the ensure_* recovery."""
+        return bool(self.loaded.get(slot) and _obj_alive(self._slot_obj(slot)))
+
+    def ensure_chat(self):
+        """Reload the chat server if its process has died (the retired unit had Restart=on-failure).
+        Caller holds LOCK."""
+        if self._slot_alive("chat"):
+            return
+        log("chat server not alive, reloading")
+        self._close_slot("chat")
+        self._load_slot("chat", self.loaded.get("chat") or self._resolve("chat"))
+
+    def ensure_router(self):
+        """Reload the router if its backend has died (a dead router subprocess would otherwise raise
+        on every turn). Caller holds LOCK."""
+        if self._slot_alive("router"):
+            return
+        log("router not alive, reloading")
+        self._close_slot("router")
+        self._load_slot("router", self.loaded.get("router") or self._resolve("router"))
+
+    def models_status(self):
+        """Per-slot status for GET /models: available ids, current id, honest loaded (a subprocess
+        whose process has died reports loaded=false), and best-effort RSS MB (process RSS for a live
+        subprocess slot, else the daemon load-delta for the in-process sherpa/Needle models)."""
+        specs = [("chat", "CHAT_MODEL", slot_ids("chat")),
+                 ("router", "ROUTER_MODEL", router_ids()),
+                 ("asr", "ASR_MODEL", slot_ids("asr")),
+                 ("tts", "TTS_MODEL", slot_ids("tts")),
+                 ("vad", "VAD_MODEL", slot_ids("vad"))]
+        out = {}
+        for slot, field, ids in specs:
+            obj = self._slot_obj(slot); alive = _obj_alive(obj); pid = _obj_pid(obj)
+            out[slot] = {"field": field, "available": ids, "current": self.loaded.get(slot),
+                         "loaded": bool(alive and self.loaded.get(slot)),
+                         "rss_mb": _proc_rss_mb(pid) if (pid and alive) else self.rss_mb.get(slot)}
+        return out
 
     def await_playback(self):
         if self.play_proc and self.play_proc.poll() is None:
@@ -771,34 +1065,26 @@ class Models:
                 pass
 
     def vad_detector(self):
-        """A reset Silero VAD built for the current VAD_THRESHOLD, or None when the model file is
-        absent (record() then falls back to the tested energy VAD). Silero decides speech from
-        spectral shape, not loudness, so it hears the user's quiet turns AND rejects the wake cue's
-        own tone leaking into the stream - both level-independent, which the RMS gate can't be.
-        Rebuilt only when the threshold is changed live; one instance is reused (reset) per capture,
-        safe because the whole pipeline is serialized under LOCK."""
-        if not os.path.isfile(SILERO_VAD):
+        """A reset VAD for the selected VAD_MODEL and current VAD_THRESHOLD, or None when no VAD model
+        is staged (record() then falls back to the tested energy VAD). The VAD decides speech from
+        spectral shape, not loudness, so it hears quiet turns AND rejects the wake cue's own tone
+        leaking into the stream. Rebuilt only when the threshold or model changes; one instance is
+        reused (reset) per capture, safe because the whole pipeline is serialized under LOCK."""
+        entry = self._vad_entry
+        if not entry:
             if not self._vad_warned:
-                log("silero VAD model %s absent - using energy VAD" % SILERO_VAD)
+                log("no VAD model staged - using energy VAD")
                 self._vad_warned = True
             return None
         th = CFG["VAD_THRESHOLD"]
-        if self.vad is None or th != self._vad_threshold:
-            so = self.so
-            cfg = so.VadModelConfig(silero_vad=so.SileroVadModelConfig(
-                model=SILERO_VAD, threshold=th, min_silence_duration=0.1,
-                min_speech_duration=0.05, window_size=512, max_speech_duration=20),
-                sample_rate=SR, num_threads=1)
-            self.vad = so.VoiceActivityDetector(cfg, buffer_size_in_seconds=30)
-            self._vad_threshold = th
+        if self.vad is None or th != self._vad_threshold or entry["id"] != self._vad_id:
+            self.vad = self._vad_build(entry, th)      # VAD_THRESHOLD is a live field, so rebuild here
+            self._vad_threshold = th; self._vad_id = entry["id"]
         self.vad.reset()
         return self.vad
 
     def transcribe(self, samples_f32):
-        s = self.stt.create_stream()
-        s.accept_waveform(SR, samples_f32)
-        self.stt.decode_stream(s)
-        return s.result.text.strip()
+        return self.asr.transcribe(samples_f32)
 
     def _play(self, pcm_i16, sr):
         """Write a mono s16 buffer to a temp wav and play it back detached (non-blocking)."""
@@ -818,9 +1104,9 @@ class Models:
     def speak(self, text):
         """Synthesize (the measured TTS cost) then play back detached so the HTTP response returns
         immediately; playback duration is not on the request path."""
-        a = self.tts.generate(text, sid=0, speed=1.15)   # 1.15 shaves synth time, still natural
-        pcm = (np.asarray(a.samples, dtype=np.float32) * 32767).clip(-32768, 32767).astype("<i2")
-        self._play(pcm, a.sample_rate)
+        samples, sr = self.tts.synth(text, sid=0, speed=1.15)   # 1.15 shaves synth time, still natural
+        pcm = (np.asarray(samples, dtype=np.float32) * 32767).clip(-32768, 32767).astype("<i2")
+        self._play(pcm, sr)
 
     def _tone(self, freqs, note_s=0.07, amp=0.35):
         """Concatenate short sine notes into one s16 buffer (each note gets a 5 ms fade to kill clicks)."""
@@ -932,13 +1218,13 @@ def record(src=None, skip_s=0.0, onset_s=0.0):
     so blocking cue playback into the room never reaches the VAD/STT. onset_s > 0 (a follow-up turn)
     gives up with no speech if none starts within that much audio, also by sample count; until
     then HARD_CAP_S is not applied, so a late start still gets a full-length utterance."""
-    p = None
+    vad = M.vad_detector()      # built/validated BEFORE opening the mic, so a VAD failure can't leak
+    p = None                    # the pw-record child (it is only opened once nothing below can raise)
     if src is None:
         M.await_playback()      # don't capture the tail of the previous spoken ack
         p = subprocess.Popen(pw_record_cmd(),
                              env=sess_env(), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         src = p.stdout
-    vad = M.vad_detector()
     frames, speech, silence_ms, voiced_run, vad_speech, start = [], False, 0, 0, False, time.time()
     nbytes = FRAME * 2
     try:
@@ -996,8 +1282,10 @@ def record(src=None, skip_s=0.0, onset_s=0.0):
 
 # ---------- routing + pipeline ----------
 def decide_route(r, transcript):
-    """Pure route decision from a Needle3 result. ask_question -> chat-tool; empty calls / NOMATCH
-    reasoning / conf < CONF_FLOOR / ungrounded -> chat-fallback; else tool. Returns
+    """Pure route decision from a router result. ask_question -> chat-tool; empty calls / NOMATCH
+    reasoning / conf < CONF_FLOOR / ungrounded -> chat-fallback; else tool. CONF_FLOOR applies only to
+    routers that report a comparable confidence (Needle3); a self-gated router (embedding floor, GGUF
+    tool_choice) sets r["self_gated"] and is trusted past the floor. Grounding applies to all. Returns
     (route, calls, conf, names)."""
     calls = r.get("function_calls") or []
     conf = r.get("confidence", 0.0)
@@ -1007,10 +1295,27 @@ def decide_route(r, transcript):
     ungrounded = bool(calls) and not is_ask and not all(_grounded(n, transcript) for n in names)
     if ungrounded:
         log("grounding: rejected %s for %r (no shared content word)" % (names, transcript))
-    go_chat = is_ask or (not calls) or _off_topic(reasoning) or conf < CFG["CONF_FLOOR"] or ungrounded
+    below_floor = (not r.get("self_gated")) and conf < CFG["CONF_FLOOR"]
+    go_chat = is_ask or (not calls) or _off_topic(reasoning) or below_floor or ungrounded
     if go_chat:
         return ("chat-tool" if is_ask else "chat-fallback"), calls, conf, names
     return "tool", calls, conf, names
+
+_NO_ROUTE = {"function_calls": [], "confidence": 0.0, "reasoning": "", "self_gated": True}
+
+def _route_complete(transcript):
+    """Route one transcript, surviving a dead/throwing router: reload it once (caller holds LOCK) and
+    retry; if it still raises, route to chat rather than failing the whole turn."""
+    try:
+        return M.router.complete(transcript)
+    except Exception:
+        log("router.complete failed:\n" + traceback.format_exc())
+    try:
+        M.ensure_router()
+        return M.router.complete(transcript)
+    except Exception:
+        log("router recovery failed, routing to chat:\n" + traceback.format_exc())
+        return dict(_NO_ROUTE)
 
 def pipeline(transcript, ms, overlay=False, notif_id=0, dry=False):
     """transcript already produced; needle -> execute -> speak. ms is mutated + returned. overlay
@@ -1033,8 +1338,8 @@ def pipeline(transcript, ms, overlay=False, notif_id=0, dry=False):
             # Bounded (8 s), not never-expiring: needle+act is 130-500 ms so step 3 almost always
             # replaces this first, but a raised exception or notif_id 0 must not leave it forever.
             _notify_async('"%s"' % transcript, "thinking…", notif_id, 8000)
-        with timed(ms, "needle"):
-            r = M.needle.complete(transcript)
+        with timed(ms, "route"):
+            r = _route_complete(transcript)
         route, calls, conf, names = decide_route(r, transcript)
         if route == "tool":
             if dry:
@@ -1274,6 +1579,9 @@ class H(BaseHTTPRequestHandler):
         self._send({"values": live_values(), "defaults": JC.defaults(),
                     "schema": JC.SCHEMA, "pending_restart": pending_restart()})
 
+    def _get_models(self):
+        self._send({"busy": SWAP_BUSY.is_set(), "slots": M.models_status() if M else {}})
+
     def _post_wake(self):
         on = bool(self._body().get("on", True))
         with CFG_LOCK:
@@ -1286,14 +1594,45 @@ class H(BaseHTTPRequestHandler):
         clean, errors = JC.validate(changes)
         if errors:
             self._send({"errors": errors}, 400); return      # nothing applied
-        with CFG_LOCK:
-            CFG.update(clean)
-            if "WAKE_ON" in clean:
-                set_wake(clean["WAKE_ON"])
-            if "KWS_TEXT" in clean:
-                sync_kws_text(CFG["KWS_TEXT"])
-            JC.save(JC.CONFIG_PATH, CFG)
-        applied = sorted(clean)
+        # Model-slot changes hot-swap in place (close old, load new). Any request carrying a model
+        # field takes SWAP_LOCK for its whole critical section - eligibility is computed, the swaps
+        # run, and CFG is published AND persisted all under the one lock - so two concurrent swaps
+        # can't publish out of order and a request can't observe a mid-swap state. A second concurrent
+        # model request gets 409, not a queue. A slot is swapped when the id differs, OR the id is the
+        # same but the slot is not live (a prior swap that failed, or a crashed subprocess) so it can
+        # be retried.
+        has_model = any(k in MODEL_FIELDS for k in clean)
+        if has_model and not SWAP_LOCK.acquire(blocking=False):
+            self._send({"busy": True, "errors": {k: "a model swap is already in progress"
+                                                 for k in clean if k in MODEL_FIELDS}}, 409); return
+        swap_errors, swapped = {}, {}
+        try:
+            if has_model:
+                SWAP_BUSY.set()
+                needs = {k: v for k, v in clean.items() if k in MODEL_FIELDS
+                         and (v != CFG.get(k) or not M._slot_alive(MODEL_FIELDS[k]))}
+                for k, v in needs.items():
+                    try:
+                        with LOCK:
+                            M.swap(MODEL_FIELDS[k], v)
+                        swapped[k] = v                    # publish only after the load succeeded
+                    except Exception as e:
+                        swap_errors[k] = "could not load %s: %s" % (v, e)
+            with CFG_LOCK:
+                # Persist swapped model ids and the non-model live fields together, atomically.
+                CFG.update(swapped)
+                CFG.update({k: v for k, v in clean.items() if k not in MODEL_FIELDS})
+                if "WAKE_ON" in clean:
+                    set_wake(clean["WAKE_ON"])
+                if "KWS_TEXT" in clean:
+                    sync_kws_text(CFG["KWS_TEXT"])
+                JC.save(JC.CONFIG_PATH, CFG)
+        finally:
+            if has_model:
+                SWAP_BUSY.clear(); SWAP_LOCK.release()
+        if swap_errors:
+            self._send({"errors": swap_errors}, 500); return
+        applied = sorted(set(swapped) | {k for k in clean if k not in MODEL_FIELDS})
         log("config: applied %s" % ", ".join(applied) if applied else "config: no change")
         self._send({"applied": applied, "values": live_values(),
                     "pending_restart": pending_restart()})
@@ -1321,7 +1660,8 @@ class H(BaseHTTPRequestHandler):
                 M.speak(txt)
         self._send({"said": txt, "ms": {"tts": ms["tts"]}})
 
-    GET_ROUTES = {"/status": _get_status, "/wake": _get_wake, "/config": _get_config}
+    GET_ROUTES = {"/status": _get_status, "/wake": _get_wake, "/config": _get_config,
+                  "/models": _get_models}
     POST_ROUTES = {"/wake": _post_wake, "/config": _post_config, "/listen": _post_listen,
                    "/text": _post_text, "/say": _post_say}
 
@@ -1366,9 +1706,11 @@ def main():
     try:
         M = Models()
     except Exception:
-        # A persisted TTS_DIR/STT_DIR that validated but doesn't actually load (wrong onnx shape)
-        # must not crash-loop the daemon. Retry once on defaults; if THAT fails, let it die.
+        # A persisted model id that validated but doesn't actually load must not crash-loop the
+        # daemon. Kill any half-started llama-server (so :8771 is free), retry once on defaults; if
+        # THAT fails, let it die.
         log("Models() failed with the current config, retrying once on defaults:\n" + traceback.format_exc())
+        HB._close_all()
         CFG = JC.defaults()
         set_wake(CFG["WAKE_ON"])
         M = Models()

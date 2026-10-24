@@ -17,7 +17,12 @@ CAPTURE_DIR = os.environ.get("HEYTUX_CAPTURES", os.path.expanduser("~/heytux/cap
 # Friendly group titles + display order. A group the schema uses but we don't list here still
 # renders (appended, titled by its raw name) - the UI never hides a field it doesn't recognise.
 GROUPS = [("wake", "Wake word"), ("listening", "Listening"),
-          ("routing", "Routing"), ("voice", "Voice and models"), ("advanced", "Advanced")]
+          ("routing", "Routing"), ("models", "Models"), ("voice", "Voice and models"),
+          ("advanced", "Advanced")]
+
+# The live per-slot model pickers (schema group "models"); greyed out while a swap runs, with the
+# model's RSS shown next to each from GET /models.
+MODEL_KEYS = ("CHAT_MODEL", "ROUTER_MODEL", "ASR_MODEL", "TTS_MODEL", "VAD_MODEL")
 
 
 def http(method, path, data=None, timeout=12):
@@ -58,6 +63,8 @@ class Window(Adw.ApplicationWindow):
         self.set_default_size(360, 740)
         self.values, self.defaults, self.pending = {}, {}, []
         self.ctl = {}
+        self.rss_lbl = {}        # model field -> suffix Label showing that model's RSS
+        self._swapping = None    # the model field whose swap this app is waiting on (pickers greyed)
         self._built = False
         self._debounce = {}
 
@@ -111,13 +118,14 @@ class Window(Adw.ApplicationWindow):
 
     # ---------- refresh ----------
     def refresh(self):
-        self._bg(lambda: (http("GET", "/config"), http("GET", "/status")), self._on_refresh)
+        self._bg(lambda: (http("GET", "/config"), http("GET", "/status"), http("GET", "/models")),
+                 self._on_refresh)
 
     def _on_refresh(self, res):
         if isinstance(res, Exception) or res[0][0] != 200:
             self.stack.set_visible_child_name("down")
             return
-        (_, cfg), (scode, status) = res
+        (_, cfg), (scode, status), (mcode, models) = res
         self.values = cfg.get("values", {})
         self.defaults = cfg.get("defaults", {})
         self.pending = cfg.get("pending_restart", [])
@@ -129,8 +137,35 @@ class Window(Adw.ApplicationWindow):
         self._sync()
         self._update_status(st)
         self._update_banner()
+        self._apply_models(models if mcode == 200 else {})
         self._load_recent()
         self.stack.set_visible_child_name("main")
+
+    # ---------- model slots: RSS + grey-out while a swap runs ----------
+    def _apply_models(self, models):
+        # Pickers stay greyed while THIS app is waiting on a swap (self._swapping) as well as while the
+        # daemon reports busy - so an early poll that races ahead of the POST can't re-enable them.
+        busy = bool(models.get("busy")) or self._swapping is not None
+        for s in (models.get("slots") or {}).values():
+            c = self.ctl.get(s.get("field"))
+            if not c:
+                continue
+            c.row.set_sensitive(not busy)
+            lbl = self.rss_lbl.get(s.get("field"))
+            if lbl is not None:
+                rss = s.get("rss_mb")
+                lbl.set_text("%d MB" % rss if rss is not None else "")
+
+    def _poll_models(self):
+        """While this app is waiting on a swap, poll /models so RSS updates and the pickers stay
+        greyed; it reschedules until _on_commit clears self._swapping (which then reconciles)."""
+        def done(res):
+            m = res[1] if (not isinstance(res, Exception) and res[0] == 200) else {}
+            self._apply_models(m)
+            if self._swapping is not None:
+                GLib.timeout_add(1200, self._poll_models)
+        self._bg(lambda: http("GET", "/models"), done)
+        return False
 
     # ---------- build the schema-driven page (once) ----------
     def _build(self, schema):
@@ -207,6 +242,10 @@ class Window(Adw.ApplicationWindow):
         except Exception as e:            # never let one odd field break the whole page
             ctl = self._row_unknown(grp, f, subtitle + "\n[unrenderable: %r]" % e)
         self.ctl[key] = ctl
+        if key in MODEL_KEYS and hasattr(ctl.row, "add_suffix"):   # RSS readout from GET /models
+            lbl = Gtk.Label(css_classes=["dim-label"], valign=Gtk.Align.CENTER)
+            ctl.row.add_suffix(lbl)
+            self.rss_lbl[key] = lbl
 
     def _reset_btn(self, key, row):
         btn = Gtk.Button(icon_name="edit-undo-symbolic", valign=Gtk.Align.CENTER,
@@ -324,24 +363,37 @@ class Window(Adw.ApplicationWindow):
         return False
 
     def commit(self, key, value):
-        self._bg(lambda: http("POST", "/config", {key: value}),
+        if key in MODEL_KEYS:                 # grey the pickers for the whole swap, then poll as a net
+            self._swapping = key
+            for mk in MODEL_KEYS:
+                if mk in self.ctl:
+                    self.ctl[mk].row.set_sensitive(False)
+            self._poll_models()
+        # 200 s client timeout > the daemon's 180 s model-load ceiling, so a slow load isn't a false error
+        self._bg(lambda: http("POST", "/config", {key: value}, timeout=200),
                  lambda res: self._on_commit(key, res))
 
     def _on_commit(self, key, res):
         if isinstance(res, Exception):
             self.toast("Could not reach heytux")
-            self._sync()
-            return
-        status, body = res
-        if status == 200:
+        elif res[0] == 200:
+            body = res[1]
             self.values.update(body.get("values", {}))
             self.pending = body.get("pending_restart", self.pending)
-            self._sync()
             self._update_banner()
+        elif res[0] == 409:
+            self.toast("A model swap is already running")
         else:
-            msg = (body.get("errors", {}) or {}).get(key) or "invalid value"
+            msg = (res[1].get("errors", {}) or {}).get(key) or "invalid value"
             self.toast(self.ctl[key].field.get("label", key) + ": " + msg)
-            self._sync()  # revert the row to the daemon's value
+        if key in MODEL_KEYS:
+            # The request is done (succeeded, failed or dropped); stop waiting and reconcile the
+            # pickers + RSS from the daemon's own /config + /models, so a lost POST can't leave a
+            # wrong selection shown or the rows greyed forever.
+            self._swapping = None
+            self.refresh()
+        else:
+            self._sync()                      # reflect the daemon's values
 
     def _on_wake(self, *_):
         on = self.wake_row.get_active()
@@ -427,7 +479,7 @@ class Window(Adw.ApplicationWindow):
         self.start_btn.set_label("Starting…")
 
         def work():
-            # heytux.service Wants= heytux-llm.service, so this brings up both
+            # heytux now hosts its own chat llama-server, so this one unit brings up everything
             subprocess.run(["systemctl", "--user", "start", "heytux"], timeout=20)
             return wait_up()
         self._bg(work, self._on_started)
@@ -440,8 +492,7 @@ class Window(Adw.ApplicationWindow):
         self.refresh()
 
     def _on_stop(self, *_):
-        self._bg(lambda: subprocess.run(["systemctl", "--user", "stop", "heytux", "heytux-llm"],
-                                        timeout=30),
+        self._bg(lambda: subprocess.run(["systemctl", "--user", "stop", "heytux"], timeout=30),
                  lambda res: self.refresh())
 
 

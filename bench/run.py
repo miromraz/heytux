@@ -13,11 +13,11 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-import backends
-from backends import SR, read_wav_f32, write_wav_f32, log
 
 HEYTUX_DIR = os.environ.get("HEYTUX_DIR", "/home/miro/heytux")
-sys.path.insert(0, HEYTUX_DIR)   # for heytux.py (TOOLS/normalize/Needle) and test_routing.CASES
+sys.path.insert(0, HEYTUX_DIR)   # for heytux.py (TOOLS/normalize/Needle), heytux_backends and test_routing.CASES
+import heytux_backends as backends
+from heytux_backends import SR, read_wav_f32, write_wav_f32, log
 
 _CUR_WORKER = None    # (Popen, pgid) of the in-flight worker, for signal cleanup
 _CUR_PIDFILE = None   # pidfile of the in-flight worker
@@ -70,29 +70,9 @@ OFFTOPIC = [
     "count to three", "whatever",
 ]
 
-# Compact example phrases per tool for the embedding-classifier router.
-# ponytail: hand-written seed set, enough to rank slots; grow it if a tool mis-clusters.
-EXAMPLES = {
-    "flashlight_on": ["turn on the flashlight", "torch on", "light up the flashlight"],
-    "flashlight_off": ["turn off the flashlight", "torch off", "kill the light"],
-    "wifi_on": ["turn on wifi", "enable wifi", "connect to wifi"],
-    "wifi_off": ["turn off wifi", "disable wifi"],
-    "bluetooth_on": ["turn on bluetooth", "enable bluetooth"],
-    "bluetooth_off": ["turn off bluetooth", "disable bluetooth"],
-    "set_brightness": ["set the brightness to 40 percent", "dim the screen", "make the screen brighter"],
-    "set_volume": ["set the volume to 30 percent", "mute the volume", "turn it up"],
-    "battery_status": ["what is the battery level", "how much battery is left"],
-    "phone_info": ["give me the full phone status", "phone info", "how much storage is free"],
-    "set_timer": ["set a timer for five minutes", "start a ten minute timer"],
-    "what_time_is_it": ["what time is it", "tell me the time"],
-    "open_app": ["open the calculator", "launch the camera app", "open settings"],
-    "take_photo": ["take a photo", "photograph this"],
-    "take_selfie": ["take a selfie"],
-    "lock_screen": ["lock the screen", "lock the phone"],
-    "play_pause": ["pause the music", "play the music"],
-    "next_track": ["skip to the next track", "next song"],
-    "find_my_phone": ["find my phone", "where is my phone"],
-}
+# Compact example phrases per tool for the embedding-classifier router. Single-sourced in
+# heytux_backends so the daemon's live embedding router and this bench score the identical seeds.
+EXAMPLES = backends.ROUTER_EXAMPLES
 
 TTS_SENTENCES = [
     "Turn on the flashlight.",

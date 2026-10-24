@@ -87,6 +87,16 @@ def t_text_dry_run_returns_route_and_empty_said():
     assert r["route"] == "tool", r
     assert r["said"] == "", r
 
+def t_models_shape():
+    code, r = req("GET", "/models")
+    assert code == 200, code
+    assert "busy" in r and "slots" in r, r
+    for slot in ("chat", "router", "asr", "tts", "vad"):
+        s = r["slots"].get(slot)
+        assert s is not None, "missing slot %s" % slot
+        for k in ("field", "available", "current", "loaded", "rss_mb"):
+            assert k in s, "slot %s missing %s" % (slot, k)
+
 def t_restart_class_isolation():
     """A restart-class field (PORT) must apply to CFG/disk and show up as pending, but must NOT
     take effect on the running process: the daemon has to still answer on its original port."""
@@ -98,8 +108,10 @@ def t_restart_class_isolation():
     assert code2 == 200, code2
     req("POST", "/config", {"PORT": 8770})       # restore (back to default -> not persisted)
 
-for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
-    check(name[2:], fn)
-
-print("\n%d failed" % len(FAILS) if FAILS else "\nall passed")
-sys.exit(1 if FAILS else 0)
+# Live test (needs the daemon): only runs as a script, so pytest can import it offline without
+# hitting the network.
+if __name__ == "__main__":
+    for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
+        check(name[2:], fn)
+    print("\n%d failed" % len(FAILS) if FAILS else "\nall passed")
+    sys.exit(1 if FAILS else 0)

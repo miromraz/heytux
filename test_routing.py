@@ -120,5 +120,6 @@ def main():
     return 0 if passed == total else 1
 
 
+# Live test (needs the daemon); runs only as a script so pytest can import it offline.
 if __name__ == "__main__":
     sys.exit(main())

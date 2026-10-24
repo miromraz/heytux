@@ -166,7 +166,7 @@ def t_dry_run_does_not_execute_or_speak():
         def complete(self, text):
             return _needle(["flashlight_on"], 1.0)
     class FakeModels:
-        def __init__(self): self.needle = FakeNeedle(); self.spoke = []
+        def __init__(self): self.router = FakeNeedle(); self.spoke = []
         def speak(self, text): self.spoke.append(text)
     fake = FakeModels()
     called = []
@@ -259,8 +259,14 @@ def t_record_onset_timeout_on_silence():
     assert speech is False and stats["vad_speech"] is False, stats
     assert abs(len(pcm) - J.SR) <= J.FRAME, "gave up after %.2f s, want 1.0" % (len(pcm) / J.SR)
 
-for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
-    check(name[2:], fn)
+def test_all():
+    """pytest entry: run every t_* check and fail on the first broken assertion."""
+    for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
+        fn()
 
-print("\n%d failed" % len(FAILS) if FAILS else "\nall passed")
-sys.exit(1 if FAILS else 0)
+
+if __name__ == "__main__":
+    for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
+        check(name[2:], fn)
+    print("\n%d failed" % len(FAILS) if FAILS else "\nall passed")
+    sys.exit(1 if FAILS else 0)

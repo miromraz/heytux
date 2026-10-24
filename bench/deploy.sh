@@ -10,6 +10,8 @@ DST=/home/miro/heytux/bench
 
 # No rsync on the phone; tar the code over ssh (scp would also work for these four files).
 $SSH "mkdir -p $DST"
-tar -C "$HERE" -czf - backends.py run.py report.py deploy.sh zram_tune.py | $SSH "tar -C $DST -xzf -"
+# backends.py moved to ../heytux_backends.py (deployed by the daemon's deploy.sh to /home/miro/heytux,
+# which run.py/zram_tune.py add to sys.path); the bench no longer ships its own copy.
+tar -C "$HERE" -czf - run.py report.py deploy.sh zram_tune.py | $SSH "tar -C $DST -xzf -"
 $SSH "chown -R miro:miro $DST"
 echo "deployed bench -> $HOST:$DST"

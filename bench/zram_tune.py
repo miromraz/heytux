@@ -9,8 +9,8 @@
 # swap in use (pages come back to RAM). Nothing is persisted: the on-disk config file that WOULD
 # persist this is noted in the report, not written.
 import gc, json, os, signal, subprocess, sys, time
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import backends
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # heytux_backends lives in the parent heytux dir
+import heytux_backends as backends
 
 ZRAM = "/sys/block/zram0"
 SWAPDEV = "/dev/zram0"
@@ -174,7 +174,7 @@ def restore(orig):
     """Restore the original config, always. Close any loaded server first (swapoff refuses while a
     model is resident), restore swappiness/page-cluster even if the zram reset fails, and return True
     only if every original setting is back."""
-    import backends as _b
+    import heytux_backends as _b
     _b._close_all()
     log("restoring ORIGINAL %s" % orig)
     try:

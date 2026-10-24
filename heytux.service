@@ -1,7 +1,8 @@
 [Unit]
 Description=Hey Tux offline voice assistant
-After=pipewire.service wireplumber.service heytux-llm.service
-Wants=heytux-llm.service
+# The chat LLM is now hosted by the daemon itself (heytux_backends.LlamaServer on :8771),
+# so there is no separate heytux-llm.service to order against.
+After=pipewire.service wireplumber.service
 
 [Service]
 Type=simple

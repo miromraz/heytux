@@ -158,8 +158,14 @@ def t_tools_corrupt_is_empty():
     open(p, "w").write("nope")
     assert C.load_tools(p) == {}, "a corrupt tools file must yield no overrides"
 
-for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
-    check(name[2:], fn)
+def test_all():
+    """pytest entry: run every t_* check and fail on the first broken assertion."""
+    for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
+        fn()
 
-print("\n%d failed" % len(FAILS) if FAILS else "\nall passed")
-sys.exit(1 if FAILS else 0)
+
+if __name__ == "__main__":
+    for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("t_")):
+        check(name[2:], fn)
+    print("\n%d failed" % len(FAILS) if FAILS else "\nall passed")
+    sys.exit(1 if FAILS else 0)

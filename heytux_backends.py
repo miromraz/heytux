@@ -5,7 +5,7 @@
 #
 # No benchmark code lives here (no timing, no scoring, no report): just the adapters. Stdlib +
 # numpy + sherpa_onnx, and the self-contained llama.cpp server/bench binaries on the phone.
-import atexit, gc, glob, json, os, re, signal, socket, subprocess, sys, time, urllib.request, wave
+import atexit, gc, glob, json, math, os, re, signal, socket, subprocess, sys, time, urllib.request, wave
 import numpy as np
 
 _LIVE = set()   # every running LlamaServer; closed unconditionally at interpreter exit (atexit)
@@ -58,6 +58,17 @@ class LlamaServer:
     def __init__(self, entry, threads=DEFAULT_THREADS, ctx=2048, mmap=True, kv_type=None,
                  embeddings=False, warmup=True, host="127.0.0.1", port=None, ready_timeout=180):
         self.host = host
+        # A fixed port (the daemon's chat :8771) must be free before we spawn: otherwise a stale
+        # server already listening there would answer /health and we'd declare ourselves "ready"
+        # while our own child dies on the bind. A random port (_free_port) can't collide.
+        if port is not None:
+            probe = socket.socket()
+            try:
+                probe.settimeout(0.5)
+                if probe.connect_ex((host, port)) == 0:
+                    raise RuntimeError("port %d already in use (stale llama-server?)" % port)
+            finally:
+                probe.close()
         self.port = port or _free_port()
         self._model_path = entry["path"]
         self.base = "http://%s:%d" % (self.host, self.port)
@@ -316,6 +327,216 @@ class SherpaVAD:
 
     def close(self):
         self.vad = None; gc.collect()
+
+# ---------- routers (shared by the daemon's live router slot and the bench) ----------
+# Similarity floor for the embedding router, calibrated on the held-out A-set (bench ASR phrases +
+# OFFTOPIC + 30 fresh paraphrases, none of them seeds): 0.40 gave the best held-out tool accuracy
+# (0.84) while keeping none-recall high (0.91) - higher floors only trade tool accuracy for none
+# recall. Below the floor the router emits no call and the daemon falls to chat. This is the
+# embedding router's OWN gate; CONF_FLOOR is Needle's and does not apply (see decide_route self_gated).
+EMB_ROUTER_FLOOR = 0.40
+
+# Compact seed phrases per tool for the embedding-classifier router. Hand-written; grow it if a
+# tool mis-clusters. Single-sourced here so the daemon's live router and the bench score the exact
+# same classifier (run.py's measure_embedding aliases this).
+ROUTER_EXAMPLES = {
+    "flashlight_on": ["turn on the flashlight", "torch on", "light up the flashlight"],
+    "flashlight_off": ["turn off the flashlight", "torch off", "kill the light"],
+    "wifi_on": ["turn on wifi", "enable wifi", "connect to wifi"],
+    "wifi_off": ["turn off wifi", "disable wifi"],
+    "bluetooth_on": ["turn on bluetooth", "enable bluetooth"],
+    "bluetooth_off": ["turn off bluetooth", "disable bluetooth"],
+    "set_brightness": ["set the brightness to 40 percent", "dim the screen", "make the screen brighter"],
+    "set_volume": ["set the volume to 30 percent", "mute the volume", "turn it up"],
+    "battery_status": ["what is the battery level", "how much battery is left"],
+    "phone_info": ["give me the full phone status", "phone info", "how much storage is free"],
+    "set_timer": ["set a timer for five minutes", "start a ten minute timer"],
+    "what_time_is_it": ["what time is it", "tell me the time"],
+    "open_app": ["open the calculator", "launch the camera app", "open settings"],
+    "take_photo": ["take a photo", "photograph this"],
+    "take_selfie": ["take a selfie"],
+    "lock_screen": ["lock the screen", "lock the phone"],
+    "play_pause": ["pause the music", "play the music"],
+    "next_track": ["skip to the next track", "next song"],
+    "find_my_phone": ["find my phone", "where is my phone"],
+}
+
+# ---- spoken-number / duration parsing for the embedding router's argument extraction ----
+_ONES = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+         "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13,
+         "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19}
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70,
+         "eighty": 80, "ninety": 90}
+_UNITS = ("hours", "hour", "minutes", "minute", "seconds", "second")
+_UNIT_MIN = {"hour": 60.0, "hours": 60.0, "minute": 1.0, "minutes": 1.0,
+             "second": 1.0 / 60, "seconds": 1.0 / 60}
+
+def _toks(s):
+    return re.findall(r"[a-z0-9]+(?:\.[0-9]+)?", s.lower())
+
+def _spoken_number(toks):
+    """First number in a token list as a float, from digits ('5', '1.5') or words (zero..ninety-nine,
+    compounds like 'forty five', optional 'hundred'). None if there is no number."""
+    for i, w in enumerate(toks):
+        if re.fullmatch(r"\d+(?:\.\d+)?", w):
+            return float(w)
+        if w in _ONES or w in _TENS:
+            val = _ONES.get(w, _TENS.get(w))
+            nxt = toks[i + 1] if i + 1 < len(toks) else None
+            if w in _TENS and nxt in _ONES and 0 < _ONES[nxt] < 10:   # "forty five" -> 45
+                val += _ONES[nxt]; nxt = toks[i + 2] if i + 2 < len(toks) else None
+            if nxt == "hundred":
+                val = (val or 1) * 100
+            return float(val)
+        if w == "hundred":
+            return 100.0
+    return None
+
+def _percent(phrase):
+    """A percent value 0..100 from the phrase, or None when none is stated (so the handler can ask)."""
+    n = _spoken_number(_toks(phrase))
+    if n is None:
+        return None
+    n = int(round(n))
+    return n if 0 <= n <= 100 else None
+
+def _quantity(seg):
+    """The numeric quantity in the words before a unit: a number (digits/words/compound), 'a/an'=1,
+    and a 'half' modifier (+0.5, or 0.5 on its own as in 'half a(n)'). None if unparseable."""
+    s = [t for t in seg if t not in ("and", "for", "please", "the", "in")]
+    half = "half" in s
+    s = [t for t in s if t != "half"]
+    num = _spoken_number(s)
+    if num is None:
+        if half:
+            num = 0.0                                # "half a(n) <unit>" -> 0.5 unit
+        elif any(t in ("a", "an") for t in s):
+            num = 1.0                                # "a/an <unit>" -> 1 unit
+        else:
+            return None
+    qty = num + (0.5 if half else 0.0)
+    return qty if qty > 0 else None
+
+def _duration_minutes(phrase):
+    """A timer duration in whole minutes (ceil), or None when unstated/ambiguous (then extract_args
+    returns {} and the handler asks). Sums every number+unit pair so compounds work ('one hour and
+    thirty minutes'=90, 'one and a half hours'=90), handles trailing 'and a half' ('an hour and a
+    half'=90), 'half an hour'=30, hours x60, seconds rounded up. Any pair it can't fully parse -> None."""
+    toks = _toks(phrase)
+    units = [(i, w) for i, w in enumerate(toks) if w in _UNIT_MIN]
+    if not units:
+        return None                                 # no unit -> a bare number is ambiguous
+    total = 0.0; start = 0
+    for ui, u in units:
+        qty = _quantity(toks[start:ui])
+        if qty is None:
+            return None
+        total += qty * _UNIT_MIN[u]; start = ui + 1
+    if "half" in toks[start:]:                       # "... <unit> and a half" -> +0.5 of the last unit
+        total += 0.5 * _UNIT_MIN[units[-1][1]]
+    return max(1, math.ceil(total)) if total > 0 else None
+
+def _timer_label(phrase):
+    """A timer label when one is spoken ('timer for 5 minutes for pasta' -> 'pasta'): the first
+    'for ...' clause that is neither a number nor a duration. None when no label is said."""
+    for seg in phrase.lower().split(" for ")[1:]:
+        seg = seg.strip()
+        st = _toks(seg)
+        if seg and not any(u in st for u in _UNITS) and _spoken_number(st) is None:
+            return seg
+    return None
+
+def extract_args(name, phrase):
+    """Fill a tool call's arguments from the raw phrase for the embedding router, which classifies a
+    tool NAME only. Mirrors the argument names/types Needle emits for the parameterized tools
+    (set_brightness percent:int, set_volume action/percent, set_timer minutes:int+label, open_app
+    app:str); every other tool takes none. Parses spoken numbers and units; when a value is ambiguous
+    it returns {} so the handler asks rather than inventing one. Stdlib only, no model."""
+    p = phrase.lower()
+    if name == "set_brightness":
+        pct = _percent(p)
+        return {"percent": pct} if pct is not None else {}
+    if name == "set_volume":
+        if "unmute" in p:
+            return {"action": "unmute"}
+        if "mute" in p:
+            return {"action": "mute"}
+        pct = _percent(p)
+        return {"action": "set", "percent": pct} if pct is not None else {"action": "set"}
+    if name == "set_timer":
+        mins = _duration_minutes(p)
+        if mins is None:
+            return {}
+        out = {"minutes": mins}
+        label = _timer_label(p)
+        if label:
+            out["label"] = label
+        return out
+    if name == "open_app":
+        app = re.sub(r"\b(open|launch|start|the|an?|my|app|please)\b", " ", p)
+        return {"app": re.sub(r"\s+", " ", app).strip()}
+    return {}
+
+class EmbeddingRouter:
+    """Embedding-classifier router over a LlamaServer(--embeddings) backend. Candidates are built from
+    the ENABLED merged tools only (so a disabled tool can never be chosen and a re-described tool
+    routes by its new description): each tool's seeds are ROUTER_EXAMPLES plus its own description, so
+    a tool with no examples stays routable. complete(transcript) is self-gated by its own similarity
+    floor (CONF_FLOOR is Needle's, not this one's) and returns the Needle-shaped dict decide_route
+    consumes: cosine argmax, floor, extract_args() for the parameterized tools."""
+    def __init__(self, server, tools, threshold=0.55, examples=ROUTER_EXAMPLES):
+        self.server = server
+        self.threshold = threshold
+        self.labels, texts = [], []
+        for t in tools:
+            fn = t.get("function", {})
+            name = fn.get("name")
+            if not name or name == "ask_question":     # ask_question is the chat sentinel, not a tool
+                continue
+            seeds = list(examples.get(name, []))
+            if fn.get("description"):
+                seeds.append(fn["description"])
+            for s in seeds:
+                self.labels.append(name); texts.append(s)
+        self.E = server.embed(texts) if texts else np.zeros((0, 1), np.float32)
+        self.pid = getattr(server, "pid", None)
+
+    def complete(self, transcript):
+        if not self.labels:
+            return {"function_calls": [], "confidence": 0.0, "reasoning": "", "self_gated": True}
+        v = self.server.embed([transcript])[0]
+        sims = self.E @ v
+        i = int(np.argmax(sims))
+        score = float(sims[i])
+        if score < self.threshold:
+            return {"function_calls": [], "confidence": score, "reasoning": "", "self_gated": True}
+        name = self.labels[i]
+        return {"function_calls": [{"name": name, "arguments": extract_args(name, transcript)}],
+                "confidence": score, "reasoning": "", "self_gated": True}
+
+    def close(self):
+        self.server.close()
+
+class GgufRouter:
+    """GGUF function-calling router over a LlamaServer. complete() adapts LlamaServer.route() to the
+    Needle-shaped dict; it is self-gated (the model's own tool_choice decides), so confidence is 1.0
+    when a tool is chosen, else 0.0, and CONF_FLOOR does not apply. Calls to a tool that isn't in the
+    enabled set are dropped. The daemon's grounding gate still applies."""
+    def __init__(self, server, tools):
+        self.server = server
+        self.tools = tools
+        self.enabled = {t["function"]["name"] for t in tools}
+        self.pid = getattr(server, "pid", None)
+
+    def complete(self, transcript):
+        r = self.server.route(transcript, self.tools)
+        calls = [{"name": c.get("name"), "arguments": c.get("arguments") or {}}
+                 for c in r["calls"] if c.get("name") in self.enabled]
+        return {"function_calls": calls, "confidence": 1.0 if calls else 0.0,
+                "reasoning": "", "self_gated": True}
+
+    def close(self):
+        self.server.close()
 
 # ---------- dispatch ----------
 def resolve_gguf(path, slot=None):

@@ -13,19 +13,31 @@ $SSH 'cd /home/miro && { [ -d jarvis ] && [ ! -e heytux ] && mv jarvis heytux; [
 
 echo "== push daemon + unit =="
 $SSH 'mkdir -p /home/miro/heytux /home/miro/.config/systemd/user /home/miro/.local/share/plasma/plasmoids /home/miro/.local/share/applications'
-tar cf - -C "$HERE" heytux.py heytux_config.py heytux_settings.py hey.txt | $SSH 'tar xf - -C /home/miro/heytux'
-tar cf - -C "$HERE" heytux.service heytux-llm.service | $SSH 'tar xf - -C /home/miro/.config/systemd/user'
+tar cf - -C "$HERE" heytux.py heytux_config.py heytux_backends.py heytux_settings.py hey.txt | $SSH 'tar xf - -C /home/miro/heytux'
+tar cf - -C "$HERE" heytux.service | $SSH 'tar xf - -C /home/miro/.config/systemd/user'
+# The daemon reads the model registry from bench/manifest.json; ship the reviewed one with it.
+$SSH 'mkdir -p /home/miro/heytux/bench'
+tar cf - -C "$HERE/bench" manifest.json | $SSH 'tar xf - -C /home/miro/heytux/bench'
 tar cf - -C "$HERE" org.bengalos.HeyTuxSettings.desktop | $SSH 'tar xf - -C /home/miro/.local/share/applications'
 tar cf - -C "$HERE/plasmoid" . | $SSH 'mkdir -p /home/miro/.local/share/plasma/plasmoids/org.bengalos.heytux && tar xf - -C /home/miro/.local/share/plasma/plasmoids/org.bengalos.heytux'
 
 echo "== fix ownership =="
 $SSH 'chown -R miro:miro /home/miro/heytux /home/miro/.config/systemd/user /home/miro/.local/share/applications /home/miro/.local/share/plasma/plasmoids/org.bengalos.heytux'
 
+echo "== retire the old chat LLM unit (heytux now hosts its own on :8771) =="
+# The daemon spawns this binary for the chat slot; refuse to retire the old unit if it is missing,
+# or we would leave the phone with no working chat model.
+$SSH 'test -x /home/miro/llm/current/bin/llama-server' || {
+    echo "ABORT: /home/miro/llm/current/bin/llama-server not found on the phone - not retiring heytux-llm" >&2
+    exit 1; }
+$SSH "$RU systemctl --user disable --now heytux-llm 2>/dev/null || true"
+$SSH 'rm -f /home/miro/.config/systemd/user/heytux-llm.service'
+
 echo "== (re)start services =="
 $SSH "$RU systemctl --user daemon-reload"
 # not enabled: the user starts/stops it from the Hey Tux app (it costs ~1/3 of a core listening)
-$SSH "$RU systemctl --user disable heytux-llm heytux 2>/dev/null || true"
-$SSH "$RU systemctl --user restart heytux-llm heytux"
+$SSH "$RU systemctl --user disable heytux 2>/dev/null || true"
+$SSH "$RU systemctl --user restart heytux"
 
 echo "== wait for load =="
 $SSH "$RU sh -c 'for i in \$(seq 1 30); do python3 -c \"import urllib.request,sys; urllib.request.urlopen(sys.argv[1],timeout=2)\" http://127.0.0.1:8770/status 2>/dev/null && exit 0; sleep 1; done; exit 1'"
