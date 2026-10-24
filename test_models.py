@@ -39,11 +39,13 @@ def test_extract_timer_word_number():
 def test_extract_timer_hours():
     assert HB.extract_args("set_timer", "timer for 1 hour") == {"minutes": 60}
 
-def test_extract_timer_fractional_minutes_round_up():
-    assert HB.extract_args("set_timer", "set a timer for 1.5 minutes") == {"minutes": 2}
+def test_extract_timer_fractional_minutes():
+    assert HB.extract_args("set_timer", "set a timer for 1.5 minutes") == {"seconds": 90}
 
-def test_extract_timer_seconds_round_up_to_a_minute():
-    assert HB.extract_args("set_timer", "timer for 90 seconds") == {"minutes": 2}
+def test_extract_timer_seconds():
+    assert HB.extract_args("set_timer", "timer for 90 seconds") == {"seconds": 90}
+    assert HB.extract_args("set_timer", "Set a timer for 5 seconds.") == {"seconds": 5}
+    assert HB.extract_args("set_timer", "set a timer for two minutes") == {"minutes": 2}
 
 def test_extract_timer_half_an_hour():
     assert HB.extract_args("set_timer", "set a timer for half an hour") == {"minutes": 30}

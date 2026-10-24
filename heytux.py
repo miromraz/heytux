@@ -436,18 +436,23 @@ def _phone_info(args):
             round(i["memory_free_gb"]),
             i["cpu_temp_c"] if i["cpu_temp_c"] is not None else "unknown", wifi))
 
-@tool("set_timer", "Start a countdown timer for some minutes, optional label.",
-      {"minutes": {"type": "integer", "minimum": 1, "maximum": 1440},
-       "label": {"type": "string"}}, ["minutes"])
+@tool("set_timer", "Start a countdown timer for some minutes or seconds, optional label.",
+      {"minutes": {"type": "integer", "minimum": 0, "maximum": 1440},
+       "seconds": {"type": "integer", "minimum": 0, "maximum": 86400},
+       "label": {"type": "string"}})
 def _set_timer(args):
     try:
-        mins = int(args.get("minutes"))
+        secs = int(args.get("minutes") or 0) * 60 + int(args.get("seconds") or 0)
     except (TypeError, ValueError):
-        return "I need a number of minutes."
+        secs = 0
+    if secs <= 0:
+        return "I need a timer length."
     label = (args.get("label") or "").strip()
-    tmr = threading.Timer(mins * 60, _timer_fire, [label]); tmr.daemon = True; tmr.start()
-    return "Timer set for %d minute%s%s." % (mins, "" if mins == 1 else "s",
-                                             " for " + label if label else "")
+    tmr = threading.Timer(secs, _timer_fire, [label]); tmr.daemon = True; tmr.start()
+    m, s = divmod(secs, 60)
+    parts = ["%d minute%s" % (m, "" if m == 1 else "s")] if m else []
+    parts += ["%d second%s" % (s, "" if s == 1 else "s")] if s else []
+    return "Timer set for %s%s." % (" ".join(parts), " for " + label if label else "")
 
 @tool("what_time_is_it", "What is the time, what day is it, what is the date today.")
 def _what_time_is_it(args):

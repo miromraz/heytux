@@ -368,8 +368,8 @@ _ONES = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six":
 _TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70,
          "eighty": 80, "ninety": 90}
 _UNITS = ("hours", "hour", "minutes", "minute", "seconds", "second")
-_UNIT_MIN = {"hour": 60.0, "hours": 60.0, "minute": 1.0, "minutes": 1.0,
-             "second": 1.0 / 60, "seconds": 1.0 / 60}
+_UNIT_S = {"hour": 3600.0, "hours": 3600.0, "minute": 60.0, "minutes": 60.0,
+           "second": 1.0, "seconds": 1.0}
 
 def _toks(s):
     return re.findall(r"[a-z0-9]+(?:\.[0-9]+)?", s.lower())
@@ -417,13 +417,13 @@ def _quantity(seg):
     qty = num + (0.5 if half else 0.0)
     return qty if qty > 0 else None
 
-def _duration_minutes(phrase):
-    """A timer duration in whole minutes (ceil), or None when unstated/ambiguous (then extract_args
+def _duration_seconds(phrase):
+    """A timer duration in whole seconds (ceil), or None when unstated/ambiguous (then extract_args
     returns {} and the handler asks). Sums every number+unit pair so compounds work ('one hour and
-    thirty minutes'=90, 'one and a half hours'=90), handles trailing 'and a half' ('an hour and a
-    half'=90), 'half an hour'=30, hours x60, seconds rounded up. Any pair it can't fully parse -> None."""
+    thirty minutes'=5400, 'one and a half hours'=5400), handles trailing 'and a half' ('an hour and
+    a half'=5400), 'half an hour'=1800. Any pair it can't fully parse -> None."""
     toks = _toks(phrase)
-    units = [(i, w) for i, w in enumerate(toks) if w in _UNIT_MIN]
+    units = [(i, w) for i, w in enumerate(toks) if w in _UNIT_S]
     if not units:
         return None                                 # no unit -> a bare number is ambiguous
     total = 0.0; start = 0
@@ -431,9 +431,9 @@ def _duration_minutes(phrase):
         qty = _quantity(toks[start:ui])
         if qty is None:
             return None
-        total += qty * _UNIT_MIN[u]; start = ui + 1
+        total += qty * _UNIT_S[u]; start = ui + 1
     if "half" in toks[start:]:                       # "... <unit> and a half" -> +0.5 of the last unit
-        total += 0.5 * _UNIT_MIN[units[-1][1]]
+        total += 0.5 * _UNIT_S[units[-1][1]]
     return max(1, math.ceil(total)) if total > 0 else None
 
 def _timer_label(phrase):
@@ -449,7 +449,7 @@ def _timer_label(phrase):
 def extract_args(name, phrase):
     """Fill a tool call's arguments from the raw phrase for the embedding router, which classifies a
     tool NAME only. Mirrors the argument names/types Needle emits for the parameterized tools
-    (set_brightness percent:int, set_volume action/percent, set_timer minutes:int+label, open_app
+    (set_brightness percent:int, set_volume action/percent, set_timer minutes:int or seconds:int, +label, open_app
     app:str); every other tool takes none. Parses spoken numbers and units; when a value is ambiguous
     it returns {} so the handler asks rather than inventing one. Stdlib only, no model."""
     p = phrase.lower()
@@ -464,10 +464,10 @@ def extract_args(name, phrase):
         pct = _percent(p)
         return {"action": "set", "percent": pct} if pct is not None else {"action": "set"}
     if name == "set_timer":
-        mins = _duration_minutes(p)
-        if mins is None:
+        secs = _duration_seconds(p)
+        if secs is None:
             return {}
-        out = {"minutes": mins}
+        out = {"minutes": secs // 60} if secs % 60 == 0 else {"seconds": secs}
         label = _timer_label(p)
         if label:
             out["label"] = label
