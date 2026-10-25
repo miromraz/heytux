@@ -1,0 +1,560 @@
+{
+  "tests": {
+    "test_heytux.py": {
+      "passed": 69,
+      "failed": 0
+    },
+    "test_config.py": {
+      "passed": 25,
+      "failed": 0
+    },
+    "test_models.py": {
+      "passed": 25,
+      "failed": 0
+    },
+    "test_routing.py": [
+      {
+        "total": "TOTAL 37/37 routed correctly",
+        "date": "PASS date is spoken correctly           want=october 25      got='Today is Sunday, October 25th, 2026.'"
+      },
+      {
+        "total": "TOTAL 37/37 routed correctly",
+        "date": "PASS date is spoken correctly           want=october 25      got='Today is Sunday, October twenty-fifth, two thousand twenty-six.'"
+      },
+      {
+        "total": "TOTAL 37/37 routed correctly",
+        "date": "PASS date is spoken correctly           want=october 25      got='Today is Sunday, October twenty-fifth, two thousand twenty-six.'"
+      }
+    ]
+  },
+  "e2e": [
+    {
+      "model": "Gemma-4-E2B-it-Q4_K_M",
+      "before": {
+        "summary": {
+          "n": 70,
+          "accuracy": 0.843,
+          "tool_accuracy": 0.738,
+          "none_accuracy": 1.0,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 2180,
+          "latency_ms_p90": 3453
+        },
+        "raw_summary": {
+          "n": 70,
+          "accuracy": 0.829,
+          "tool_accuracy": 0.738,
+          "none_accuracy": 0.964,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 2180,
+          "latency_ms_p90": 3453
+        },
+        "czech_commands_correct": 2,
+        "czech_commands_total": 13,
+        "false_triggers": [],
+        "missed_tools": [
+          {
+            "phrase": "rozsviť baterku",
+            "expected": "flashlight_on",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2520
+          },
+          {
+            "phrase": "zhasni baterku",
+            "expected": "flashlight_off",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2160
+          },
+          {
+            "phrase": "zapni wifi",
+            "expected": "wifi_on",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2947
+          },
+          {
+            "phrase": "vypni wifi",
+            "expected": "wifi_off",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2412
+          },
+          {
+            "phrase": "zapni bluetooth",
+            "expected": "bluetooth_on",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1789
+          },
+          {
+            "phrase": "ztlum hlasitost",
+            "expected": "set_volume",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 3399
+          },
+          {
+            "phrase": "jaký je stav baterie",
+            "expected": "battery_status",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2785
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1715
+          },
+          {
+            "phrase": "nastav časovač na pět minut",
+            "expected": "set_timer",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2653
+          },
+          {
+            "phrase": "otevři kalkulačku",
+            "expected": "open_app",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1568
+          },
+          {
+            "phrase": "zamkni obrazovku",
+            "expected": "lock_screen",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2433
+          }
+        ],
+        "probes": [
+          {
+            "phrase": "tell me a joke",
+            "expected": null,
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2310
+          },
+          {
+            "phrase": "sing me a song",
+            "expected": null,
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2468
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1715
+          }
+        ]
+      },
+      "after": {
+        "summary": {
+          "n": 70,
+          "accuracy": 0.829,
+          "tool_accuracy": 0.714,
+          "none_accuracy": 1.0,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 2383,
+          "latency_ms_p90": 4131
+        },
+        "raw_summary": {
+          "n": 70,
+          "accuracy": 0.829,
+          "tool_accuracy": 0.714,
+          "none_accuracy": 1.0,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 2383,
+          "latency_ms_p90": 4131
+        },
+        "czech_commands_correct": 2,
+        "czech_commands_total": 13,
+        "false_triggers": [],
+        "missed_tools": [
+          {
+            "phrase": "open the weather app",
+            "expected": "open_app",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 6023
+          },
+          {
+            "phrase": "rozsviť baterku",
+            "expected": "flashlight_on",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 3847
+          },
+          {
+            "phrase": "zhasni baterku",
+            "expected": "flashlight_off",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2365
+          },
+          {
+            "phrase": "zapni wifi",
+            "expected": "wifi_on",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2472
+          },
+          {
+            "phrase": "vypni wifi",
+            "expected": "wifi_off",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2621
+          },
+          {
+            "phrase": "zapni bluetooth",
+            "expected": "bluetooth_on",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1945
+          },
+          {
+            "phrase": "nastav jas na čtyřicet procent",
+            "expected": "set_brightness",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2965
+          },
+          {
+            "phrase": "ztlum hlasitost",
+            "expected": "set_volume",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 3859
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2816
+          },
+          {
+            "phrase": "nastav časovač na pět minut",
+            "expected": "set_timer",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 3003
+          },
+          {
+            "phrase": "otevři kalkulačku",
+            "expected": "open_app",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2695
+          },
+          {
+            "phrase": "zamkni obrazovku",
+            "expected": "lock_screen",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2657
+          }
+        ],
+        "probes": [
+          {
+            "phrase": "tell me a joke",
+            "expected": null,
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 4002
+          },
+          {
+            "phrase": "sing me a song",
+            "expected": null,
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2401
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 2816
+          }
+        ]
+      }
+    },
+    {
+      "model": "Qwen3.5-0.8B-Q4_K_M",
+      "before": {
+        "summary": {
+          "n": 70,
+          "accuracy": 0.9,
+          "tool_accuracy": 0.857,
+          "none_accuracy": 0.964,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 1211,
+          "latency_ms_p90": 2332
+        },
+        "raw_summary": {
+          "n": 70,
+          "accuracy": 0.886,
+          "tool_accuracy": 0.857,
+          "none_accuracy": 0.929,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 1211,
+          "latency_ms_p90": 2332
+        },
+        "czech_commands_correct": 7,
+        "czech_commands_total": 13,
+        "false_triggers": [
+          {
+            "phrase": "sing me a song",
+            "expected": null,
+            "route": "llm-tool",
+            "name": "play_pause",
+            "lat_ms": 1664
+          }
+        ],
+        "missed_tools": [
+          {
+            "phrase": "zhasni baterku",
+            "expected": "flashlight_off",
+            "route": "llm-tool",
+            "name": "battery_status",
+            "lat_ms": 1698
+          },
+          {
+            "phrase": "vypni wifi",
+            "expected": "wifi_off",
+            "route": "llm-tool",
+            "name": "wifi_on",
+            "lat_ms": 1675
+          },
+          {
+            "phrase": "nastav jas na čtyřicet procent",
+            "expected": "set_brightness",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1691
+          },
+          {
+            "phrase": "ztlum hlasitost",
+            "expected": "set_volume",
+            "route": "llm-tool",
+            "name": "flashlight_on",
+            "lat_ms": 1830
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 948
+          },
+          {
+            "phrase": "otevři kalkulačku",
+            "expected": "open_app",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1337
+          }
+        ],
+        "probes": [
+          {
+            "phrase": "tell me a joke",
+            "expected": null,
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 3127
+          },
+          {
+            "phrase": "sing me a song",
+            "expected": null,
+            "route": "llm-tool",
+            "name": "play_pause",
+            "lat_ms": 1664
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 948
+          }
+        ]
+      },
+      "after": {
+        "summary": {
+          "n": 70,
+          "accuracy": 0.886,
+          "tool_accuracy": 0.833,
+          "none_accuracy": 0.964,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 1500,
+          "latency_ms_p90": 3404
+        },
+        "raw_summary": {
+          "n": 70,
+          "accuracy": 0.886,
+          "tool_accuracy": 0.833,
+          "none_accuracy": 0.964,
+          "fast_path": 28,
+          "fast_path_pct": 40,
+          "latency_ms_median": 1500,
+          "latency_ms_p90": 3404
+        },
+        "czech_commands_correct": 6,
+        "czech_commands_total": 13,
+        "false_triggers": [
+          {
+            "phrase": "sing me a song",
+            "expected": null,
+            "route": "llm-tool",
+            "name": "play_pause",
+            "lat_ms": 1794
+          }
+        ],
+        "missed_tools": [
+          {
+            "phrase": "rozsviť baterku",
+            "expected": "flashlight_on",
+            "route": "llm-tool",
+            "name": "battery_status",
+            "lat_ms": 1869
+          },
+          {
+            "phrase": "zhasni baterku",
+            "expected": "flashlight_off",
+            "route": "llm-tool",
+            "name": "battery_status",
+            "lat_ms": 1854
+          },
+          {
+            "phrase": "vypni wifi",
+            "expected": "wifi_off",
+            "route": "llm-tool",
+            "name": "wifi_on",
+            "lat_ms": 1812
+          },
+          {
+            "phrase": "nastav jas na čtyřicet procent",
+            "expected": "set_brightness",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 4721
+          },
+          {
+            "phrase": "ztlum hlasitost",
+            "expected": "set_volume",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1548
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1974
+          },
+          {
+            "phrase": "otevři kalkulačku",
+            "expected": "open_app",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1811
+          }
+        ],
+        "probes": [
+          {
+            "phrase": "tell me a joke",
+            "expected": null,
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 3464
+          },
+          {
+            "phrase": "sing me a song",
+            "expected": null,
+            "route": "llm-tool",
+            "name": "play_pause",
+            "lat_ms": 1794
+          },
+          {
+            "phrase": "kolik je hodin",
+            "expected": "what_time_is_it",
+            "route": "llm-answer",
+            "name": null,
+            "lat_ms": 1974
+          }
+        ]
+      }
+    }
+  ],
+  "config_diff_bytes": 0,
+  "config_snapshot": "/home/miro/heytux-config-r3.geDr2Y",
+  "date_scoring": "Baseline and final summaries both accept the date tool, like test_routing; archived raw baseline summaries used the old scorer.",
+  "czech_language_review": {
+    "answers": 12,
+    "not_czech": 1,
+    "requested_english_translations": 1,
+    "unintended_foreign_language_answers": 0,
+    "notes": [
+      "English answer Good day was explicitly requested by the translation question.",
+      "Other answers are Czech, with malformed grammar and a Slovak adjective in the battery tip.",
+      "Factual errors remain: 7 times 8 answered as 70, Svejk author as Milan Kundera, and Prague omitted from the three largest Czech cities."
+    ]
+  },
+  "measurement_limits": "Single stochastic e2e runs (tool_chat temperature 0.3). Accuracy scores the first tool name, not its arguments.",
+  "final_daemon": {
+    "CHAT_MODEL": "Gemma-4-E2B-it-Q4_K_M",
+    "ROUTE_MODE": "hybrid",
+    "LANG_AUTO": true,
+    "active": true
+  },
+  "prompt_attempts": [
+    {
+      "attempt": 1,
+      "instruction": "Call tools only for clear phone control or queries; otherwise answer in words. For time, date, battery or other phone state, use the matching tool; never guess.",
+      "outcome": "Gemma tool 76.2%, none 100%; Qwen tool 83.3%, none 85.7%, with joke->flashlight, counting->timer, singing->play_pause, and conversation->phone_info regressions."
+    },
+    {
+      "attempt": 2,
+      "instruction": "Answer conversation, jokes and singing in words, without tools. Use matching tools only for explicit phone commands or current device facts (time, date, battery, phone state); never guess these facts.",
+      "outcome": "Initial Qwen run tool 85.7%, none 92.9%; singing and jokes were answered, but weather->open_app and the->flashlight remained. Selected after attempt 3; final fresh runs are in e2e."
+    },
+    {
+      "attempt": 3,
+      "instruction": "Answer conversation, jokes, singing, weather chat and unclear input in words, without tools. Call matching tools only when clearly asked to control the phone or query its time, date, battery or state; never guess device facts.",
+      "outcome": "Rejected: Gemma tool 69.0%, none 100%; Qwen tool 81.0%, none 96.4%. Tool accuracy dropped more than 3 points on both."
+    }
+  ],
+  "language_instruction": "Reply in Czech if the user spoke Czech; otherwise English. Never use another language.",
+  "selected_prompt_attempt": 2,
+  "wording_revisions": 2,
+  "selected_addition": "Answer conversation, jokes and singing in words, without tools. Use matching tools only for explicit phone commands or current device facts (time, date, battery, phone state); never guess these facts. Reply in Czech if the user spoke Czech; otherwise English. Never use another language.",
+  "remaining_reproduced_failures": [
+    "Qwen final run still calls play_pause for sing me a song; earlier success did not reproduce reliably.",
+    "For kolik je hodin, final Gemma said I do not have access to the current time (English response to Czech); final Qwen said Přesně, dnes je hodiny 10:30. rather than calling the clock tool.",
+    "Czech command accuracy remains poor: Gemma 2/13, Qwen 6/13.",
+    "Czech-answer generation still has factual errors and malformed Czech, though Danish/Polish drift disappeared in these 12 answers. One requested English translation remains literally non-Czech."
+  ],
+  "related_fixes": [
+    "Spoken date test now accepts spelled ordinals and no longer matches the day inside the year.",
+    "hybrid_e2e accepts the same date-tool exception as test_routing; baseline metrics were recomputed from archived rows.",
+    "Czech benchmark previously duplicated LANG_HINT and used import-time default config; it now loads daemon config and calls _chat_sys.",
+    "Date response what time is it was reproduced as a bare tool name rather than an actual call; chat_tool now falls back for these responses too."
+  ]
+}

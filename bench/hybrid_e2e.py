@@ -50,7 +50,10 @@ def summarize(rows):
             fast += 1
         if exp is None:
             none_total += 1
-            if route in ANSWER_ROUTES:
+            # Like test_routing.check(): the date question accepts either a factual answer or
+            # the clock tool (which also speaks the date), not a false positive phone action.
+            if route in ANSWER_ROUTES or (r["phrase"] == "what is today's date" and
+                    route in TOOL_ROUTES and name == "what_time_is_it"):
                 none_ok += 1; ok += 1
         else:
             tool_total += 1

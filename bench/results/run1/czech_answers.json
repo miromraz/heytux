@@ -302,42 +302,42 @@
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Jaké je hlavní město České republiky?",
-  "answer": "Hlavní město je Praha."
+  "answer": "Praha je hlavní město České republiky."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
-  "answer": "Knihu napsal Jaroslav Hašek."
+  "answer": "Knihu napsal Milan Kundera."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Kolik je sedm krát osm?",
-  "answer": "Sedm krát osm je sedmdeset osm."
+  "answer": "Sedm krát osm je sedmdeset."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Pověz mi krátký vtip.",
-  "answer": "Proč se počítače nikdy nemohou houbat? Protože nemají nohy."
+  "answer": "Proč net jde ryba do školy? Protože je vždycky v vodě."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
-  "answer": "Fotosyntéza je způsob, jak rostliny vyrábějí si jídlo pomocí slunečního světla. Vytvářejí cukry a uvolňují kyslík."
+  "answer": "Fotosyntéza je způsob, jakým rostliny vyrábějí jídlo pomocí slunečního světla. To jim pomáhá růst."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Jaká je největší planeta sluneční soustavy?",
-  "answer": "Největší planeta je Jupiter."
+  "answer": "Největší planeta je Jupiter. Je to obrovská gasovitá planeta."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "A která je druhá největší?",
-  "answer": "Druhá největší planeta je Saturn."
+  "answer": "Druhá největší je Saturn. Je to známá svou krásnou atmosférou."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Vyjmenuj tři největší města v Česku.",
-  "answer": "Praha je největší, po ní sleduje Brno a Plzeň."
+  "answer": "Brno je jedno z největších měst. Ostatní jsou Plzeň a Ostrava."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
@@ -347,17 +347,17 @@
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Kolik mám volného místa v telefonu?",
-  "answer": "Jeg kan ikke se dit telefonlager. Du skal tjekke indstillingerne i din telefon."
+  "answer": "I do nich neznám. Musím ověřit to pro vás."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Proč je obloha modrá?",
-  "answer": "Obloha je modrá kvůli rasproštění světla v atmosféře."
+  "answer": "To je kvůli rozptylu světla v atmosféře. Sluneční záření se rozptyluje a způsobuje to modrou barvu."
  },
  {
   "model": "Gemma-4-E2B-it-Q4_K_M",
   "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
-  "answer": "Wyłącz nieużywane aplikacje i zmniejsz jasność ekranu."
+  "answer": "Vypněte Wi-Fi a mobilné data, když nejsou potřeba."
  },
  {
   "model": "Qwen3.5-4B-Q4_K_M",

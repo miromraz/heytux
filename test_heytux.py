@@ -4,7 +4,7 @@
 # Run:  python3 test_heytux.py
 import io, json, os, sys, time, urllib.request
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 import heytux as J
@@ -358,6 +358,122 @@ def t_hybrid_low_conf_goes_to_chat_model():
     assert route == "llm-answer", route
     assert said == "It is sunny.", said
 
+def t_hybrid_echo_falls_back_without_speaking_or_remembering_echo():
+    restore = _hybrid_env()
+    try:
+        for dry in (False, True):
+            for echo in ("**What is today's date?**", "What is todays dates?"):
+                J.M = _FakeModels(route_reply=_needle([], 0.0),
+                                  chat_reply={"content": echo, "calls": []})
+                with patch.object(J, "chat_llm", return_value="Today is October 25.") as fallback, \
+                     patch.object(J, "_remember") as remember, patch.object(J, "log") as log:
+                    r = J.pipeline("what is today's date", {}, dry=dry)
+                fallback.assert_called_once_with("what is today's date", remember=False)
+                # remembered once, by chat_tool, with the accepted fallback answer (never the echo)
+                assert remember.call_args_list == ([] if dry else
+                                                   [call("what is today's date", "Today is October 25.")])
+                assert r["said"] == "Today is October 25.", r
+                assert J.M.spoke == ([] if dry else [r["said"]]), J.M.spoke
+                assert any("chat_tool echo" in str(c) for c in log.call_args_list)
+    finally:
+        restore()
+
+def t_hybrid_non_echo_answer_is_spoken():
+    restore = _hybrid_env()
+    J.M = _FakeModels(route_reply=_needle([], 0.0),
+                      chat_reply={"content": "Today's date is October 25.", "calls": []})
+    try:
+        with patch.object(J, "chat_llm") as fallback:
+            r = J.pipeline("what is today's date", {}, dry=False)
+        fallback.assert_not_called()
+        assert J.M.spoke == ["Today's date is October 25."], (r, J.M.spoke)
+    finally:
+        restore()
+
+def t_hybrid_short_greeting_is_not_an_echo():
+    # "hello" -> "Hello!" is a correct reply: one inference, spoken as is.
+    for q, a in (("hello", "Hello!"), ("ahoj", "Ahoj!"), ("good morning", "Good morning!")):
+        with patch.object(J, "M", _FakeModels(chat_reply={"content": a, "calls": []})), \
+             patch.object(J, "chat_llm") as fallback:
+            assert J.chat_tool(q, dry=True) == (False, a, [])
+        fallback.assert_not_called()
+
+def t_hybrid_echo_fallback_failure_is_safe():
+    echo = {"content": "What is today's date?", "calls": []}
+    for fb in (None, "What is today's date?", "what_time_is_it"):   # failed, echoed again, bare name
+        with patch.object(J, "M", _FakeModels(chat_reply=echo)), \
+             patch.object(J, "chat_llm", return_value=fb), patch.object(J, "_remember") as remember:
+            assert J.chat_tool("what is today's date", dry=False) == (False, J.CHAT_FAIL, [])
+        remember.assert_not_called()
+
+def t_hybrid_bare_tool_name_falls_back():
+    restore = _hybrid_env()
+    try:
+        for text in ("what time is it", "what_time_is_it"):
+            J.M = _FakeModels(chat_reply={"content": text, "calls": []})
+            with patch.object(J, "chat_llm", return_value="October 25.") as fallback, \
+                 patch.object(J, "execute") as execute:
+                assert J.chat_tool("what is today's date", dry=True) == (False, "October 25.", [])
+            fallback.assert_called_once_with("what is today's date", remember=False)
+            execute.assert_not_called()
+    finally:
+        restore()
+
+def t_hybrid_system_prompt_is_stable_and_scoped():
+    with patch.dict(J.CFG, ROUTE_MODE="hybrid", LANG_AUTO=True), \
+         patch.object(J, "_live_facts", side_effect=AssertionError("volatile prefix")):
+        system = J._chat_sys()
+        assert J.HYBRID_HINT in system and J.LANG_HINT in system, system
+        assert "time, date, battery" in system and "never guess" in system
+        assert "only for explicit phone commands" in system and "singing in words, without tools" in system
+        assert "Czech" in system and "English" in system and "Never use another language" in system
+        assert J._chat_sys() == system
+        # the chat_llm fallback offers no tools but keeps the Czech/English rule
+        assert J._chat_sys(tools=False) == J.CFG["LLM_SYS"] + " " + J.LANG_HINT
+        J.CFG["LANG_AUTO"] = False
+        assert J._chat_sys() == J.CFG["LLM_SYS"] + " " + J.HYBRID_HINT
+        J.CFG["ROUTE_MODE"] = "router"
+        assert J._chat_sys() == J.CFG["LLM_SYS"]
+
+def t_echo_fallback_uses_facts_without_tool_instructions():
+    with patch.dict(J.CFG, ROUTE_MODE="hybrid"), \
+         patch.object(J, "_live_facts", return_value="Current date: October 25."), \
+         patch.object(J, "_chat_history", return_value=[]), \
+         patch.object(J, "_llm_once", return_value="October 25.") as once:
+        assert J.chat_llm("date?", remember=False) == "October 25."
+        system = json.loads(once.call_args.args[0])["messages"][0]["content"]
+        assert "Current date: October 25." in system and J.HYBRID_HINT not in system
+
+def t_czech_bench_uses_daemon_system_prompt():
+    from bench import toolcall as B
+    be = SimpleNamespace(chat=Mock(return_value={"text": "Česky."}))
+    with patch.object(J, "_chat_sys", return_value="daemon prompt") as system:
+        rows = B.czech_answers(be, "fake", 90)
+    system.assert_called_once_with(tools=False)
+    assert len(rows) == 12
+    assert all(c.args[0][0]["content"] == "daemon prompt" for c in be.chat.call_args_list)
+
+def t_hybrid_bench_accepts_date_tool_but_rejects_chat_tool_trigger():
+    from bench import hybrid_e2e as B
+    rows = [{"phrase": phrase, "expected": None, "route": "llm-tool", "name": name,
+             "lat_ms": 100} for phrase, name in [("what is today's date", "what_time_is_it"),
+                                                  ("tell me a joke", "play_pause")]]
+    assert B.summarize(rows)["none_accuracy"] == 0.5
+
+def t_spoken_date_accepts_ordinals_but_not_year_substrings():
+    from test_routing import spoken_date_matches
+    for day, words in [(1, "first"), (2, "second"), (3, "third"), (12, "twelfth"),
+                       (20, "twentieth"), (25, "twenty-fifth"), (30, "thirtieth"), (31, "thirty first")]:
+        assert spoken_date_matches("October %s, 2026." % words, "october", day)
+        assert spoken_date_matches("October %s, 2026." % day, "october", day)
+    assert spoken_date_matches("October 25th, 2026.", "october", 25)
+    assert not spoken_date_matches("October 26th, 2025.", "october", 25)
+    assert not spoken_date_matches("October 25th, 2026.", "october", 2)
+    assert not spoken_date_matches("September twenty-fifth.", "october", 25)
+    for said, day in (("October twenty-first.", 1), ("October thirty first.", 1),
+                      ("October twenty-second.", 2), ("October twenty-fifth.", 5), ("October 21st.", 1)):
+        assert not spoken_date_matches(said, "october", day), (said, day)
+
 def t_hybrid_llm_tool_call_runs_execute():
     restore = _hybrid_env()
     calls = []
@@ -503,7 +619,8 @@ def t_config_prewarms_final_prefix_after_swap_and_live_changes():
          patch.object(C, "save"):
         h._post_config()
         assert chat.tool_chat.call_count == 1
-        assert chat.tool_chat.call_args.args[0][0]["content"] == "New system. " + J.LANG_HINT
+        assert chat.tool_chat.call_args.args[0][0]["content"] == \
+            "New system. " + J.HYBRID_HINT + " " + J.LANG_HINT
         h._body = lambda: {"ROUTE_MODE": "hybrid"}
         h._post_config()
         assert chat.tool_chat.call_count == 1, "unchanged mode must not prewarm again"
@@ -511,7 +628,7 @@ def t_config_prewarms_final_prefix_after_swap_and_live_changes():
             h._body = lambda: change
             h._post_config()
         assert chat.tool_chat.call_count == 3
-        assert chat.tool_chat.call_args.args[0][0]["content"] == "Another system."
+        assert chat.tool_chat.call_args.args[0][0]["content"] == "Another system. " + J.HYBRID_HINT
 
 def t_tts_alt_startup_and_reload_failure_are_nonfatal():
     load = J.Models._load_slot

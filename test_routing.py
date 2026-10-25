@@ -4,7 +4,7 @@
 # (a tool route + expected function) or the chat LLM (an answer route).
 # Run ON the phone as miro:  python3 test_routing.py            (defaults to 127.0.0.1:8770)
 # Or point elsewhere:        HEYTUX_URL=http://host:8770 python3 test_routing.py
-import json, os, sys, urllib.request
+import json, os, re, sys, urllib.request
 
 BASE = os.environ.get("HEYTUX_URL", "http://127.0.0.1:8770")
 # Dry by default: decide the route without executing tools or speaking. Executing here dropped the
@@ -84,13 +84,27 @@ def route_of(phrase):
     return r.get("route"), name, r.get("said") or ""
 
 
+def spoken_date_matches(said, month, day):
+    # TTS answers may spell the day: "October twenty-fifth" is as correct as "October 25th".
+    # Boundaries also stop e.g. day 2 from matching the year 2026.
+    ordinals = ("first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth "
+                "thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth "
+                "twenty-first twenty-second twenty-third twenty-fourth twenty-fifth twenty-sixth "
+                "twenty-seventh twenty-eighth twenty-ninth thirtieth thirty-first").split()
+    ordinal = ordinals[int(day) - 1].replace("-", "[- ]")
+    # Lookbehinds: day 1 must not match the tail of "twenty-first" / "thirty first".
+    return bool(re.search(r"\b%s\b" % re.escape(month), said, re.I) and
+                re.search(r"(?<!twenty[- ])(?<!thirty[- ])\b(?:%s(?:st|nd|rd|th)?|%s)\b"
+                          % (int(day), ordinal), said, re.I))
+
+
 def said_has_date():
     """Whichever way it routes, asking the date must produce today's month and day."""
     import time
     _, name, said = route_of("what is today's date")
     want = (time.strftime("%B").lower(), time.strftime("%-d"))
     # A dry run doesn't execute what_time_is_it (said=""); that handler always speaks the strftime date.
-    ok = (DRY and name == "what_time_is_it") or all(w in said.lower() for w in want)
+    ok = (DRY and name == "what_time_is_it") or spoken_date_matches(said, *want)
     print("%-4s %-34s want=%-15s got=%r" % ("PASS" if ok else "FAIL", "date is spoken correctly",
                                             " ".join(want), said))
     return ok

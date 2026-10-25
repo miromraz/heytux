@@ -3,7 +3,7 @@
 # Pipeline: mic (Silero VAD, energy fallback) -> normalize -> Parakeet/Moonshine STT -> Needle3 -> execute -> Piper TTS ack.
 # stdlib + numpy + sherpa_onnx + ctypes only. Runs as miro's systemd --user service,
 # so all subprocesses (pw-record/pw-play/wpctl/gio/busctl/nmcli/bluetoothctl) inherit miro's session.
-import contextlib, ctypes, fcntl, glob, hashlib, json, math, os, queue, re, subprocess, sys, \
+import contextlib, ctypes, difflib, fcntl, glob, hashlib, json, math, os, queue, re, subprocess, sys, \
     threading, time, traceback, unicodedata, urllib.request, wave
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import numpy as np
@@ -643,7 +643,13 @@ def clean_spoken(t):
 # language when LANG_AUTO) picks the language, and the spoken voice follows the reply TEXT. A small
 # stdlib heuristic - Czech-specific diacritics, or a couple of common Czech function words - is
 # enough to pick between the English main voice and the Czech alt voice.
-LANG_HINT = "Answer in the same language the user spoke."
+# Only English and Czech voices exist, so name them: "the user's language" let Gemma drift into
+# Danish/Polish.
+LANG_HINT = "Reply in Czech if the user spoke Czech; otherwise English. Never use another language."
+# Only when tools are offered (hybrid chat_tool): measured +5-7 points tool accuracy on run1 e2e.
+HYBRID_HINT = ("Answer conversation, jokes and singing in words, without tools. "
+               "Use matching tools only for explicit phone commands or current device facts "
+               "(time, date, battery, phone state); never guess these facts.")
 _CZ_DIACRITICS = set("ěščřžůťňďý")
 # Deliberately NO single letters and no English homographs ("a", "i", "to", "u"...): those appear in
 # ordinary English and would misclassify an English reply as Czech. Only multi-letter Czech words
@@ -692,10 +698,13 @@ def _chat_history():
         CHAT_HISTORY.clear()
     return CHAT_HISTORY[-n:] if n > 0 else []
 
-def _chat_sys():
-    """Stable chat system prompt: LLM_SYS, plus the reply-language instruction when LANG_AUTO. Kept
-    free of volatile facts so it (and the tool schemas after it) stay a cacheable prefix in hybrid."""
-    return CFG["LLM_SYS"] + (" " + LANG_HINT if CFG["LANG_AUTO"] else "")
+def _chat_sys(tools=None):
+    """Stable chat system prompt: LLM_SYS, the tool-use rules when tools are offered (default: in
+    hybrid), and the reply-language rule when LANG_AUTO. Kept free of volatile facts so it (and the
+    tool schemas after it) stay a cacheable prefix in hybrid."""
+    tools = CFG["ROUTE_MODE"] == "hybrid" if tools is None else tools
+    return (CFG["LLM_SYS"] + (" " + HYBRID_HINT if tools else "") +
+            (" " + LANG_HINT if CFG["LANG_AUTO"] else ""))
 
 def _remember(transcript, answer):
     """Append a (user, answer) turn to the rolling chat memory. Tool turns are recorded too, so a
@@ -724,7 +733,7 @@ def chat_llm(transcript, remember=True):
     died, reload it once (the old unit's Restart=on-failure) and retry; a live-but-slow server is left
     alone (no pointless second wait). Callers already hold LOCK, which ensure_chat needs."""
     body = json.dumps({
-        "messages": chat_messages(_chat_sys() + " " + _live_facts(), _chat_history(), transcript),
+        "messages": chat_messages(_chat_sys(tools=False) + " " + _live_facts(), _chat_history(), transcript),
         "max_tokens": 60, "temperature": 0.7,
         "chat_template_kwargs": {"enable_thinking": False}}).encode()
     try:
@@ -748,6 +757,20 @@ def hybrid_tools():
     """Enabled merged tools offered to the chat model in hybrid mode, minus ask_question (that is the
     router's chat sentinel, not a real tool - the chat model answers directly instead)."""
     return [t for t in MERGED_TOOLS if t["function"]["name"] != "ask_question"]
+
+def _norm_text(s):
+    """Case-, punctuation- and space-insensitive form for echo comparison."""
+    return "".join(c for c in unicodedata.normalize("NFKC", s or "").casefold() if c.isalnum())
+
+def _unusable_answer(transcript, ans, names):
+    """'echo' if the answer just repeats the question (Gemma: "What is today's date?"), 'bare tool
+    name' if it names a tool instead of calling it, else None. Questions under 12 normalized chars
+    are exempt: "hello" -> "Hello!" is a fine reply, not an echo."""
+    q, a = _norm_text(transcript), _norm_text(ans)
+    if len(q) >= 12 and (q == a or (len(a) >= 12 and
+                                    difflib.SequenceMatcher(None, q, a).ratio() >= 0.95)):
+        return "echo"
+    return "bare tool name" if a in {_norm_text(n) for n in names} else None
 
 def chat_tool(transcript, dry=False):
     """Hybrid turn: ask the chat model with the enabled phone commands offered as tools. It either
@@ -796,6 +819,15 @@ def chat_tool(transcript, dry=False):
     ans = clean_spoken(res.get("content") or "")
     if not ans:
         return False, CHAT_FAIL, []
+    bad = _unusable_answer(transcript, ans, enabled)
+    if bad:
+        # Recover via plain chat with live facts (date/time/battery in the prompt), validated the
+        # same way; remembered once, here, and never spoken if it is unusable too.
+        log("chat_tool %s: falling back to chat_llm" % bad, repr(ans))
+        ans = chat_llm(transcript, remember=False)
+        if not ans or _unusable_answer(transcript, ans, enabled):
+            log("chat_tool fallback unusable too:", repr(ans))
+            return False, CHAT_FAIL, []
     if not dry:
         _remember(transcript, ans)
     return False, ans, []

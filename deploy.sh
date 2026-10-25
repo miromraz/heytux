@@ -3,7 +3,7 @@
 # Usage: ./deploy.sh [ssh-host-args]   (defaults to the WiFi target below)
 set -euo pipefail
 
-SSH=${HEYTUX_SSH:-"ssh -o BatchMode=yes -o ConnectTimeout=8 -o UserKnownHostsFile=$HOME/.ssh/known_hosts.sunfish -o HostKeyAlias=172.16.42.1 root@192.168.100.195"}
+SSH=${HEYTUX_SSH:-"ssh -o BatchMode=yes -o ConnectTimeout=8 pixelw"}
 HERE="$(cd "$(dirname "$0")" && pwd)"
 RU="runuser -u miro -- env XDG_RUNTIME_DIR=/run/user/60466 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/60466/bus"
 

@@ -152,7 +152,9 @@ def metrics(rows):
     for r in rows:
         exp, pred = r["expected"], r["pred"]
         if exp is None:
-            truth_none += 1; none_ok += (pred == "none")
+            # Same rule as hybrid_e2e/test_routing: the clock tool also answers the date question.
+            truth_none += 1
+            none_ok += (pred == "none" or (r["phrase"] == "what is today's date" and pred == "what_time_is_it"))
         else:
             tool_total += 1; tool_ok += (pred == exp)
         pred_none += (pred == "none")
@@ -187,7 +189,7 @@ def latency(rows):
 def czech_answers(be, model_id, max_tokens):
     """Generate the 12 Czech answers (one follow-up pair keeps history). Returns a list of
     {model, question, answer} dicts; the orchestrator judges them."""
-    sys_prompt = J.CFG["LLM_SYS"] + " " + J.LANG_HINT
+    sys_prompt = J._chat_sys(tools=False)       # text-only language eval: no tools offered here
     out, history = [], []
     for i, q in enumerate(CZECH_QA):
         use_hist = history if i == 6 else []        # Q6 is the follow-up to Q5
@@ -283,6 +285,8 @@ def main():
                     help="DANGER: bench even while the heytux daemon is active (can OOM the phone)")
     args = ap.parse_args()
 
+    J.load_config()
+    J.CFG["ROUTE_MODE"] = "hybrid"              # benchmark mode only; never persist it
     manifest = json.load(open(MANIFEST))
     ids = MODELS if args.models == "all" else args.models.split(",")
     os.makedirs(args.out, exist_ok=True)
