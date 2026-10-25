@@ -2,7 +2,9 @@
 # test_heytux.py - offline unit checks for heytux.py. Plain asserts, no pytest, no phone, no models.
 # Imports heytux WITHOUT loading models (sherpa_onnx is only imported inside Models.__init__).
 # Run:  python3 test_heytux.py
-import io, json, os, sys, urllib.request
+import io, json, os, sys, time, urllib.request
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np
 import heytux as J
@@ -246,6 +248,19 @@ def t_chat_dry_does_not_remember():
     _chat(["q1", "q2"], remember=False)
     assert J.CHAT_HISTORY == []
 
+def t_remember_drops_expired_history_on_tool_turn():
+    # A fast-path tool turn never calls _chat_history(), so _remember itself must expire a stale
+    # conversation - else the next chat request sees context that should have timed out.
+    saved = (J.CFG["CHAT_HISTORY_TURNS"], J.CFG["CHAT_MEMORY_S"])
+    J.CFG["CHAT_HISTORY_TURNS"], J.CFG["CHAT_MEMORY_S"] = 4, 60.0
+    J.CHAT_HISTORY[:] = [("tell me a joke", "a joke.")]
+    J.chat_last = time.time() - 61                 # older than CHAT_MEMORY_S
+    try:
+        J._remember("turn on the flashlight", "Flashlight on.")
+    finally:
+        J.CFG["CHAT_HISTORY_TURNS"], J.CFG["CHAT_MEMORY_S"] = saved
+    assert J.CHAT_HISTORY == [("turn on the flashlight", "Flashlight on.")], J.CHAT_HISTORY
+
 # --- follow-up onset timeout: silence ends the capture after onset_s of audio, no speech ---
 def t_record_onset_timeout_on_silence():
     class FakeModels:
@@ -258,6 +273,413 @@ def t_record_onset_timeout_on_silence():
         J.M = orig_M
     assert speech is False and stats["vad_speech"] is False, stats
     assert abs(len(pcm) - J.SR) <= J.FRAME, "gave up after %.2f s, want 1.0" % (len(pcm) / J.SR)
+
+# --- reply-language heuristic (voice selection) ---
+def t_is_czech_diacritics():
+    assert J.is_czech("Dnes je úterý a svítí slunce.")           # diacritics -> Czech
+
+def t_is_czech_stopwords_no_diacritics():
+    assert J.is_czech("ano to je pravda")                        # >=2 Czech words, no diacritics
+
+def t_is_czech_english_is_false():
+    assert not J.is_czech("The capital of France is Paris.")
+    assert not J.is_czech("The café serves a soufflé and piñá coládá.")
+    assert not J.is_czech("é á ó í ú")
+    assert not J.is_czech("Flashlight on.")                      # a tool ack stays English
+    assert not J.is_czech("I am a voice assistant.")             # 'i'/'a' must NOT read as Czech
+    assert not J.is_czech("a a a the the")                       # repeated articles can't reach 2
+
+def t_is_czech_one_word_not_enough():
+    assert not J.is_czech("the ano here")                        # a single Czech word is not enough
+
+def t_clean_spoken_keeps_czech_drops_emoji():
+    out = J.clean_spoken("Dobrý den 😀, jak se máš?")
+    assert "Dobrý" in out and "máš" in out, out                  # diacritics survive
+    assert "😀" not in out, out                                   # emoji dropped
+
+# --- hybrid routing: fast path vs chat model, grounding/enabled gates, execute() ---
+class _FakeChat:
+    def __init__(self, reply): self.reply = reply
+    def tool_chat(self, msgs, tools): return self.reply
+
+class _FakeModels:
+    def __init__(self, route_reply=None, chat_reply=None):
+        self._route_reply = route_reply
+        self.chat = _FakeChat(chat_reply) if chat_reply is not None else None
+        self.spoke = []
+    class _R:
+        scored = True
+        def __init__(self, reply): self.reply = reply
+        def complete(self, text):
+            if self.reply is None: raise AssertionError("router must not be consulted")
+            return self.reply
+    @property
+    def router(self): return self._R(self._route_reply)
+    def speak(self, text): self.spoke.append(text)
+    def _slot_alive(self, slot): return True
+
+def _hybrid_env(**cfg):
+    """Snapshot/patch CFG + globals for a hybrid-routing test; returns a restore() callable."""
+    keys = ["ROUTE_MODE", "HYBRID_FLOOR", "FOLLOWUP_ROUTE", "CONF_FLOOR", "GROUNDING_ON",
+            "CHAT_HISTORY_TURNS", "LANG_AUTO"]
+    saved_cfg = {k: J.CFG[k] for k in keys}
+    saved = (J.M, J.execute, list(J.MERGED_TOOLS))
+    J.CFG.update({"ROUTE_MODE": "hybrid", "HYBRID_FLOOR": 0.75, "FOLLOWUP_ROUTE": "normal",
+                  "CONF_FLOOR": 0.5, "GROUNDING_ON": True, "CHAT_HISTORY_TURNS": 0, "LANG_AUTO": False})
+    J.CFG.update(cfg)
+    J.CHAT_HISTORY.clear()
+    def restore():
+        J.CFG.update(saved_cfg)
+        J.M, J.execute, J.MERGED_TOOLS = saved
+    return restore
+
+def t_hybrid_fast_path_executes_tool():
+    restore = _hybrid_env()
+    calls = []
+    J.M = _FakeModels(route_reply=_needle(["flashlight_on"], 0.9))
+    J.execute = lambda n, a: calls.append((n, a)) or "Flashlight on."
+    try:
+        route, said, c, conf, names = J._decide_and_run("turn on the flashlight", {}, dry=False, followup=False)
+    finally:
+        restore()
+    assert route == "tool-fast", route
+    assert calls == [("flashlight_on", {})], calls
+    assert said == "Flashlight on.", said
+
+def t_hybrid_low_conf_goes_to_chat_model():
+    restore = _hybrid_env()
+    J.M = _FakeModels(route_reply=_needle(["flashlight_on"], 0.6),      # >=CONF_FLOOR, <HYBRID_FLOOR
+                      chat_reply={"content": "It is sunny.", "calls": []})
+    J.execute = lambda n, a: (_ for _ in ()).throw(AssertionError("no tool on a chat answer"))
+    try:
+        route, said, c, conf, names = J._decide_and_run("turn on the flashlight", {}, dry=False, followup=False)
+    finally:
+        restore()
+    assert route == "llm-answer", route
+    assert said == "It is sunny.", said
+
+def t_hybrid_llm_tool_call_runs_execute():
+    restore = _hybrid_env()
+    calls = []
+    J.M = _FakeModels(route_reply=_needle([], 0.0),                     # router declines -> chat model
+                      chat_reply={"content": "", "calls": [{"name": "flashlight_on", "arguments": {}}]})
+    J.execute = lambda n, a: calls.append((n, a)) or "Flashlight on."
+    try:
+        route, said, c, conf, names = J._decide_and_run("turn on the flashlight", {}, dry=False, followup=False)
+    finally:
+        restore()
+    assert route == "llm-tool", route
+    assert calls == [("flashlight_on", {})], calls
+    assert names == ["flashlight_on"], names
+
+def t_hybrid_disabled_tool_is_rejected():
+    # flashlight_on is grounded, but with it removed from the enabled set the model's call must NOT run.
+    restore = _hybrid_env()
+    calls = []
+    J.M = _FakeModels(route_reply=_needle([], 0.0),
+                      chat_reply={"content": "", "calls": [{"name": "flashlight_on", "arguments": {}}]})
+    J.execute = lambda n, a: calls.append((n, a)) or "ran"
+    J.MERGED_TOOLS = [t for t in J.MERGED_TOOLS if t["function"]["name"] != "flashlight_on"]
+    try:
+        route, said, c, conf, names = J._decide_and_run("turn on the flashlight", {}, dry=False, followup=False)
+    finally:
+        restore()
+    assert calls == [], "a disabled tool must never execute"
+    assert route == "llm-answer", route
+    assert said == J.CHAT_FAIL, said
+
+def t_hybrid_czech_llm_tool_call_runs_execute():
+    restore = _hybrid_env()
+    calls = []
+    J.M = _FakeModels(route_reply=_needle(["flashlight_on"], 0.99),
+                      chat_reply={"content": "", "calls": [{"name": "flashlight_on", "arguments": {}}]})
+    J.execute = lambda n, a: calls.append((n, a)) or "Flashlight on."
+    try:
+        assert not J._grounded("flashlight_on", "rozsviť baterku")
+        route, said, c, conf, names = J._decide_and_run("rozsviť baterku", {}, dry=False, followup=False)
+    finally:
+        restore()
+    # High-confidence router call still fails grounding; the explicit LLM call executes.
+    assert route == "llm-tool", route
+    assert calls == [("flashlight_on", {})], calls
+    assert names == ["flashlight_on"], names
+
+def t_hybrid_confabulated_tool_call_is_rejected():
+    restore = _hybrid_env()
+    calls = []
+    logs = []
+    saved_log = J.log
+    J.log = lambda *args: logs.append(args)
+    # Exercise the known-name check independently of the enabled-set check.
+    J.MERGED_TOOLS.append({"type": "function", "function": {"name": "get_phone_phone"}})
+    J.M = _FakeModels(route_reply=_needle([], 0.0),
+                      chat_reply={"content": "", "calls": [{"name": "get_phone_phone", "arguments": {}}]})
+    J.execute = lambda n, a: calls.append((n, a)) or "ran"
+    try:
+        route, said, c, conf, names = J._decide_and_run("what is the capital of france", {}, dry=False, followup=False)
+    finally:
+        J.log = saved_log
+        restore()
+    assert calls == [], "a confabulated tool call must never execute"
+    assert route == "llm-answer" and said == J.CHAT_FAIL, (route, said)
+    assert ("chat_tool rejected:", "get_phone_phone", "unknown") in logs, logs
+
+# --- follow-up routing: FOLLOWUP_ROUTE=chat skips the router on a follow-up turn ---
+def t_followup_chat_skips_router_in_router_mode():
+    restore = _hybrid_env(ROUTE_MODE="router", FOLLOWUP_ROUTE="chat")
+    J.M = _FakeModels(route_reply=None)        # .router.complete would AssertionError if consulted
+    saved = urllib.request.urlopen
+    urllib.request.urlopen = lambda req, timeout=0: io.BytesIO(
+        b'{"choices":[{"message":{"content":"follow up answer."}}]}')
+    try:
+        route, said, c, conf, names = J._decide_and_run("and the moon?", {}, dry=True, followup=True)
+    finally:
+        urllib.request.urlopen = saved
+        restore()
+    assert route == "chat-followup", route
+    assert said == "follow up answer.", said
+
+def t_followup_normal_still_uses_router():
+    restore = _hybrid_env(ROUTE_MODE="router", FOLLOWUP_ROUTE="normal")
+    J.M = _FakeModels(route_reply=_needle(["flashlight_on"], 1.0))
+    J.execute = lambda n, a: "Flashlight on."
+    try:
+        route, said, c, conf, names = J._decide_and_run("turn on the flashlight", {}, dry=True, followup=True)
+    finally:
+        restore()
+    assert route == "tool", route            # router mode: a normal follow-up routes as usual
+
+# --- review regressions: fake backends only; these tests never load a second model ---
+def _empty_models():
+    m = J.Models.__new__(J.Models)
+    m.loaded, m.rss_mb = {}, {}
+    m._chat_prewarm_key = None
+    m.chat = m.router = m.asr = m.tts = m.tts_alt = m.vad = m._vad_entry = None
+    return m
+
+def t_prewarm_dedup_prefix_and_reload():
+    m = _empty_models()
+    chat = SimpleNamespace(tool_chat=Mock(), close=Mock())
+    with patch.dict(J.CFG, ROUTE_MODE="hybrid", LANG_AUTO=False), \
+         patch.dict(J.REGISTRY, chat={"path": "/fake.gguf"}), \
+         patch.object(J.HB, "LlamaServer", return_value=chat), \
+         patch.object(J, "MERGED_TOOLS", list(J.MERGED_TOOLS)):
+        m._load_slot("chat", "chat")
+        m._prewarm_chat()
+        assert chat.tool_chat.call_count == 1
+        J.CFG["LLM_SYS"] += " changed"
+        m._prewarm_chat()
+        J.CFG["LANG_AUTO"] = True
+        m._prewarm_chat()
+        J.MERGED_TOOLS = J.MERGED_TOOLS[:-2]
+        m._prewarm_chat()
+        m._prewarm_chat()
+        assert chat.tool_chat.call_count == 4
+        m._close_slot("chat")
+        m._load_slot("chat", "chat")             # same id, new server: cannot reuse the old key
+        assert chat.tool_chat.call_count == 5
+
+def t_prewarm_failed_attempt_is_retryable():
+    m = _empty_models()
+    m.loaded["chat"] = "chat"
+    m.chat = SimpleNamespace(tool_chat=Mock(side_effect=[RuntimeError("cold"), {}]))
+    m._prewarm_chat()
+    assert m._chat_prewarm_key is None
+    m._prewarm_chat()
+    m._prewarm_chat()
+    assert m.chat.tool_chat.call_count == 2
+
+def t_config_prewarms_final_prefix_after_swap_and_live_changes():
+    m = _empty_models()
+    chat = SimpleNamespace(tool_chat=Mock(), close=Mock())
+    h = J.H.__new__(J.H)
+    h._send = Mock()
+    h._body = lambda: {"CHAT_MODEL": "chat", "ROUTE_MODE": "hybrid",
+                       "LLM_SYS": "New system.", "LANG_AUTO": True}
+    with patch.dict(J.CFG, ROUTE_MODE="router", CHAT_MODEL="old", LANG_AUTO=False), \
+         patch.dict(J.REGISTRY, chat={"path": "/fake.gguf"}), \
+         patch.object(J.HB, "LlamaServer", return_value=chat), patch.object(J, "M", m), \
+         patch.object(C, "validate", side_effect=lambda changes: (changes, {})), \
+         patch.object(C, "save"):
+        h._post_config()
+        assert chat.tool_chat.call_count == 1
+        assert chat.tool_chat.call_args.args[0][0]["content"] == "New system. " + J.LANG_HINT
+        h._body = lambda: {"ROUTE_MODE": "hybrid"}
+        h._post_config()
+        assert chat.tool_chat.call_count == 1, "unchanged mode must not prewarm again"
+        for change in ({"LLM_SYS": "Another system."}, {"LANG_AUTO": False}):
+            h._body = lambda: change
+            h._post_config()
+        assert chat.tool_chat.call_count == 3
+        assert chat.tool_chat.call_args.args[0][0]["content"] == "Another system."
+
+def t_tts_alt_startup_and_reload_failure_are_nonfatal():
+    load = J.Models._load_slot
+    def startup_load(m, slot, mid, strict=False):
+        if slot == "tts_alt":
+            return load(m, slot, mid, strict=strict)
+        m.loaded[slot] = mid
+    with patch.dict(sys.modules, sherpa_onnx=SimpleNamespace()), \
+         patch.dict(J.REGISTRY, broken={}), \
+         patch.object(J.HB, "load", side_effect=RuntimeError("bad voice")), \
+         patch.object(J.Models, "_resolve", return_value="broken"), \
+         patch.object(J.Models, "_load_slot", startup_load), \
+         patch.object(J.Models, "build_kws") as kws:
+        m = J.Models()
+        assert m.tts_alt is None and m.loaded["tts_alt"] is None
+        kws.assert_called_once()
+        load(m, "tts_alt", "broken")
+        assert m.tts_alt is None and m.loaded["tts_alt"] is None
+
+def t_tts_alt_explicit_swap_reports_error_and_rolls_back():
+    m = _empty_models()
+    old = SimpleNamespace(close=Mock())
+    restored = SimpleNamespace(close=Mock())
+    m.tts_alt = old; m.loaded["tts_alt"] = "old"
+    with patch.dict(J.REGISTRY, old={}, broken={}), \
+         patch.object(J.HB, "load", side_effect=[RuntimeError("bad voice"), restored]):
+        try:
+            m.swap("tts_alt", "broken")
+            assert False, "an explicit bad voice must report failure"
+        except RuntimeError as e:
+            assert str(e) == "bad voice"
+    old.close.assert_called_once()
+    assert m.tts_alt is restored and m.loaded["tts_alt"] == "old"
+    with patch.dict(J.REGISTRY, old={}, broken={}), \
+         patch.object(J.HB, "load", side_effect=RuntimeError("both broken")):
+        try:
+            m.swap("tts_alt", "broken")
+            assert False
+        except RuntimeError:
+            pass
+    assert m.tts_alt is None and m.loaded["tts_alt"] is None
+
+def t_parse_tool_calls_rejects_malformed_arguments():
+    for raw in ("{bad", "[]", "1", '"text"', "null", "false", [], [1], 0, 1, False, None):
+        calls = J.HB.LlamaServer._parse_tool_calls({"tool_calls": [
+            {"function": {"name": "set_volume", "arguments": raw}}]})
+        assert calls == [{"name": "set_volume", "arguments": None}], (raw, calls)
+    for raw in ({}, "{}", {"percent": 30}, '{"percent":30}'):
+        calls = J.HB.LlamaServer._parse_tool_calls({"tool_calls": [
+            {"function": {"name": "set_volume", "arguments": raw}}]})
+        assert isinstance(calls[0]["arguments"], dict), calls
+
+def t_chat_tool_logs_all_rejections_before_any_execution():
+    restore = _hybrid_env()
+    events = []
+    J.MERGED_TOOLS = [t for t in J.MERGED_TOOLS if t["function"]["name"] != "wifi_off"]
+    J.M = _FakeModels(chat_reply={"content": "Here is some text.", "calls": [
+        {"name": "flashlight_on", "arguments": {}},
+        {"name": "set_volume", "arguments": None},
+        {"name": "wifi_off", "arguments": {}},
+        {"name": "invented", "arguments": {}}]})
+    J.execute = lambda n, a: events.append(("execute", n)) or "Done."
+    try:
+        with patch.object(J, "log", side_effect=lambda *args: events.append(args)):
+            did, said, calls = J.chat_tool("do it")
+        assert did and said == "Done."
+        assert events == [("chat_tool rejected:", "set_volume", "bad arguments"),
+                          ("chat_tool rejected:", "wifi_off", "not enabled"),
+                          ("chat_tool rejected:", "invented", "unknown"),
+                          ("execute", "flashlight_on")], events
+        events.clear()
+        J.M.chat.reply["calls"] = [{"name": "set_volume", "arguments": None}]
+        with patch.object(J, "log", side_effect=lambda *args: events.append(args)):
+            did, said, calls = J.chat_tool("do it")
+        assert not did and said == "Here is some text." and calls == []
+        assert events == [("chat_tool rejected:", "set_volume", "bad arguments")]
+    finally:
+        restore()
+
+def t_gguf_router_drops_malformed_arguments():
+    srv = SimpleNamespace(route=lambda *a: {"calls": [{"name": "set_volume", "arguments": None},
+                                                      {"name": "wifi_off", "arguments": {}}]})
+    router = J.HB.GgufRouter(srv, J.TOOLS)
+    r = router.complete("volume")
+    assert r["function_calls"] == [{"name": "wifi_off", "arguments": {}}] and r["confidence"] == 1.0
+    srv.route = lambda *a: {"calls": [{"name": "set_volume", "arguments": None}]}
+    r = router.complete("volume")
+    assert r["function_calls"] == [] and r["confidence"] == 0.0
+
+def t_hybrid_unscored_router_goes_directly_to_chat():
+    assert J.HB.EmbeddingRouter.scored and not J.HB.GgufRouter.scored and not J.Needle.scored
+    restore = _hybrid_env()
+    J.M = _FakeModels(route_reply=None, chat_reply={"content": "An answer.", "calls": []})
+    try:
+        with patch.object(_FakeModels._R, "scored", False):
+            route, said, calls, conf, names = J._decide_and_run("flashlight", {}, False, False)
+        assert route == "llm-answer" and said == "An answer.", (route, said)
+    finally:
+        restore()
+
+def t_models_alt_slot_maps_to_settings_field():
+    m = _empty_models()
+    m.tts_alt = SimpleNamespace()
+    m.loaded["tts_alt"] = "voice"
+    m.rss_mb["tts_alt"] = 42
+    s = m.models_status()["tts_alt"]
+    assert s["field"] == "TTS_MODEL_ALT" and s["loaded"] and s["rss_mb"] == 42, s
+
+
+def t_bench_guard_stops_and_waits_for_terminal_state():
+    from bench import toolcall as B
+    commands = []
+    def run(cmd, **kwargs):
+        commands.append(cmd)
+        return SimpleNamespace(returncode=1 if cmd[0] == "pgrep" else 0, stdout="", stderr="")
+    with patch.object(B.subprocess, "run", side_effect=run), \
+         patch.object(B, "_daemon_state", side_effect=["activating", "deactivating", "inactive"]), \
+         patch.object(B.time, "sleep"), patch.object(B.time, "monotonic", side_effect=[0, 0, 1, 2]):
+        B.ensure_daemon_stopped()
+    assert commands[0] == ["systemctl", "--user", "stop", "heytux"]
+    assert len(commands) == 7, commands
+
+def t_bench_guard_refuses_ambiguous_state_or_orphan_server():
+    from bench import toolcall as B
+    for state, process, listener, stop_rc, lookup_rc in [
+        ("", "", "", 0, 1), ("unknown", "", "", 0, 1),
+        ("activating", "", "", 0, 1), ("deactivating", "", "", 0, 1),
+        ("inactive", "123 llama-server --port 8771", "", 0, 0),
+        ("failed", "123 llama-server --port=8771", "", 0, 0),
+        ("inactive", "", "LISTEN 0 128 127.0.0.1:8771", 0, 1),
+        ("inactive", "", "", 1, 1), ("inactive", "", "", 0, 2)]:
+        def run(cmd, **kwargs):
+            rc, out = ((stop_rc, "") if cmd[0] == "systemctl" else
+                       (lookup_rc, process) if cmd[0] == "pgrep" else (0, listener))
+            return SimpleNamespace(returncode=rc, stdout=out, stderr="lookup/stop failed")
+        with patch.object(B.subprocess, "run", side_effect=run), \
+             patch.object(B, "_daemon_state", return_value=state), \
+             patch.object(B.time, "sleep"), patch.object(B.time, "monotonic", side_effect=[0, 0, 31]):
+            try:
+                B.ensure_daemon_stopped()
+                assert False, (state, process, listener, stop_rc, lookup_rc)
+            except SystemExit as e:
+                assert "REFUSING" in str(e)
+    with patch.object(B.subprocess, "run") as run:
+        B.ensure_daemon_stopped(allow=True)
+        run.assert_not_called()
+
+def t_bench_guard_failed_lookup_is_not_inactive():
+    from bench import toolcall as B
+    with patch.object(B.subprocess, "run", return_value=SimpleNamespace(returncode=4, stdout="inactive")):
+        assert B._daemon_state() == "unknown"
+    with patch.object(B.subprocess, "run", side_effect=OSError("missing systemctl")):
+        assert B._daemon_state() == "unknown"
+
+def t_hybrid_bench_restores_after_failed_mutation():
+    from bench import hybrid_e2e as B
+    before = {"CHAT_MODEL": "original", "ROUTE_MODE": "router"}
+    with patch.object(sys, "argv", ["hybrid_e2e.py", "--model", "broken"]), \
+         patch.object(B, "_get", return_value={"values": before}), \
+         patch.object(B, "_post", side_effect=[RuntimeError("swap failed"), {}]) as post:
+        try:
+            B.main()
+            assert False
+        except RuntimeError as e:
+            assert str(e) == "swap failed"
+        assert post.call_count == 2
+        assert post.call_args.args[2] == before
+
 
 def test_all():
     """pytest entry: run every t_* check and fail on the first broken assertion."""

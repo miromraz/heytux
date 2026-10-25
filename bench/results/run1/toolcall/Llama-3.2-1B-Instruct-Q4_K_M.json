@@ -1,0 +1,1012 @@
+{
+ "id": "Llama-3.2-1B-Instruct-Q4_K_M",
+ "ts": "2026-10-24T19:35:39",
+ "n_phrases": 70,
+ "max_tokens": 48,
+ "n_tools": 19,
+ "load_s": 11.42,
+ "cold_prefill_s": 46.81,
+ "cold_prefill_prompt_ms": 46725.699,
+ "truncated_after": 65,
+ "rss_mb": 1583,
+ "metrics_heldout": {
+  "tool_accuracy": 0.517,
+  "tool_n": 29,
+  "none_recall": 0.0,
+  "none_precision": null,
+  "none_n": 25
+ },
+ "metrics_czech": {
+  "tool_accuracy": 0.455,
+  "tool_n": 11,
+  "none_recall": null,
+  "none_precision": null,
+  "none_n": 0
+ },
+ "metrics_all": {
+  "tool_accuracy": 0.5,
+  "tool_n": 40,
+  "none_recall": 0.0,
+  "none_precision": null,
+  "none_n": 25
+ },
+ "latency": {
+  "first_turn_total_s": 3.06,
+  "cached_turn_total_s_median": 3.65,
+  "first_turn_prompt_ms": 922.9,
+  "cached_turn_prompt_ms_median": 1040.0,
+  "prompt_tokens_first": 9,
+  "n_valid": 31,
+  "n_error": 34
+ },
+ "errors": [
+  {
+   "phrase": "turn off wifi",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "enable bluetooth",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "mute the volume",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "open the calculator",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "skip to the next track",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "find my phone",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "how are you doing today",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "sing me a song",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "next song",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "where is my phone",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "who are you",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "explain how a battery works",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "hmm",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "what do you think about the weather",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "the",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "okay so anyway",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "when you please",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "uh thank you",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "how are you",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "say something nice",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "i am bored",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "what is love",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "count to three",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "whatever",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "turn on wifi",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "turn off bluetooth",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "open the settings",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "take a photo",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "lock the phone",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "play the music",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "When you please,",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "How are you?",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "How is the other day?",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  },
+  {
+   "phrase": "otev\u0159i kalkula\u010dku",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>"
+  }
+ ],
+ "rows": [
+  {
+   "phrase": "turn on the flashlight",
+   "expected": "flashlight_on",
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 3.06,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 922.882,
+    "prompt_per_token_ms": 102.54244444444444,
+    "prompt_per_second": 9.7520593098576,
+    "predicted_n": 14,
+    "predicted_ms": 2072.229,
+    "predicted_per_token_ms": 159.40223076923075,
+    "predicted_per_second": 6.273437926020725
+   }
+  },
+  {
+   "phrase": "turn off wifi",
+   "expected": "wifi_off",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "enable bluetooth",
+   "expected": "bluetooth_on",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "set the brightness to forty percent",
+   "expected": "set_brightness",
+   "pred": "set_brightness",
+   "group": "heldout",
+   "latency_s": 3.74,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1135.294,
+    "prompt_per_token_ms": 103.20854545454546,
+    "prompt_per_second": 9.68912017503836,
+    "predicted_n": 17,
+    "predicted_ms": 2572.372,
+    "predicted_per_token_ms": 160.77325,
+    "predicted_per_second": 6.219940195275023
+   }
+  },
+  {
+   "phrase": "mute the volume",
+   "expected": "set_volume",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "what is the battery level",
+   "expected": "battery_status",
+   "pred": "battery_status",
+   "group": "heldout",
+   "latency_s": 3.01,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 10,
+    "prompt_ms": 1035.388,
+    "prompt_per_token_ms": 103.5388,
+    "prompt_per_second": 9.658215084586649,
+    "predicted_n": 13,
+    "predicted_ms": 1921.055,
+    "predicted_per_token_ms": 160.08791666666667,
+    "predicted_per_second": 6.246567641217976
+   }
+  },
+  {
+   "phrase": "set a timer for five minutes",
+   "expected": "set_timer",
+   "pred": "set_timer",
+   "group": "heldout",
+   "latency_s": 3.78,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1146.486,
+    "prompt_per_token_ms": 104.22600000000001,
+    "prompt_per_second": 9.594534952890832,
+    "predicted_n": 17,
+    "predicted_ms": 2563.549,
+    "predicted_per_token_ms": 160.2218125,
+    "predicted_per_second": 6.241347444499793
+   }
+  },
+  {
+   "phrase": "what time is it",
+   "expected": "what_time_is_it",
+   "pred": "what_time_is_it",
+   "group": "heldout",
+   "latency_s": 3.27,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 925.638,
+    "prompt_per_token_ms": 102.84866666666667,
+    "prompt_per_second": 9.723023471378658,
+    "predicted_n": 15,
+    "predicted_ms": 2274.498,
+    "predicted_per_token_ms": 162.46414285714286,
+    "predicted_per_second": 6.155204357181233
+   }
+  },
+  {
+   "phrase": "open the calculator",
+   "expected": "open_app",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "take a selfie",
+   "expected": "take_selfie",
+   "pred": "take_selfie",
+   "group": "heldout",
+   "latency_s": 2.95,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 8,
+    "prompt_ms": 816.408,
+    "prompt_per_token_ms": 102.051,
+    "prompt_per_second": 9.799022057598652,
+    "predicted_n": 14,
+    "predicted_ms": 2075.4,
+    "predicted_per_token_ms": 159.64615384615385,
+    "predicted_per_second": 6.263852751276862
+   }
+  },
+  {
+   "phrase": "lock the screen",
+   "expected": "lock_screen",
+   "pred": "lock_screen",
+   "group": "heldout",
+   "latency_s": 4.18,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 8,
+    "prompt_ms": 817.213,
+    "prompt_per_token_ms": 102.151625,
+    "prompt_per_second": 9.789369478948574,
+    "predicted_n": 22,
+    "predicted_ms": 3351.547,
+    "predicted_per_token_ms": 159.5974761904762,
+    "predicted_per_second": 6.265763243063577
+   }
+  },
+  {
+   "phrase": "pause the music",
+   "expected": "play_pause",
+   "pred": "play_pause",
+   "group": "heldout",
+   "latency_s": 5.07,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 8,
+    "prompt_ms": 823.306,
+    "prompt_per_token_ms": 102.91325,
+    "prompt_per_second": 9.71692177635047,
+    "predicted_n": 27,
+    "predicted_ms": 4177.098,
+    "predicted_per_token_ms": 160.65761538461538,
+    "predicted_per_second": 6.224417047433409
+   }
+  },
+  {
+   "phrase": "skip to the next track",
+   "expected": "next_track",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "find my phone",
+   "expected": "find_my_phone",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "give me the full phone status",
+   "expected": "phone_info",
+   "pred": "phone_info",
+   "group": "heldout",
+   "latency_s": 3.14,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1147.566,
+    "prompt_per_token_ms": 104.32418181818183,
+    "prompt_per_second": 9.585505321698273,
+    "predicted_n": 13,
+    "predicted_ms": 1922.272,
+    "predicted_per_token_ms": 160.18933333333334,
+    "predicted_per_second": 6.242612908058797
+   }
+  },
+  {
+   "phrase": "turn on the flashlight please",
+   "expected": "flashlight_on",
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 3.16,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 10,
+    "prompt_ms": 1037.731,
+    "prompt_per_token_ms": 103.7731,
+    "prompt_per_second": 9.636408664673215,
+    "predicted_n": 14,
+    "predicted_ms": 2076.124,
+    "predicted_per_token_ms": 159.70184615384613,
+    "predicted_per_second": 6.261668378189357
+   }
+  },
+  {
+   "phrase": "what is the capital of France",
+   "expected": null,
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 4.75,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1137.586,
+    "prompt_per_token_ms": 103.41690909090909,
+    "prompt_per_second": 9.669598606171315,
+    "predicted_n": 23,
+    "predicted_ms": 3541.298,
+    "predicted_per_token_ms": 160.9680909090909,
+    "predicted_per_second": 6.212411381363557
+   }
+  },
+  {
+   "phrase": "tell me a joke",
+   "expected": null,
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 3.07,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 937.353,
+    "prompt_per_token_ms": 104.15033333333332,
+    "prompt_per_second": 9.601505516064918,
+    "predicted_n": 14,
+    "predicted_ms": 2079.096,
+    "predicted_per_token_ms": 159.93046153846154,
+    "predicted_per_second": 6.25271752723299
+   }
+  },
+  {
+   "phrase": "how are you doing today",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "sing me a song",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "open the weather app",
+   "expected": "open_app",
+   "pred": "open_app",
+   "group": "heldout",
+   "latency_s": 3.56,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 931.401,
+    "prompt_per_token_ms": 103.48899999999999,
+    "prompt_per_second": 9.662862719709342,
+    "predicted_n": 17,
+    "predicted_ms": 2566.654,
+    "predicted_per_token_ms": 160.415875,
+    "predicted_per_second": 6.23379699795921
+   }
+  },
+  {
+   "phrase": "turn off the flashlight",
+   "expected": "flashlight_off",
+   "pred": "flashlight_off",
+   "group": "heldout",
+   "latency_s": 4.52,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 931.838,
+    "prompt_per_token_ms": 103.53755555555556,
+    "prompt_per_second": 9.658331169151719,
+    "predicted_n": 23,
+    "predicted_ms": 3530.976,
+    "predicted_per_token_ms": 160.4989090909091,
+    "predicted_per_second": 6.23057194384782
+   }
+  },
+  {
+   "phrase": "set the volume to thirty percent",
+   "expected": "set_volume",
+   "pred": "set_volume",
+   "group": "heldout",
+   "latency_s": 4.75,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1152.4,
+    "prompt_per_token_ms": 104.76363636363637,
+    "prompt_per_second": 9.545296771954181,
+    "predicted_n": 23,
+    "predicted_ms": 3531.459,
+    "predicted_per_token_ms": 160.52086363636363,
+    "predicted_per_second": 6.229719784372408
+   }
+  },
+  {
+   "phrase": "next song",
+   "expected": "next_track",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "where is my phone",
+   "expected": "find_my_phone",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "who are you",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "explain how a battery works",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "hmm",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "what do you think about the weather",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "good morning",
+   "expected": null,
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 4.34,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 7,
+    "prompt_ms": 758.879,
+    "prompt_per_token_ms": 108.41128571428571,
+    "prompt_per_second": 9.22413191035725,
+    "predicted_n": 23,
+    "predicted_ms": 3520.325,
+    "predicted_per_token_ms": 160.0147727272727,
+    "predicted_per_second": 6.249422993615646
+   }
+  },
+  {
+   "phrase": "the",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "okay so anyway",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "when you please",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "uh thank you",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "how are you",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "what is your favorite color",
+   "expected": null,
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 3.2,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 10,
+    "prompt_ms": 1041.75,
+    "prompt_per_token_ms": 104.175,
+    "prompt_per_second": 9.599232061435085,
+    "predicted_n": 14,
+    "predicted_ms": 2090.35,
+    "predicted_per_token_ms": 160.79615384615383,
+    "predicted_per_second": 6.219054225368958
+   }
+  },
+  {
+   "phrase": "say something nice",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "i am bored",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "what is love",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "count to three",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "whatever",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "turn on wifi",
+   "expected": "wifi_on",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "turn off bluetooth",
+   "expected": "bluetooth_off",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "set the brightness to 40 percent",
+   "expected": "set_brightness",
+   "pred": "set_brightness",
+   "group": "heldout",
+   "latency_s": 3.84,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 12,
+    "prompt_ms": 1208.088,
+    "prompt_per_token_ms": 100.67399999999999,
+    "prompt_per_second": 9.933051234678269,
+    "predicted_n": 17,
+    "predicted_ms": 2567.121,
+    "predicted_per_token_ms": 160.4450625,
+    "predicted_per_second": 6.232662971476607
+   }
+  },
+  {
+   "phrase": "set the volume to 30 percent",
+   "expected": "set_volume",
+   "pred": "set_volume",
+   "group": "heldout",
+   "latency_s": 4.64,
+   "timings": {
+    "cache_n": 1471,
+    "prompt_n": 10,
+    "prompt_ms": 1042.053,
+    "prompt_per_token_ms": 104.20530000000001,
+    "prompt_per_second": 9.596440872009389,
+    "predicted_n": 23,
+    "predicted_ms": 3530.104,
+    "predicted_per_token_ms": 160.45927272727272,
+    "predicted_per_second": 6.232111008627508
+   }
+  },
+  {
+   "phrase": "what is today's date",
+   "expected": null,
+   "pred": "what_time_is_it",
+   "group": "heldout",
+   "latency_s": 3.34,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 10,
+    "prompt_ms": 1038.257,
+    "prompt_per_token_ms": 103.82570000000001,
+    "prompt_per_second": 9.6315266836631,
+    "predicted_n": 15,
+    "predicted_ms": 2238.892,
+    "predicted_per_token_ms": 159.92085714285713,
+    "predicted_per_second": 6.25309304781115
+   }
+  },
+  {
+   "phrase": "open the settings",
+   "expected": "open_app",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "take a photo",
+   "expected": "take_photo",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "lock the phone",
+   "expected": "lock_screen",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "play the music",
+   "expected": "play_pause",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "When you please,",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "Uh, thank you.",
+   "expected": null,
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 3.21,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 10,
+    "prompt_ms": 1044.069,
+    "prompt_per_token_ms": 104.4069,
+    "prompt_per_second": 9.577911038446693,
+    "predicted_n": 14,
+    "predicted_ms": 2083.369,
+    "predicted_per_token_ms": 160.25915384615385,
+    "predicted_per_second": 6.239893173028877
+   }
+  },
+  {
+   "phrase": "How are you?",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "How is the other day?",
+   "expected": null,
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "heldout",
+   "latency_s": 0.0,
+   "timings": {}
+  },
+  {
+   "phrase": "rozsvi\u0165 baterku",
+   "expected": "flashlight_on",
+   "pred": "battery_status",
+   "group": "czech",
+   "latency_s": 3.21,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 12,
+    "prompt_ms": 1220.108,
+    "prompt_per_token_ms": 101.67566666666666,
+    "prompt_per_second": 9.835194917171268,
+    "predicted_n": 13,
+    "predicted_ms": 1923.247,
+    "predicted_per_token_ms": 160.27058333333335,
+    "predicted_per_second": 6.239448183202677
+   }
+  },
+  {
+   "phrase": "zhasni baterku",
+   "expected": "flashlight_off",
+   "pred": "battery_status",
+   "group": "czech",
+   "latency_s": 3.15,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1149.95,
+    "prompt_per_token_ms": 104.5409090909091,
+    "prompt_per_second": 9.565633288403843,
+    "predicted_n": 13,
+    "predicted_ms": 1929.594,
+    "predicted_per_token_ms": 160.7995,
+    "predicted_per_second": 6.218924810089583
+   }
+  },
+  {
+   "phrase": "zapni wifi",
+   "expected": "wifi_on",
+   "pred": "wifi_on",
+   "group": "czech",
+   "latency_s": 2.82,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 8,
+    "prompt_ms": 822.16,
+    "prompt_per_token_ms": 102.77,
+    "prompt_per_second": 9.73046608932568,
+    "predicted_n": 13,
+    "predicted_ms": 1930.853,
+    "predicted_per_token_ms": 160.90441666666666,
+    "predicted_per_second": 6.214869801067196
+   }
+  },
+  {
+   "phrase": "vypni wifi",
+   "expected": "wifi_off",
+   "pred": "wifi_on",
+   "group": "czech",
+   "latency_s": 4.37,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 940.633,
+    "prompt_per_token_ms": 104.51477777777778,
+    "prompt_per_second": 9.568024936399212,
+    "predicted_n": 22,
+    "predicted_ms": 3369.152,
+    "predicted_per_token_ms": 160.43580952380952,
+    "predicted_per_second": 6.233022434131793
+   }
+  },
+  {
+   "phrase": "zapni bluetooth",
+   "expected": "bluetooth_on",
+   "pred": "bluetooth_on",
+   "group": "czech",
+   "latency_s": 4.42,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 8,
+    "prompt_ms": 815.201,
+    "prompt_per_token_ms": 101.900125,
+    "prompt_per_second": 9.81353065072295,
+    "predicted_n": 23,
+    "predicted_ms": 3539.115,
+    "predicted_per_token_ms": 160.8688636363636,
+    "predicted_per_second": 6.216243326368316
+   }
+  },
+  {
+   "phrase": "nastav jas na \u010dty\u0159icet procent",
+   "expected": "set_brightness",
+   "pred": "set_brightness",
+   "group": "czech",
+   "latency_s": 4.06,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 14,
+    "prompt_ms": 1432.152,
+    "prompt_per_token_ms": 102.29657142857143,
+    "prompt_per_second": 9.775498690083175,
+    "predicted_n": 17,
+    "predicted_ms": 2581.349,
+    "predicted_per_token_ms": 161.3343125,
+    "predicted_per_second": 6.198309488565862
+   }
+  },
+  {
+   "phrase": "ztlum hlasitost",
+   "expected": "set_volume",
+   "pred": "flashlight_on",
+   "group": "czech",
+   "latency_s": 3.35,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 11,
+    "prompt_ms": 1151.645,
+    "prompt_per_token_ms": 104.695,
+    "prompt_per_second": 9.551554515497397,
+    "predicted_n": 14,
+    "predicted_ms": 2137.931,
+    "predicted_per_token_ms": 164.45623076923079,
+    "predicted_per_second": 6.080645259365246
+   }
+  },
+  {
+   "phrase": "jak\u00fd je stav baterie",
+   "expected": "battery_status",
+   "pred": "battery_status",
+   "group": "czech",
+   "latency_s": 3.21,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 12,
+    "prompt_ms": 1223.108,
+    "prompt_per_token_ms": 101.92566666666666,
+    "prompt_per_second": 9.811071467114925,
+    "predicted_n": 13,
+    "predicted_ms": 1925.661,
+    "predicted_per_token_ms": 160.47175000000001,
+    "predicted_per_second": 6.2316264389214915
+   }
+  },
+  {
+   "phrase": "kolik je hodin",
+   "expected": "what_time_is_it",
+   "pred": "set_timer",
+   "group": "czech",
+   "latency_s": 5.62,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 9,
+    "prompt_ms": 946.195,
+    "prompt_per_token_ms": 105.13277777777779,
+    "prompt_per_second": 9.511781398126178,
+    "predicted_n": 30,
+    "predicted_ms": 4662.494,
+    "predicted_per_token_ms": 160.7756551724138,
+    "predicted_per_second": 6.219847146183995
+   }
+  },
+  {
+   "phrase": "nastav \u010dasova\u010d na p\u011bt minut",
+   "expected": "set_timer",
+   "pred": "set_timer",
+   "group": "czech",
+   "latency_s": 6.17,
+   "timings": {
+    "cache_n": 1469,
+    "prompt_n": 14,
+    "prompt_ms": 1439.916,
+    "prompt_per_token_ms": 102.85114285714285,
+    "prompt_per_second": 9.722789384936343,
+    "predicted_n": 30,
+    "predicted_ms": 4673.044,
+    "predicted_per_token_ms": 161.13944827586207,
+    "predicted_per_second": 6.205805038428913
+   }
+  },
+  {
+   "phrase": "otev\u0159i kalkula\u010dku",
+   "expected": "open_app",
+   "pred": "ERROR:<HTTPError 500: 'Internal Server Error'>",
+   "group": "czech",
+   "latency_s": 0.0,
+   "timings": {}
+  }
+ ]
+}

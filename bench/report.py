@@ -169,6 +169,49 @@ def render_zram(run_dir):
         L += ["", "Skipped configs: " + "; ".join(skipped)]
     return L
 
+def render_toolcall(run_dir):
+    """toolcall/ holds one record per chat model benched as a hybrid tool-caller (toolcall.py);
+    its schema differs from the slot records, so it gets its own table."""
+    files = sorted(glob.glob(os.path.join(run_dir, "toolcall", "*.json")))
+    if not files:
+        return []
+    L = ["", "## toolcall (chat models as hybrid tool-callers)", "",
+         "| model | tool acc | none prec | none recall | cz tool acc | cached turn s | "
+         "cold prefill s | prefill ms warm1/cached | RSS MB | status |", "|-|-|-|-|-|-|-|-|-|-|"]
+    for p in sorted(files):
+        r = _read_json(p)
+        if not isinstance(r, dict) or r.get("mode") == "hybrid-e2e":   # e2e records rendered below
+            continue
+        h = r.get("metrics_heldout") or {}; cz = r.get("metrics_czech") or {}
+        lat = r.get("latency") or {}
+        L.append("| %s | %s | %s | %s | %s | %s | %s | %s/%s | %s | %s |" % (
+            r.get("id"), pct(h.get("tool_accuracy")), pct(h.get("none_precision")),
+            pct(h.get("none_recall")), pct(cz.get("tool_accuracy")),
+            num(lat.get("cached_turn_total_s_median"), "%.1f"),
+            num(r.get("cold_prefill_s"), "%.1f"),
+            num(lat.get("first_turn_prompt_ms"), "%.0f"),
+            num(lat.get("cached_turn_prompt_ms_median"), "%.0f"),
+            num(r.get("rss_mb"), "%.0f"), r.get("status", "ok")))
+    L += ["", "cold prefill s = first ever turn (no prewarm, full ~1200-token tools prefix). The "
+          "daemon prewarms this on chat load in hybrid mode, so warm1 (first turn after prewarm) and "
+          "cached are what a user actually sees; warm1/cached prefill ms near-equal means the "
+          "system+tools prefix stayed cached (cache_prompt held)."]
+    # hybrid end-to-end records (through the real daemon)
+    e2e = [r for r in (_read_json(p) for p in sorted(files))
+           if isinstance(r, dict) and r.get("mode") == "hybrid-e2e"]
+    if e2e:
+        L += ["", "### hybrid end-to-end (live daemon, dry /text)", "",
+              "| model | accuracy | tool acc | none acc | fast-path | median ms | p90 ms |",
+              "|-|-|-|-|-|-|-|"]
+        for r in e2e:
+            s = r.get("summary") or {}
+            L.append("| %s | %s | %s | %s | %s (%s%%) | %s | %s |" % (
+                r.get("id"), pct(s.get("accuracy")), pct(s.get("tool_accuracy")),
+                pct(s.get("none_accuracy")), num(s.get("fast_path"), "%d"),
+                num(s.get("fast_path_pct"), "%d"), num(s.get("latency_ms_median"), "%d"),
+                num(s.get("latency_ms_p90"), "%d")))
+    return L
+
 def main():
     if len(sys.argv) < 2:
         raise SystemExit("usage: report.py <run_dir>")
@@ -180,6 +223,8 @@ def main():
     for slot in ["chat", "router", "embedding", "asr", "tts", "vad", "vision", "wake"]:
         if slot in slots:
             L += render_slot(run_dir, slot)
+    if "toolcall" in slots:
+        L += render_toolcall(run_dir)
     if "zram" in slots:
         L += render_zram(run_dir)
     out = os.path.join(run_dir, "REPORT.md")

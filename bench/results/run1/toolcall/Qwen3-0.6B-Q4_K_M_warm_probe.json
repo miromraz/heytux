@@ -1,0 +1,144 @@
+{
+  "model": "Qwen3-0.6B-Q4_K_M",
+  "mem_available_gb": 4.875364,
+  "rows": [
+    {
+      "mode": "with-tools",
+      "phrase": "turn on the flashlight",
+      "wall_ms": 2017.83,
+      "cache_n": 1157,
+      "prompt_n": 13,
+      "prompt_ms": 1325.208,
+      "predicted_n": 5,
+      "predicted_ms": 627.043,
+      "other_ms": 65.58
+    },
+    {
+      "mode": "with-tools",
+      "phrase": "please turn on the flashlight",
+      "wall_ms": 2070.08,
+      "cache_n": 1157,
+      "prompt_n": 14,
+      "prompt_ms": 1426.21,
+      "predicted_n": 5,
+      "predicted_ms": 620.545,
+      "other_ms": 23.32
+    },
+    {
+      "mode": "with-tools",
+      "phrase": "switch on the flashlight please",
+      "wall_ms": 2588.73,
+      "cache_n": 1157,
+      "prompt_n": 14,
+      "prompt_ms": 1426.299,
+      "predicted_n": 8,
+      "predicted_ms": 1095.382,
+      "other_ms": 67.05
+    },
+    {
+      "mode": "without-tools",
+      "phrase": "turn on the flashlight",
+      "wall_ms": 401.89,
+      "cache_n": 45,
+      "prompt_n": 13,
+      "prompt_ms": 175.25,
+      "predicted_n": 6,
+      "predicted_ms": 209.215,
+      "other_ms": 17.42
+    },
+    {
+      "mode": "without-tools",
+      "phrase": "please turn on the flashlight",
+      "wall_ms": 458.1,
+      "cache_n": 45,
+      "prompt_n": 14,
+      "prompt_ms": 188.685,
+      "predicted_n": 7,
+      "predicted_ms": 251.197,
+      "other_ms": 18.22
+    },
+    {
+      "mode": "without-tools",
+      "phrase": "switch on the flashlight please",
+      "wall_ms": 460.77,
+      "cache_n": 45,
+      "prompt_n": 14,
+      "prompt_ms": 191.005,
+      "predicted_n": 7,
+      "predicted_ms": 251.8,
+      "other_ms": 17.97
+    },
+    {
+      "mode": "raw",
+      "phrase": "turn on the flashlight",
+      "wall_ms": 1926.92,
+      "cache_n": 1157,
+      "prompt_n": 13,
+      "prompt_ms": 1323.223,
+      "predicted_n": 5,
+      "predicted_ms": 570.4,
+      "other_ms": 33.3
+    },
+    {
+      "mode": "raw",
+      "phrase": "please turn on the flashlight",
+      "wall_ms": 2461.55,
+      "cache_n": 1157,
+      "prompt_n": 14,
+      "prompt_ms": 1424.569,
+      "predicted_n": 8,
+      "predicted_ms": 1004.01,
+      "other_ms": 32.97
+    },
+    {
+      "mode": "raw",
+      "phrase": "switch on the flashlight please",
+      "wall_ms": 2318.62,
+      "cache_n": 1157,
+      "prompt_n": 14,
+      "prompt_ms": 1426.562,
+      "predicted_n": 7,
+      "predicted_ms": 855.775,
+      "other_ms": 36.28
+    }
+  ],
+  "cold": [
+    {
+      "mode": "with-tools",
+      "phrase": "hi",
+      "wall_ms": 19616.36,
+      "cache_n": 0,
+      "prompt_n": 1167,
+      "prompt_ms": 19549.054,
+      "predicted_n": 1,
+      "predicted_ms": 0.001,
+      "other_ms": 67.31
+    },
+    {
+      "mode": "without-tools",
+      "phrase": "hi",
+      "wall_ms": 259.32,
+      "cache_n": 39,
+      "prompt_n": 16,
+      "prompt_ms": 196.301,
+      "predicted_n": 1,
+      "predicted_ms": 0.001,
+      "other_ms": 63.02
+    },
+    {
+      "mode": "raw",
+      "phrase": "hi",
+      "wall_ms": 1088.37,
+      "cache_n": 1157,
+      "prompt_n": 10,
+      "prompt_ms": 1028.234,
+      "predicted_n": 1,
+      "predicted_ms": 0.001,
+      "other_ms": 60.14
+    }
+  ],
+  "raw_equivalent_to": "chat with tools",
+  "log": "/tmp/llama-server-33437.log",
+  "load_s": 6.481478073998005,
+  "elapsed_s": 42.44
+}

@@ -13,7 +13,7 @@ $SSH 'cd /home/miro && { [ -d jarvis ] && [ ! -e heytux ] && mv jarvis heytux; [
 
 echo "== push daemon + unit =="
 $SSH 'mkdir -p /home/miro/heytux /home/miro/.config/systemd/user /home/miro/.local/share/plasma/plasmoids /home/miro/.local/share/applications'
-tar cf - -C "$HERE" heytux.py heytux_config.py heytux_backends.py heytux_settings.py hey.txt | $SSH 'tar xf - -C /home/miro/heytux'
+tar cf - -C "$HERE" heytux.py heytux_config.py heytux_backends.py heytux_settings.py hey.txt test_routing.py | $SSH 'tar xf - -C /home/miro/heytux'
 tar cf - -C "$HERE" heytux.service | $SSH 'tar xf - -C /home/miro/.config/systemd/user'
 # The daemon reads the model registry from bench/manifest.json; ship the reviewed one with it.
 $SSH 'mkdir -p /home/miro/heytux/bench'
@@ -39,8 +39,9 @@ $SSH "$RU systemctl --user daemon-reload"
 $SSH "$RU systemctl --user disable heytux 2>/dev/null || true"
 $SSH "$RU systemctl --user restart heytux"
 
+# Hybrid prewarm can take 300 s after model loading; do not fail deployment after only 30 s.
 echo "== wait for load =="
-$SSH "$RU sh -c 'for i in \$(seq 1 30); do python3 -c \"import urllib.request,sys; urllib.request.urlopen(sys.argv[1],timeout=2)\" http://127.0.0.1:8770/status 2>/dev/null && exit 0; sleep 1; done; exit 1'"
+$SSH "$RU sh -c 'for i in \$(seq 1 420); do python3 -c \"import urllib.request,sys; urllib.request.urlopen(sys.argv[1],timeout=2)\" http://127.0.0.1:8770/status 2>/dev/null && exit 0; sleep 1; done; exit 1'"
 
 echo "== smoke: /text turn on/off the flashlight =="
 $SSH "$RU python3 -" <<'PY'

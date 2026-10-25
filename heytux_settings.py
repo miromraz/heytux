@@ -22,7 +22,7 @@ GROUPS = [("wake", "Wake word"), ("listening", "Listening"),
 
 # The live per-slot model pickers (schema group "models"); greyed out while a swap runs, with the
 # model's RSS shown next to each from GET /models.
-MODEL_KEYS = ("CHAT_MODEL", "ROUTER_MODEL", "ASR_MODEL", "TTS_MODEL", "VAD_MODEL")
+MODEL_KEYS = ("CHAT_MODEL", "ROUTER_MODEL", "ASR_MODEL", "TTS_MODEL", "TTS_MODEL_ALT", "VAD_MODEL")
 
 
 def http(method, path, data=None, timeout=12):
@@ -369,8 +369,9 @@ class Window(Adw.ApplicationWindow):
                 if mk in self.ctl:
                     self.ctl[mk].row.set_sensitive(False)
             self._poll_models()
-        # 200 s client timeout > the daemon's 180 s model-load ceiling, so a slow load isn't a false error
-        self._bg(lambda: http("POST", "/config", {key: value}, timeout=200),
+        # 540 s client timeout > the daemon's 180 s model-load + 300 s hybrid-prewarm ceilings, so a
+        # slow swap isn't a false error (and _swapping isn't cleared while the daemon is still busy)
+        self._bg(lambda: http("POST", "/config", {key: value}, timeout=540),
                  lambda res: self._on_commit(key, res))
 
     def _on_commit(self, key, res):

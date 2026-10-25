@@ -1,0 +1,422 @@
+[
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Hlavním městem České republiky je Praha."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Tato kniha vyšla v roce 1944 jako kniha o náboženských předpovědích a nebyla napsána žádným konkrétným osobou, aniž by byla publikována pod jménem autora."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "8 krát sedm je osmnáct, nebo 56."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Když si na konci den řekneš „Dnes jsem si užil\", tak už to byl."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je to proces, kdy rostliny na slunečním svítu využívají světlo a vodu k vytvoření živin, která jim dodávají energii."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Největší planetou sluneční soustavy je Země. Je to jediný svět na kterém žijeme."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "A která je druhá největší?",
+  "answer": "Druhou největší planetou sluneční soustavy je Jupiter, která oproti Zeměmu o 13 let více váží než Země."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Největší tři města v Česku jsou Praha, Brno a Ostrava."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "Dobrý den."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Musím vidět vaši obrazovku a telefon, protože nejde měřit volné místo bez toho, abych viděl obsah."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Proč je obloha modrá?",
+  "answer": "Naše obloha je modrá, protože atmosféra na naší Země obsahuje takové množství vody a plynu, které ji vlní."
+ },
+ {
+  "model": "Qwen3.5-2B-Q4_0",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Začínaj s nastavením, kde omezíš rychlost přenosu dat a vypni nepotřebné funkce. Přečte si podrobnosti v nastavení ošetřování energie telefonu."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Praha je hlavní město České republiky."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Osnova knihy Osudy dobrého vojáka Švejka napsal Jiří Křížek."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "10"
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Pomalu a zvyklo se. 😄"
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je proces, ve kterém rostliny z slunečního světla vyrábí energii pro životní zásoby, tedy fotosyntéza je proces, ve kterém rostliny z slunečního světla vyrábí energii pro životní zásoby."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Já bych to pro vás odpověděl, že největší planetou sluneční soustavy je Júpán."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "A která je druhá největší?",
+  "answer": "Druhá největší planeta sluneční soustavy je Saturnus."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Přímý název největších měst v ČR není přesně definován (např. Praha, obnovení Prahy, Plzeň), ale lze říci, že nejstarší a největší jsou město Praha, hlavní město Českého křídla, a další významné města s významem v oblasti jako Brno, Praha, nebo Brno."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "To se říká \"okruh\"."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Váš telefon má 1 volitelné místo."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Proč je obloha modrá?",
+  "answer": "Modrá obloha je běžná na všechny dni v obou hemifázách."
+ },
+ {
+  "model": "Qwen3.5-0.8B-Q4_K_M",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Kam se zapájit na baterii je klíčové: najteplotu kolem 30 stuprov, udržujte ji hladkou a neprášte se."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Praha je hlavním městem České republiky."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Autor tohoto románu je Bohuslav Zahradil."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "Sedm krát osm je 63."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Taky jsem chodil do obnovení a dostal jsem od osobní péče."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je proces, při kterém rostliny přeměňují světelnou energii na chemickou energii."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Největší planeta sluneční soustavy je Jupiter."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "A která je druhá největší?",
+  "answer": "Druhá největší planeta sluneční soustavy je Saturn."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Tři největší města v Česku jsou Praha, Brno a Ostrava."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "Good morning!"
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Máte stále 6 volného míst na telefonu."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Proč je obloha modrá?",
+  "answer": "Obloha je modrá kvůli příchodu slunečního světla skrze zemskou atmosféru."
+ },
+ {
+  "model": "Granite-4.0-1B-Q4_K_M",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Uveďte, aby se vyhnuli všem zároveň, ale zaměřte se na zároveň."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Hlavní město České republiky je Praha."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Knihu Osudy dobrého vojáka Švejka napsal Ján Kritček."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "Sedm krát osm je 56."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Jsem vtipný, ale nejsem vtipný."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je proces, při kterém živé byty využívají světlo pro vývoj plynu vodíku a vytváření cukru."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Největší planeta sluneční soustavy je Jůz."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "A která je druhá největší?",
+  "answer": "Drážd."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Praha, Brno a Plzeň."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "Good day."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Máš v telefonu většinou více volných míst, ale přesné číslo závisí na výrobci a konfiguraci telefonu."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Proč je obloha modrá?",
+  "answer": "Obloha je modrá, jer světlo vyslané z slunce je modré a zároveň se záře září do oblohy a září do očí."
+ },
+ {
+  "model": "Qwen3-1.7B-Q4_K_M",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Zavři aplikace, které nepotřebují závěrečné, záplňuj si závěrečné a zavři závěrečné."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Hlavní město České republiky je Praha."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Kníhu Osudy dobrého vojáka Švejka napsal Jaroslav Hašek."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "Sedm krát osm je šedesát čtyřicet."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Proč se ptal počítač, jestli je hlad? Protože má prázdný disk!"
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je proces, při kterém rostliny pomocí slunečního světla vytvářejí potravu. Je to jako když rostliny vaří vlastní jídlo!"
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Největší planeta sluneční soustavy je Jupiter."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "A která je druhá největší?",
+  "answer": "Druhá největší planeta je Saturn."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Tři největší města v Česku jsou Praha,大阪 a Brno."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "Anglicky se to řekne \"Good day\"."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Aktuálně máš 15 GB volného místa."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Proč je obloha modrá?",
+  "answer": "Obloha je modrá díky absorpci a rozptylu světla. Je to způsobeno rozptylem slunečního světla molekulami v atmosféře."
+ },
+ {
+  "model": "Gemma-3n-E2B-it-Q4_K_M",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Můžu ti poradit s několika tipy, abys ušetřil baterii na telefonu."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Hlavní město je Praha."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Knihu napsal Jaroslav Hašek."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "Sedm krát osm je sedmdeset osm."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Proč se počítače nikdy nemohou houbat? Protože nemají nohy."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je způsob, jak rostliny vyrábějí si jídlo pomocí slunečního světla. Vytvářejí cukry a uvolňují kyslík."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Největší planeta je Jupiter."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "A která je druhá největší?",
+  "answer": "Druhá největší planeta je Saturn."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Praha je největší, po ní sleduje Brno a Plzeň."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "Good day"
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Jeg kan ikke se dit telefonlager. Du skal tjekke indstillingerne i din telefon."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Proč je obloha modrá?",
+  "answer": "Obloha je modrá kvůli rasproštění světla v atmosféře."
+ },
+ {
+  "model": "Gemma-4-E2B-it-Q4_K_M",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Wyłącz nieużywane aplikacje i zmniejsz jasność ekranu."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Jaké je hlavní město České republiky?",
+  "answer": "Hlavním městem České republiky je Praha."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Kdo napsal knihu Osudy dobrého vojáka Švejka?",
+  "answer": "Knihu Osudy dobrého vojáka Švejka napsal Jaroslav Hašek. Je to jeho nejznámější satirická kniha o první světové válce."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Kolik je sedm krát osm?",
+  "answer": "Sedm krát osm je padesát šest."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Pověz mi krátký vtip.",
+  "answer": "Proč se pes kouká do zrcadla, když ho nikdo nevidí? Protože to není zrcadlo, ale jen zrcadlovka."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Co je to fotosyntéza, vysvětli to jednoduše?",
+  "answer": "Fotosyntéza je proces, při němž rostliny pomocí slunečního světla vytvářejí své vlastní jídlo."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Jaká je největší planeta sluneční soustavy?",
+  "answer": "Největší planetou je Jupiter. Je to obřích plynný planet, který se ve Sluneční soustavě dostaví."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "A která je druhá největší?",
+  "answer": "Druhou největší planetou je Saturn. Je to také plynný obř, který je však menší než Jupiter."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Vyjmenuj tři největší města v Česku.",
+  "answer": "Třemi největšími městy v Česku jsou Praha, Brno a Ostrava."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Jak se řekne anglicky dobrý den?",
+  "answer": "V angličtině se to říká „Good morning\"."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Kolik mám volného místa v telefonu?",
+  "answer": "Na telefonu mám zobrazený prostor volného místa."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Proč je obloha modrá?",
+  "answer": "Obloha je modrá díky rozptylu slunečního světla atmosférickými molekulami."
+ },
+ {
+  "model": "Qwen3.5-4B-Q4_K_M",
+  "question": "Dej mi tip, jak ušetřit baterii na telefonu.",
+  "answer": "Zkuste vypnout nepoužívaný Bluetooth a vypnout displej, když nepotřebujete telefon."
+ }
+]

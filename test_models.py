@@ -99,3 +99,17 @@ def test_migrate_keeps_an_explicit_new_field():
     J.REGISTRY = {"x": {"id": "x", "slot": "asr", "path": "/m/old"}}
     out = J.migrate_config({"STT_DIR": "/m/old", "ASR_MODEL": "chosen"})
     assert out["ASR_MODEL"] == "chosen"                # an already-set ASR_MODEL wins over migration
+
+
+if __name__ == "__main__":
+    failed = passed = 0
+    for name, fn in sorted((k, v) for k, v in list(globals().items()) if k.startswith("test_")):
+        try:
+            fn()
+            passed += 1
+            print("PASS " + name)
+        except Exception as e:
+            failed += 1
+            print("FAIL %s: %s" % (name, e))
+    print("%d passed, %d failed" % (passed, failed))
+    sys.exit(1 if failed else 0)

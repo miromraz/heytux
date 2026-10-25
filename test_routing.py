@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # test_routing.py - routing acceptance check for heytux. Plain asserts, no pytest.
 # Drives the LIVE daemon's /text endpoint and checks each phrase reaches the right tool
-# (route=tool + expected function) or the chat LLM (route starts with "chat").
+# (a tool route + expected function) or the chat LLM (an answer route).
 # Run ON the phone as miro:  python3 test_routing.py            (defaults to 127.0.0.1:8770)
 # Or point elsewhere:        HEYTUX_URL=http://host:8770 python3 test_routing.py
 import json, os, sys, urllib.request
@@ -32,7 +32,7 @@ CASES = [
     ("what time is it",                   "what_time_is_it"),
     # Date questions miss the router and fall to chat; _live_facts feeds it the real date,
     # so either route is correct. said_has_date() below checks the answer, not the route.
-    ("what is today's date",              "chat"),
+    ("what is today's date",              "chat"),      # hybrid may also call what_time_is_it: see check()
     ("open the calculator",               "open_app"),
     ("open the settings",                 "open_app"),
     ("take a photo",                      "take_photo"),
@@ -78,7 +78,7 @@ def route_of(phrase):
     body = json.dumps({"text": phrase, "dry": DRY}).encode()
     req = urllib.request.Request(BASE + "/text", data=body,
                                  headers={"Content-Type": "application/json"})
-    r = json.load(urllib.request.urlopen(req, timeout=30))
+    r = json.load(urllib.request.urlopen(req, timeout=180))
     calls = r.get("calls") or []
     name = calls[0].get("name") if calls else None
     return r.get("route"), name, r.get("said") or ""
@@ -87,9 +87,10 @@ def route_of(phrase):
 def said_has_date():
     """Whichever way it routes, asking the date must produce today's month and day."""
     import time
-    _, _, said = route_of("what is today's date")
+    _, name, said = route_of("what is today's date")
     want = (time.strftime("%B").lower(), time.strftime("%-d"))
-    ok = all(w in said.lower() for w in want)
+    # A dry run doesn't execute what_time_is_it (said=""); that handler always speaks the strftime date.
+    ok = (DRY and name == "what_time_is_it") or all(w in said.lower() for w in want)
     print("%-4s %-34s want=%-15s got=%r" % ("PASS" if ok else "FAIL", "date is spoken correctly",
                                             " ".join(want), said))
     return ok
@@ -97,9 +98,11 @@ def said_has_date():
 
 def check(phrase, expected):
     route, name, _ = route_of(phrase)
+    if phrase == "what is today's date" and name == "what_time_is_it":
+        expected = name                   # hybrid: the clock tool also speaks the date, equally right
     if expected == "chat":
-        return (route or "").startswith("chat"), "%s/%s" % (route, name)
-    return route == "tool" and name == expected, "%s/%s" % (route, name)
+        return route in {"chat-tool", "chat-fallback", "llm-answer", "chat-followup"}, "%s/%s" % (route, name)
+    return route in {"tool", "tool-fast", "llm-tool"} and name == expected, "%s/%s" % (route, name)
 
 
 def main():

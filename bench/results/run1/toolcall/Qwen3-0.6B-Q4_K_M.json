@@ -1,0 +1,1304 @@
+{
+ "id": "Qwen3-0.6B-Q4_K_M",
+ "ts": "2026-10-24T19:19:47",
+ "n_phrases": 70,
+ "max_tokens": 48,
+ "n_tools": 19,
+ "load_s": 7.46,
+ "cold_prefill_s": 22.62,
+ "cold_prefill_prompt_ms": 22552.797,
+ "rss_mb": 1098,
+ "metrics_heldout": {
+  "tool_accuracy": 0.034,
+  "tool_n": 29,
+  "none_recall": 1.0,
+  "none_precision": 0.472,
+  "none_n": 25
+ },
+ "metrics_czech": {
+  "tool_accuracy": 0.0,
+  "tool_n": 13,
+  "none_recall": 1.0,
+  "none_precision": 0.188,
+  "none_n": 3
+ },
+ "metrics_all": {
+  "tool_accuracy": 0.024,
+  "tool_n": 42,
+  "none_recall": 1.0,
+  "none_precision": 0.406,
+  "none_n": 28
+ },
+ "latency": {
+  "first_turn_total_s": 1.94,
+  "cached_turn_total_s_median": 2.5,
+  "first_turn_prompt_ms": 1393.5,
+  "cached_turn_prompt_ms_median": 1389.0,
+  "prompt_tokens_first": 13,
+  "n_valid": 70,
+  "n_error": 0
+ },
+ "errors": [],
+ "rows": [
+  {
+   "phrase": "turn on the flashlight",
+   "expected": "flashlight_on",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.94,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1393.521,
+    "prompt_per_token_ms": 107.19392307692307,
+    "prompt_per_second": 9.32888704224766,
+    "predicted_n": 4,
+    "predicted_ms": 463.303,
+    "predicted_per_token_ms": 154.43433333333334,
+    "predicted_per_second": 6.475244062740798
+   }
+  },
+  {
+   "phrase": "turn off wifi",
+   "expected": "wifi_off",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.57,
+   "timings": {
+    "cache_n": 1158,
+    "prompt_n": 11,
+    "prompt_ms": 1183.43,
+    "prompt_per_token_ms": 107.58454545454546,
+    "prompt_per_second": 9.295015336775306,
+    "predicted_n": 3,
+    "predicted_ms": 308.192,
+    "predicted_per_token_ms": 154.096,
+    "predicted_per_second": 6.489461115148998
+   }
+  },
+  {
+   "phrase": "enable bluetooth",
+   "expected": "bluetooth_on",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.73,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 11,
+    "prompt_ms": 1190.897,
+    "prompt_per_token_ms": 108.26336363636364,
+    "prompt_per_second": 9.236734998912585,
+    "predicted_n": 4,
+    "predicted_ms": 459.743,
+    "predicted_per_token_ms": 153.24766666666667,
+    "predicted_per_second": 6.52538483457062
+   }
+  },
+  {
+   "phrase": "set the brightness to forty percent",
+   "expected": "set_brightness",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.78,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1604.896,
+    "prompt_per_token_ms": 106.99306666666666,
+    "prompt_per_second": 9.34640001595119,
+    "predicted_n": 8,
+    "predicted_ms": 1105.961,
+    "predicted_per_token_ms": 157.99442857142859,
+    "predicted_per_second": 6.329337110440603
+   }
+  },
+  {
+   "phrase": "mute the volume",
+   "expected": "set_volume",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.97,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1278.857,
+    "prompt_per_token_ms": 106.57141666666666,
+    "prompt_per_second": 9.3833790642738,
+    "predicted_n": 5,
+    "predicted_ms": 610.685,
+    "predicted_per_token_ms": 152.67125,
+    "predicted_per_second": 6.550021696946872
+   }
+  },
+  {
+   "phrase": "what is the battery level",
+   "expected": "battery_status",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.95,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1488.502,
+    "prompt_per_token_ms": 106.32157142857143,
+    "prompt_per_second": 9.405429082392903,
+    "predicted_n": 10,
+    "predicted_ms": 1378.04,
+    "predicted_per_token_ms": 153.11555555555555,
+    "predicted_per_second": 6.53101506487475
+   }
+  },
+  {
+   "phrase": "set a timer for five minutes",
+   "expected": "set_timer",
+   "pred": "set_timer",
+   "group": "heldout",
+   "latency_s": 4.57,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1601.479,
+    "prompt_per_token_ms": 106.76526666666668,
+    "prompt_per_second": 9.366341987625187,
+    "predicted_n": 20,
+    "predicted_ms": 2904.464,
+    "predicted_per_token_ms": 152.86652631578946,
+    "predicted_per_second": 6.5416545014846115
+   }
+  },
+  {
+   "phrase": "what time is it",
+   "expected": "what_time_is_it",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.24,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1387.452,
+    "prompt_per_token_ms": 106.72707692307692,
+    "prompt_per_second": 9.369693510117827,
+    "predicted_n": 6,
+    "predicted_ms": 765.742,
+    "predicted_per_token_ms": 153.14839999999998,
+    "predicted_per_second": 6.529614413209671
+   }
+  },
+  {
+   "phrase": "open the calculator",
+   "expected": "open_app",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.13,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1281.533,
+    "prompt_per_token_ms": 106.79441666666666,
+    "prompt_per_second": 9.363785403887377,
+    "predicted_n": 6,
+    "predicted_ms": 765.797,
+    "predicted_per_token_ms": 153.1594,
+    "predicted_per_second": 6.529145452384901
+   }
+  },
+  {
+   "phrase": "take a selfie",
+   "expected": "take_selfie",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.83,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1276.037,
+    "prompt_per_token_ms": 106.33641666666666,
+    "prompt_per_second": 9.40411602484881,
+    "predicted_n": 4,
+    "predicted_ms": 467.607,
+    "predicted_per_token_ms": 155.869,
+    "predicted_per_second": 6.415643906100636
+   }
+  },
+  {
+   "phrase": "lock the screen",
+   "expected": "lock_screen",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.67,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1283.27,
+    "prompt_per_token_ms": 106.93916666666667,
+    "prompt_per_second": 9.351110834041162,
+    "predicted_n": 3,
+    "predicted_ms": 318.977,
+    "predicted_per_token_ms": 159.4885,
+    "predicted_per_second": 6.270044548666519
+   }
+  },
+  {
+   "phrase": "pause the music",
+   "expected": "play_pause",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.84,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1295.215,
+    "prompt_per_token_ms": 107.93458333333332,
+    "prompt_per_second": 9.26487108317924,
+    "predicted_n": 4,
+    "predicted_ms": 476.024,
+    "predicted_per_token_ms": 158.67466666666667,
+    "predicted_per_second": 6.302203250256289
+   }
+  },
+  {
+   "phrase": "skip to the next track",
+   "expected": "next_track",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.03,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1496.027,
+    "prompt_per_token_ms": 106.85907142857143,
+    "prompt_per_second": 9.358119873504956,
+    "predicted_n": 4,
+    "predicted_ms": 459.71,
+    "predicted_per_token_ms": 153.23666666666665,
+    "predicted_per_second": 6.525853255313132
+   }
+  },
+  {
+   "phrase": "find my phone",
+   "expected": "find_my_phone",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.96,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1279.554,
+    "prompt_per_token_ms": 106.62950000000001,
+    "prompt_per_second": 9.378267740165715,
+    "predicted_n": 5,
+    "predicted_ms": 616.551,
+    "predicted_per_token_ms": 154.13775,
+    "predicted_per_second": 6.487703369226551
+   }
+  },
+  {
+   "phrase": "give me the full phone status",
+   "expected": "phone_info",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 4.49,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1605.219,
+    "prompt_per_token_ms": 107.0146,
+    "prompt_per_second": 9.344519345958402,
+    "predicted_n": 19,
+    "predicted_ms": 2815.658,
+    "predicted_per_token_ms": 156.42544444444445,
+    "predicted_per_second": 6.392821855495234
+   }
+  },
+  {
+   "phrase": "turn on the flashlight please",
+   "expected": "flashlight_on",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.32,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1496.462,
+    "prompt_per_token_ms": 106.89014285714286,
+    "prompt_per_second": 9.355399602529166,
+    "predicted_n": 6,
+    "predicted_ms": 767.776,
+    "predicted_per_token_ms": 153.55519999999999,
+    "predicted_per_second": 6.512316092193556
+   }
+  },
+  {
+   "phrase": "what is the capital of France",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.76,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1607.797,
+    "prompt_per_token_ms": 107.18646666666667,
+    "prompt_per_second": 9.329536004856335,
+    "predicted_n": 8,
+    "predicted_ms": 1074.543,
+    "predicted_per_token_ms": 153.50614285714283,
+    "predicted_per_second": 6.514397283310208
+   }
+  },
+  {
+   "phrase": "tell me a joke",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 4.23,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1386.137,
+    "prompt_per_token_ms": 106.62592307692307,
+    "prompt_per_second": 9.378582347920878,
+    "predicted_n": 19,
+    "predicted_ms": 2767.68,
+    "predicted_per_token_ms": 153.76,
+    "predicted_per_second": 6.503642039542144
+   }
+  },
+  {
+   "phrase": "how are you doing today",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.47,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1502.73,
+    "prompt_per_token_ms": 107.33785714285715,
+    "prompt_per_second": 9.316377526235584,
+    "predicted_n": 13,
+    "predicted_ms": 1884.486,
+    "predicted_per_token_ms": 157.0405,
+    "predicted_per_second": 6.3677841066476475
+   }
+  },
+  {
+   "phrase": "sing me a song",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 4.72,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1388.964,
+    "prompt_per_token_ms": 106.84338461538461,
+    "prompt_per_second": 9.359493838573211,
+    "predicted_n": 22,
+    "predicted_ms": 3254.234,
+    "predicted_per_token_ms": 154.9635238095238,
+    "predicted_per_second": 6.453131520351641
+   }
+  },
+  {
+   "phrase": "open the weather app",
+   "expected": "open_app",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.09,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1391.177,
+    "prompt_per_token_ms": 107.01361538461538,
+    "prompt_per_second": 9.34460532340601,
+    "predicted_n": 5,
+    "predicted_ms": 625.762,
+    "predicted_per_token_ms": 156.4405,
+    "predicted_per_second": 6.39220662168684
+   }
+  },
+  {
+   "phrase": "turn off the flashlight",
+   "expected": "flashlight_off",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.91,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1385.004,
+    "prompt_per_token_ms": 106.53876923076922,
+    "prompt_per_second": 9.386254480131466,
+    "predicted_n": 4,
+    "predicted_ms": 471.58,
+    "predicted_per_token_ms": 157.19333333333333,
+    "predicted_per_second": 6.361592942872896
+   }
+  },
+  {
+   "phrase": "set the volume to thirty percent",
+   "expected": "set_volume",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.36,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1597.334,
+    "prompt_per_token_ms": 106.48893333333334,
+    "prompt_per_second": 9.39064716584008,
+    "predicted_n": 12,
+    "predicted_ms": 1680.463,
+    "predicted_per_token_ms": 152.76936363636364,
+    "predicted_per_second": 6.5458150521612195
+   }
+  },
+  {
+   "phrase": "next song",
+   "expected": "next_track",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.74,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 11,
+    "prompt_ms": 1193.826,
+    "prompt_per_token_ms": 108.52963636363637,
+    "prompt_per_second": 9.214073072625323,
+    "predicted_n": 4,
+    "predicted_ms": 469.775,
+    "predicted_per_token_ms": 156.59166666666667,
+    "predicted_per_second": 6.386035868234793
+   }
+  },
+  {
+   "phrase": "where is my phone",
+   "expected": "find_my_phone",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.54,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1395.886,
+    "prompt_per_token_ms": 107.37584615384615,
+    "prompt_per_second": 9.313081440748027,
+    "predicted_n": 8,
+    "predicted_ms": 1083.169,
+    "predicted_per_token_ms": 154.73842857142859,
+    "predicted_per_second": 6.462518775925086
+   }
+  },
+  {
+   "phrase": "who are you",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.28,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1280.31,
+    "prompt_per_token_ms": 106.6925,
+    "prompt_per_second": 9.372730041942967,
+    "predicted_n": 7,
+    "predicted_ms": 936.71,
+    "predicted_per_token_ms": 156.11833333333334,
+    "predicted_per_second": 6.405397615056955
+   }
+  },
+  {
+   "phrase": "explain how a battery works",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 5.44,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1496.666,
+    "prompt_per_token_ms": 106.90471428571428,
+    "prompt_per_second": 9.354124433908435,
+    "predicted_n": 26,
+    "predicted_ms": 3889.761,
+    "predicted_per_token_ms": 155.59044,
+    "predicted_per_second": 6.427130098738715
+   }
+  },
+  {
+   "phrase": "hmm",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.46,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 11,
+    "prompt_ms": 1185.205,
+    "prompt_per_token_ms": 107.74590909090908,
+    "prompt_per_second": 9.281094831695782,
+    "predicted_n": 9,
+    "predicted_ms": 1220.23,
+    "predicted_per_token_ms": 152.52875,
+    "predicted_per_second": 6.556141055374806
+   }
+  },
+  {
+   "phrase": "what do you think about the weather",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 5.89,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 16,
+    "prompt_ms": 1686.829,
+    "prompt_per_token_ms": 105.4268125,
+    "prompt_per_second": 9.485253099158243,
+    "predicted_n": 28,
+    "predicted_ms": 4151.702,
+    "predicted_per_token_ms": 153.76674074074074,
+    "predicted_per_second": 6.503356936504594
+   }
+  },
+  {
+   "phrase": "good morning",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.74,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 11,
+    "prompt_ms": 1197.216,
+    "prompt_per_token_ms": 108.83781818181818,
+    "prompt_per_second": 9.187982786731885,
+    "predicted_n": 4,
+    "predicted_ms": 456.79,
+    "predicted_per_token_ms": 152.26333333333335,
+    "predicted_per_second": 6.567569342586308
+   }
+  },
+  {
+   "phrase": "the",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.8,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 10,
+    "prompt_ms": 1079.572,
+    "prompt_per_token_ms": 107.95719999999999,
+    "prompt_per_second": 9.262930124160317,
+    "predicted_n": 18,
+    "predicted_ms": 2636.919,
+    "predicted_per_token_ms": 155.11288235294117,
+    "predicted_per_second": 6.446917785491325
+   }
+  },
+  {
+   "phrase": "okay so anyway",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.67,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1276.362,
+    "prompt_per_token_ms": 106.3635,
+    "prompt_per_second": 9.401721455198446,
+    "predicted_n": 3,
+    "predicted_ms": 308.948,
+    "predicted_per_token_ms": 154.474,
+    "predicted_per_second": 6.4735813146548935
+   }
+  },
+  {
+   "phrase": "when you please",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.65,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1287.197,
+    "prompt_per_token_ms": 107.26641666666666,
+    "prompt_per_second": 9.322582324228538,
+    "predicted_n": 16,
+    "predicted_ms": 2300.244,
+    "predicted_per_token_ms": 153.3496,
+    "predicted_per_second": 6.521047332369958
+   }
+  },
+  {
+   "phrase": "uh thank you",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.83,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1296.231,
+    "prompt_per_token_ms": 108.01925,
+    "prompt_per_second": 9.257609176142214,
+    "predicted_n": 4,
+    "predicted_ms": 459.852,
+    "predicted_per_token_ms": 153.284,
+    "predicted_per_second": 6.523838104433601
+   }
+  },
+  {
+   "phrase": "how are you",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.24,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1284.587,
+    "prompt_per_token_ms": 107.04891666666667,
+    "prompt_per_second": 9.341523773788774,
+    "predicted_n": 13,
+    "predicted_ms": 1885.091,
+    "predicted_per_token_ms": 157.09091666666666,
+    "predicted_per_second": 6.365740433750943
+   }
+  },
+  {
+   "phrase": "what is your favorite color",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 4.06,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1505.853,
+    "prompt_per_token_ms": 107.56092857142858,
+    "prompt_per_second": 9.297056219963038,
+    "predicted_n": 17,
+    "predicted_ms": 2487.518,
+    "predicted_per_token_ms": 155.469875,
+    "predicted_per_second": 6.432114260077716
+   }
+  },
+  {
+   "phrase": "say something nice",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.06,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1284.209,
+    "prompt_per_token_ms": 107.01741666666668,
+    "prompt_per_second": 9.344273400980681,
+    "predicted_n": 12,
+    "predicted_ms": 1703.457,
+    "predicted_per_token_ms": 154.85972727272727,
+    "predicted_per_second": 6.45745680695198
+   }
+  },
+  {
+   "phrase": "i am bored",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.05,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1281.787,
+    "prompt_per_token_ms": 106.81558333333334,
+    "prompt_per_second": 9.361929868223037,
+    "predicted_n": 12,
+    "predicted_ms": 1690.23,
+    "predicted_per_token_ms": 153.65727272727273,
+    "predicted_per_second": 6.507990036858889
+   }
+  },
+  {
+   "phrase": "what is love",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.99,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1280.255,
+    "prompt_per_token_ms": 106.68791666666668,
+    "prompt_per_second": 9.373132696220674,
+    "predicted_n": 5,
+    "predicted_ms": 637.346,
+    "predicted_per_token_ms": 159.3365,
+    "predicted_per_second": 6.276025894882842
+   }
+  },
+  {
+   "phrase": "count to three",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.95,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1276.444,
+    "prompt_per_token_ms": 106.37033333333333,
+    "prompt_per_second": 9.40111747949773,
+    "predicted_n": 5,
+    "predicted_ms": 625.119,
+    "predicted_per_token_ms": 156.27975,
+    "predicted_per_second": 6.398781671969656
+   }
+  },
+  {
+   "phrase": "whatever",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.16,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 10,
+    "prompt_ms": 1079.345,
+    "prompt_per_token_ms": 107.9345,
+    "prompt_per_second": 9.264878236337779,
+    "predicted_n": 14,
+    "predicted_ms": 2005.911,
+    "predicted_per_token_ms": 154.30084615384615,
+    "predicted_per_second": 6.480845860060591
+   }
+  },
+  {
+   "phrase": "turn on wifi",
+   "expected": "wifi_on",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.83,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1283.377,
+    "prompt_per_token_ms": 106.94808333333333,
+    "prompt_per_second": 9.350331196522925,
+    "predicted_n": 4,
+    "predicted_ms": 474.392,
+    "predicted_per_token_ms": 158.13066666666666,
+    "predicted_per_second": 6.323884045262146
+   }
+  },
+  {
+   "phrase": "turn off bluetooth",
+   "expected": "bluetooth_off",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.74,
+   "timings": {
+    "cache_n": 1158,
+    "prompt_n": 11,
+    "prompt_ms": 1187.109,
+    "prompt_per_token_ms": 107.919,
+    "prompt_per_second": 9.266208915946219,
+    "predicted_n": 4,
+    "predicted_ms": 468.226,
+    "predicted_per_token_ms": 156.07533333333333,
+    "predicted_per_second": 6.4071623532225885
+   }
+  },
+  {
+   "phrase": "set the brightness to 40 percent",
+   "expected": "set_brightness",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.42,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 17,
+    "prompt_ms": 1830.129,
+    "prompt_per_token_ms": 107.65464705882353,
+    "prompt_per_second": 9.28896269060815,
+    "predicted_n": 11,
+    "predicted_ms": 1536.379,
+    "predicted_per_token_ms": 153.6379,
+    "predicted_per_second": 6.508810651538456
+   }
+  },
+  {
+   "phrase": "set the volume to 30 percent",
+   "expected": "set_volume",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.37,
+   "timings": {
+    "cache_n": 1159,
+    "prompt_n": 15,
+    "prompt_ms": 1603.994,
+    "prompt_per_token_ms": 106.93293333333332,
+    "prompt_per_second": 9.351655928887514,
+    "predicted_n": 12,
+    "predicted_ms": 1692.504,
+    "predicted_per_token_ms": 153.864,
+    "predicted_per_second": 6.499246087453855
+   }
+  },
+  {
+   "phrase": "what is today's date",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.5,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1500.467,
+    "prompt_per_token_ms": 107.1762142857143,
+    "prompt_per_second": 9.330428459939473,
+    "predicted_n": 7,
+    "predicted_ms": 921.106,
+    "predicted_per_token_ms": 153.51766666666666,
+    "predicted_per_second": 6.513908279828815
+   }
+  },
+  {
+   "phrase": "open the settings",
+   "expected": "open_app",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.97,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1280.09,
+    "prompt_per_token_ms": 106.67416666666666,
+    "prompt_per_second": 9.374340866657814,
+    "predicted_n": 5,
+    "predicted_ms": 620.027,
+    "predicted_per_token_ms": 155.00675,
+    "predicted_per_second": 6.4513319581244035
+   }
+  },
+  {
+   "phrase": "take a photo",
+   "expected": "take_photo",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.97,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1281.203,
+    "prompt_per_token_ms": 106.76691666666666,
+    "prompt_per_second": 9.366197238064538,
+    "predicted_n": 5,
+    "predicted_ms": 612.816,
+    "predicted_per_token_ms": 153.204,
+    "predicted_per_second": 6.527244719459022
+   }
+  },
+  {
+   "phrase": "lock the phone",
+   "expected": "lock_screen",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.69,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1280.133,
+    "prompt_per_token_ms": 106.67775,
+    "prompt_per_second": 9.374025980113004,
+    "predicted_n": 3,
+    "predicted_ms": 321.801,
+    "predicted_per_token_ms": 160.9005,
+    "predicted_per_second": 6.215021084459029
+   }
+  },
+  {
+   "phrase": "play the music",
+   "expected": "play_pause",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 1.97,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1277.545,
+    "prompt_per_token_ms": 106.46208333333334,
+    "prompt_per_second": 9.39301551021686,
+    "predicted_n": 5,
+    "predicted_ms": 620.613,
+    "predicted_per_token_ms": 155.15325,
+    "predicted_per_second": 6.445240431637751
+   }
+  },
+  {
+   "phrase": "When you please,",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.02,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1398.439,
+    "prompt_per_token_ms": 107.57223076923077,
+    "prompt_per_second": 9.296079414261186,
+    "predicted_n": 11,
+    "predicted_ms": 1537.931,
+    "predicted_per_token_ms": 153.7931,
+    "predicted_per_second": 6.502242298256553
+   }
+  },
+  {
+   "phrase": "Uh, thank you.",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.19,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1498.579,
+    "prompt_per_token_ms": 107.04135714285714,
+    "prompt_per_second": 9.34218349516442,
+    "predicted_n": 5,
+    "predicted_ms": 606.029,
+    "predicted_per_token_ms": 151.50725,
+    "predicted_per_second": 6.600344207950445
+   }
+  },
+  {
+   "phrase": "How are you?",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 3.6,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1388.151,
+    "prompt_per_token_ms": 106.78084615384616,
+    "prompt_per_second": 9.364975424143339,
+    "predicted_n": 15,
+    "predicted_ms": 2131.231,
+    "predicted_per_token_ms": 152.23078571428573,
+    "predicted_per_second": 6.568973518121686
+   }
+  },
+  {
+   "phrase": "How is the other day?",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 2.34,
+   "timings": {
+    "cache_n": 1158,
+    "prompt_n": 14,
+    "prompt_ms": 1491.434,
+    "prompt_per_token_ms": 106.53099999999999,
+    "prompt_per_second": 9.386939013057232,
+    "predicted_n": 6,
+    "predicted_ms": 769.47,
+    "predicted_per_token_ms": 153.894,
+    "predicted_per_second": 6.497979128491039
+   }
+  },
+  {
+   "phrase": "rozsvi\u0165 baterku",
+   "expected": "flashlight_on",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.99,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 16,
+    "prompt_ms": 1680.832,
+    "prompt_per_token_ms": 105.052,
+    "prompt_per_second": 9.519095305182194,
+    "predicted_n": 9,
+    "predicted_ms": 1242.49,
+    "predicted_per_token_ms": 155.31125,
+    "predicted_per_second": 6.438683611135703
+   }
+  },
+  {
+   "phrase": "zhasni baterku",
+   "expected": "flashlight_off",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.8,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1635.274,
+    "prompt_per_token_ms": 109.01826666666666,
+    "prompt_per_second": 9.172774715429954,
+    "predicted_n": 8,
+    "predicted_ms": 1100.949,
+    "predicted_per_token_ms": 157.27842857142858,
+    "predicted_per_second": 6.358151013353025
+   }
+  },
+  {
+   "phrase": "zapni wifi",
+   "expected": "wifi_on",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 1.81,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1276.173,
+    "prompt_per_token_ms": 106.34775,
+    "prompt_per_second": 9.403113841148496,
+    "predicted_n": 4,
+    "predicted_ms": 464.676,
+    "predicted_per_token_ms": 154.892,
+    "predicted_per_second": 6.456111355008652
+   }
+  },
+  {
+   "phrase": "vypni wifi",
+   "expected": "wifi_off",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.08,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 13,
+    "prompt_ms": 1393.341,
+    "prompt_per_token_ms": 107.18007692307691,
+    "prompt_per_second": 9.330092202841948,
+    "predicted_n": 5,
+    "predicted_ms": 618.698,
+    "predicted_per_token_ms": 154.6745,
+    "predicted_per_second": 6.465189801809607
+   }
+  },
+  {
+   "phrase": "zapni bluetooth",
+   "expected": "bluetooth_on",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 1.8,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 12,
+    "prompt_ms": 1290.292,
+    "prompt_per_token_ms": 107.52433333333333,
+    "prompt_per_second": 9.30022041522384,
+    "predicted_n": 4,
+    "predicted_ms": 462.408,
+    "predicted_per_token_ms": 154.136,
+    "predicted_per_second": 6.487777028079099
+   }
+  },
+  {
+   "phrase": "nastav jas na \u010dty\u0159icet procent",
+   "expected": "set_brightness",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 3.94,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 22,
+    "prompt_ms": 2338.068,
+    "prompt_per_token_ms": 106.2758181818182,
+    "prompt_per_second": 9.409478252984943,
+    "predicted_n": 11,
+    "predicted_ms": 1529.08,
+    "predicted_per_token_ms": 152.908,
+    "predicted_per_second": 6.539880189394931
+   }
+  },
+  {
+   "phrase": "ztlum hlasitost",
+   "expected": "set_volume",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 3.02,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 16,
+    "prompt_ms": 1682.978,
+    "prompt_per_token_ms": 105.186125,
+    "prompt_per_second": 9.506957310196567,
+    "predicted_n": 9,
+    "predicted_ms": 1271.037,
+    "predicted_per_token_ms": 158.879625,
+    "predicted_per_second": 6.294073264586318
+   }
+  },
+  {
+   "phrase": "jak\u00fd je stav baterie",
+   "expected": "battery_status",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 3.45,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 16,
+    "prompt_ms": 1696.854,
+    "prompt_per_token_ms": 106.053375,
+    "prompt_per_second": 9.429214298932024,
+    "predicted_n": 12,
+    "predicted_ms": 1683.984,
+    "predicted_per_token_ms": 153.08945454545454,
+    "predicted_per_second": 6.532128571292839
+   }
+  },
+  {
+   "phrase": "kolik je hodin",
+   "expected": "what_time_is_it",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.65,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 14,
+    "prompt_ms": 1495.499,
+    "prompt_per_token_ms": 106.82135714285714,
+    "prompt_per_second": 9.361423845820024,
+    "predicted_n": 8,
+    "predicted_ms": 1079.176,
+    "predicted_per_token_ms": 154.16799999999998,
+    "predicted_per_second": 6.48643038762908
+   }
+  },
+  {
+   "phrase": "nastav \u010dasova\u010d na p\u011bt minut",
+   "expected": "set_timer",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 4.3,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 21,
+    "prompt_ms": 2223.18,
+    "prompt_per_token_ms": 105.86571428571428,
+    "prompt_per_second": 9.445928804685181,
+    "predicted_n": 14,
+    "predicted_ms": 1989.088,
+    "predicted_per_token_ms": 153.00676923076924,
+    "predicted_per_second": 6.5356585530655265
+   }
+  },
+  {
+   "phrase": "otev\u0159i kalkula\u010dku",
+   "expected": "open_app",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 3.85,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 18,
+    "prompt_ms": 1911.079,
+    "prompt_per_token_ms": 106.17105555555555,
+    "prompt_per_second": 9.41876290828375,
+    "predicted_n": 13,
+    "predicted_ms": 1858.128,
+    "predicted_per_token_ms": 154.844,
+    "predicted_per_second": 6.4581126811500615
+   }
+  },
+  {
+   "phrase": "zamkni obrazovku",
+   "expected": "lock_screen",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 3.28,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 17,
+    "prompt_ms": 1795.446,
+    "prompt_per_token_ms": 105.61447058823529,
+    "prompt_per_second": 9.468399495167219,
+    "predicted_n": 10,
+    "predicted_ms": 1411.651,
+    "predicted_per_token_ms": 156.85011111111112,
+    "predicted_per_second": 6.375513494482701
+   }
+  },
+  {
+   "phrase": "najdi m\u016fj telefon",
+   "expected": "find_my_phone",
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.97,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 16,
+    "prompt_ms": 1687.283,
+    "prompt_per_token_ms": 105.4551875,
+    "prompt_per_second": 9.482700886573266,
+    "predicted_n": 9,
+    "predicted_ms": 1232.891,
+    "predicted_per_token_ms": 154.111375,
+    "predicted_per_second": 6.488813690748006
+   }
+  },
+  {
+   "phrase": "jak\u00e9 je hlavn\u00ed m\u011bsto Francie",
+   "expected": null,
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 4.2,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 20,
+    "prompt_ms": 2110.219,
+    "prompt_per_token_ms": 105.51095000000001,
+    "prompt_per_second": 9.477689282486795,
+    "predicted_n": 14,
+    "predicted_ms": 2008.055,
+    "predicted_per_token_ms": 154.46576923076924,
+    "predicted_per_second": 6.473926261979876
+   }
+  },
+  {
+   "phrase": "pov\u011bz mi vtip",
+   "expected": null,
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.23,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 16,
+    "prompt_ms": 1690.179,
+    "prompt_per_token_ms": 105.6361875,
+    "prompt_per_second": 9.466452961491061,
+    "predicted_n": 4,
+    "predicted_ms": 464.548,
+    "predicted_per_token_ms": 154.84933333333333,
+    "predicted_per_second": 6.457890250307826
+   }
+  },
+  {
+   "phrase": "jak se dnes m\u00e1\u0161",
+   "expected": null,
+   "pred": "none",
+   "group": "czech",
+   "latency_s": 2.45,
+   "timings": {
+    "cache_n": 1157,
+    "prompt_n": 15,
+    "prompt_ms": 1601.788,
+    "prompt_per_token_ms": 106.78586666666666,
+    "prompt_per_second": 9.364535131990001,
+    "predicted_n": 6,
+    "predicted_ms": 765.509,
+    "predicted_per_token_ms": 153.1018,
+    "predicted_per_second": 6.5316018492271155
+   }
+  }
+ ]
+}

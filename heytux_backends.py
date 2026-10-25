@@ -72,8 +72,11 @@ class LlamaServer:
         self.port = port or _free_port()
         self._model_path = entry["path"]
         self.base = "http://%s:%d" % (self.host, self.port)
+        # --jinja: use the model's own chat template so native OpenAI tool-calling works (route()/
+        # tool_chat()). It is on by default in this build; passed explicitly so a future default flip
+        # can't silently break tool calls.
         cmd = [LLAMA_BIN + "/llama-server", "-m", entry["path"], "-t", str(threads),
-               "-c", str(ctx), "--host", host, "--port", str(self.port), "--no-webui"]
+               "-c", str(ctx), "--host", host, "--port", str(self.port), "--no-webui", "--jinja"]
         if not warmup:
             cmd.append("--no-warmup")
         if not mmap:
@@ -177,6 +180,20 @@ class LlamaServer:
         return {"text": "".join(out).strip(), "ttft_s": ttft, "n_tokens": n,
                 "elapsed_s": elapsed, "tok_s": tok_s}
 
+    @staticmethod
+    def _parse_tool_calls(msg):
+        """OpenAI tool_calls -> [{name, arguments}] with arguments a dict, or None when malformed."""
+        calls = []
+        for c in (msg.get("tool_calls") or []):
+            fn = c.get("function", {})
+            args = fn.get("arguments")
+            if isinstance(args, str):
+                try: args = json.loads(args)
+                except Exception: args = None
+            calls.append({"name": fn.get("name"),
+                          "arguments": args if isinstance(args, dict) else None})
+        return calls
+
     def route(self, transcript, tools, system="You are a function router. Call the single best tool."):
         """OpenAI tool-calling (--jinja is on by default). Returns {names, calls, raw}. Empty names
         == no tool chosen. Decides the route without heytux's grounding/NOMATCH gates (those live in
@@ -186,15 +203,24 @@ class LlamaServer:
                 "tools": tools, "tool_choice": "auto", "temperature": 0.0, "max_tokens": 256}
         r = self._post("/v1/chat/completions", body, timeout=120)
         msg = r["choices"][0]["message"]
-        calls = []
-        for c in (msg.get("tool_calls") or []):
-            fn = c.get("function", {})
-            args = fn.get("arguments")
-            if isinstance(args, str):
-                try: args = json.loads(args)
-                except Exception: args = {}
-            calls.append({"name": fn.get("name"), "arguments": args or {}})
+        calls = self._parse_tool_calls(msg)
         return {"names": [c["name"] for c in calls], "calls": calls, "raw": msg}
+
+    def tool_chat(self, messages, tools, max_tokens=120, temperature=0.3, cache_prompt=True,
+                  think=False, timeout=120):
+        """One chat completion with tools offered (hybrid route). The daemon and the tool-call bench
+        both go through here, so they exercise the identical request path. cache_prompt lets the
+        server reuse the system+tools prefix across turns (measure that it holds). Returns
+        {content, calls}; calls is [] when the model answered instead of calling a tool."""
+        body = {"messages": list(messages), "tools": tools, "tool_choice": "auto",
+                "max_tokens": max_tokens, "temperature": temperature, "cache_prompt": cache_prompt,
+                "timings_per_token": True, "chat_template_kwargs": {"enable_thinking": think}}
+        r = self._post("/v1/chat/completions", body, timeout=timeout)
+        msg = r["choices"][0]["message"]
+        # "timings" is llama.cpp's own prefill/decode breakdown; the daemon ignores it, the tool-call
+        # bench reads timings.prompt_ms to show the system+tools prefix is cached across turns.
+        return {"content": msg.get("content") or "", "calls": self._parse_tool_calls(msg),
+                "timings": r.get("timings")}
 
     def embed(self, texts):
         """L2-normalized embeddings for a list of strings as an (n, d) float32 array."""
@@ -484,6 +510,8 @@ class EmbeddingRouter:
     a tool with no examples stays routable. complete(transcript) is self-gated by its own similarity
     floor (CONF_FLOOR is Needle's, not this one's) and returns the Needle-shaped dict decide_route
     consumes: cosine argmax, floor, extract_args() for the parameterized tools."""
+    scored = True
+
     def __init__(self, server, tools, threshold=0.55, examples=ROUTER_EXAMPLES):
         self.server = server
         self.threshold = threshold
@@ -522,6 +550,8 @@ class GgufRouter:
     Needle-shaped dict; it is self-gated (the model's own tool_choice decides), so confidence is 1.0
     when a tool is chosen, else 0.0, and CONF_FLOOR does not apply. Calls to a tool that isn't in the
     enabled set are dropped. The daemon's grounding gate still applies."""
+    scored = False
+
     def __init__(self, server, tools):
         self.server = server
         self.tools = tools
@@ -530,8 +560,10 @@ class GgufRouter:
 
     def complete(self, transcript):
         r = self.server.route(transcript, self.tools)
-        calls = [{"name": c.get("name"), "arguments": c.get("arguments") or {}}
-                 for c in r["calls"] if c.get("name") in self.enabled]
+        # arguments None = malformed/non-object JSON from the parser: drop the call, never run it with {}
+        calls = [{"name": c.get("name"), "arguments": c["arguments"]}
+                 for c in r["calls"]
+                 if c.get("name") in self.enabled and isinstance(c.get("arguments"), dict)]
         return {"function_calls": calls, "confidence": 1.0 if calls else 0.0,
                 "reasoning": "", "self_gated": True}
 

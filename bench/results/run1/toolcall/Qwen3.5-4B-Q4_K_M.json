@@ -1,0 +1,10 @@
+{
+ "id": "Qwen3.5-4B-Q4_K_M",
+ "ts": "2026-10-24T20:56:11",
+ "n_phrases": 70,
+ "max_tokens": 48,
+ "n_tools": 19,
+ "mem_available_gb": 3.51,
+ "status": "skipped",
+ "note": "MemAvailable 3.51 GB < --min-avail-gb 4.20"
+}

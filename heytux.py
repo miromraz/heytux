@@ -4,7 +4,7 @@
 # stdlib + numpy + sherpa_onnx + ctypes only. Runs as miro's systemd --user service,
 # so all subprocesses (pw-record/pw-play/wpctl/gio/busctl/nmcli/bluetoothctl) inherit miro's session.
 import contextlib, ctypes, fcntl, glob, hashlib, json, math, os, queue, re, subprocess, sys, \
-    threading, time, traceback, urllib.request, wave
+    threading, time, traceback, unicodedata, urllib.request, wave
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import numpy as np
 import heytux_config as JC
@@ -29,9 +29,10 @@ KWS_CHUNK = 3200                               # bytes = 100 ms s16 mono @ 16 kH
 CAPTURE_DIR = "/home/miro/heytux/captures"     # fixed location; only the ring size (CAPTURE_KEEP) is configurable
 MANIFEST_PATH = os.environ.get("HEYTUX_MANIFEST", "/home/miro/heytux/bench/manifest.json")  # model registry
 
-# The five live-swappable model slots and the config field that selects each.
+# The live-swappable model slots and the config field that selects each. tts_alt is the optional
+# second voice (TTS_MODEL_ALT="" means off); like vad it may resolve to no model.
 MODEL_FIELDS = {"CHAT_MODEL": "chat", "ROUTER_MODEL": "router", "ASR_MODEL": "asr",
-                "TTS_MODEL": "tts", "VAD_MODEL": "vad"}
+                "TTS_MODEL": "tts", "TTS_MODEL_ALT": "tts_alt", "VAD_MODEL": "vad"}
 FIELD_FOR_SLOT = {v: k for k, v in MODEL_FIELDS.items()}
 SWAP_BUSY = threading.Event()                   # set while a hot model swap is in progress (for /models)
 SWAP_LOCK = threading.Lock()                    # serialises swaps; a second request gets 409, not a queue
@@ -151,6 +152,7 @@ def discover_models():
     JC.FIELDS["CHAT_MODEL"]["values"] = slot_ids("chat")
     JC.FIELDS["ASR_MODEL"]["values"] = slot_ids("asr")
     JC.FIELDS["TTS_MODEL"]["values"] = slot_ids("tts")
+    JC.FIELDS["TTS_MODEL_ALT"]["values"] = slot_ids("tts") + [""]   # "" = off
     JC.FIELDS["VAD_MODEL"]["values"] = slot_ids("vad")
     JC.FIELDS["ROUTER_MODEL"]["values"] = router_ids()
 
@@ -627,13 +629,40 @@ LLM_URL = "http://127.0.0.1:8771/v1/chat/completions"
 CHAT_FAIL = "I can't answer that right now."
 
 def clean_spoken(t):
-    """Make LLM output safe to speak: drop markdown/non-ASCII, collapse space, first 2 sentences."""
+    """Make LLM output safe to speak: drop markdown and emoji, collapse space, first 2 sentences.
+    Keeps non-ASCII LETTERS (so Czech diacritics survive for the alt voice and lang detection) while
+    still dropping non-ASCII symbols/emoji (unicode category S*)."""
     t = re.sub(r"[*_`#>~\[\]]", "", t or "")
-    t = "".join(ch for ch in t if ord(ch) < 128)      # strip emoji / non-ASCII symbols
+    t = "".join(ch for ch in t if ord(ch) < 128 or unicodedata.category(ch)[0] == "L")
     t = re.sub(r"\s+", " ", t).strip()
     sents = re.split(r"(?<=[.!?])\s+", t)
     t = " ".join(sents[:2]).strip()
     return t[:220].strip()
+
+# Reply-language detection for voice selection: the chat model (told to answer in the user's
+# language when LANG_AUTO) picks the language, and the spoken voice follows the reply TEXT. A small
+# stdlib heuristic - Czech-specific diacritics, or a couple of common Czech function words - is
+# enough to pick between the English main voice and the Czech alt voice.
+LANG_HINT = "Answer in the same language the user spoke."
+_CZ_DIACRITICS = set("ěščřžůťňďý")
+# Deliberately NO single letters and no English homographs ("a", "i", "to", "u"...): those appear in
+# ordinary English and would misclassify an English reply as Czech. Only multi-letter Czech words
+# that are not also English words, so the no-diacritics fallback needs real Czech evidence.
+_CZ_STOPWORDS = frozenset("""
+je jsem jsi jsme jste jsou byl byla bylo není
+na se si že co kdo kde kdy jak proč když jako
+ten tato toto můj moje tvůj náš také
+ano dobře děkuji prosím dnes teď hodin stupňů baterie telefon
+""".split())
+_CZ_WORD_RE = re.compile(r"[a-zěščřžýáíéúůťňďó]+")
+
+def is_czech(text):
+    """True if the reply text looks Czech: any Czech-only diacritic, or >=2 DISTINCT unambiguous
+    Czech words (distinct so a repeated English article can't reach the threshold)."""
+    t = (text or "").lower()
+    if any(ch in _CZ_DIACRITICS for ch in t):
+        return True
+    return len(set(_CZ_WORD_RE.findall(t)) & _CZ_STOPWORDS) >= 2
 
 def _live_facts():
     """Cheap sysfs-only facts injected into the LLM prompt so a fallback answers a low-confidence
@@ -663,6 +692,25 @@ def _chat_history():
         CHAT_HISTORY.clear()
     return CHAT_HISTORY[-n:] if n > 0 else []
 
+def _chat_sys():
+    """Stable chat system prompt: LLM_SYS, plus the reply-language instruction when LANG_AUTO. Kept
+    free of volatile facts so it (and the tool schemas after it) stay a cacheable prefix in hybrid."""
+    return CFG["LLM_SYS"] + (" " + LANG_HINT if CFG["LANG_AUTO"] else "")
+
+def _remember(transcript, answer):
+    """Append a (user, answer) turn to the rolling chat memory. Tool turns are recorded too, so a
+    follow-up like 'turn it off' after 'turn on the flashlight' has the prior turn as context. Drops
+    an expired conversation first (same CHAT_MEMORY_S timeout as _chat_history), so a fast-path tool
+    turn that never calls _chat_history can't resurrect stale context for the next chat request."""
+    global chat_last
+    if not (answer and CFG["CHAT_HISTORY_TURNS"] > 0):
+        return
+    if time.time() - chat_last > CFG["CHAT_MEMORY_S"]:
+        CHAT_HISTORY.clear()
+    CHAT_HISTORY.append((transcript, answer))
+    del CHAT_HISTORY[:-CFG["CHAT_HISTORY_TURNS"]]
+    chat_last = time.time()
+
 def _llm_once(body):
     req = urllib.request.Request(LLM_URL, data=body, headers={"Content-Type": "application/json"})
     # 60 s: a big slow model (Qwen3.5-4B ~3.2 t/s) needs ~19 s for 60 tokens; 10 s timed out valid replies.
@@ -675,9 +723,8 @@ def chat_llm(transcript, remember=True):
     daemon owns the chat server now, so if the request fails ONLY because the process has actually
     died, reload it once (the old unit's Restart=on-failure) and retry; a live-but-slow server is left
     alone (no pointless second wait). Callers already hold LOCK, which ensure_chat needs."""
-    global chat_last
     body = json.dumps({
-        "messages": chat_messages(CFG["LLM_SYS"] + " " + _live_facts(), _chat_history(), transcript),
+        "messages": chat_messages(_chat_sys() + " " + _live_facts(), _chat_history(), transcript),
         "max_tokens": 60, "temperature": 0.7,
         "chat_template_kwargs": {"enable_thinking": False}}).encode()
     try:
@@ -693,11 +740,65 @@ def chat_llm(transcript, remember=True):
         except Exception as e2:
             log("chat_llm retry failed:", repr(e2))
             return None
-    if ans and remember and CFG["CHAT_HISTORY_TURNS"] > 0:
-        CHAT_HISTORY.append((transcript, ans))
-        del CHAT_HISTORY[:-CFG["CHAT_HISTORY_TURNS"]]
-        chat_last = time.time()
+    if ans and remember:
+        _remember(transcript, ans)
     return ans or None
+
+def hybrid_tools():
+    """Enabled merged tools offered to the chat model in hybrid mode, minus ask_question (that is the
+    router's chat sentinel, not a real tool - the chat model answers directly instead)."""
+    return [t for t in MERGED_TOOLS if t["function"]["name"] != "ask_question"]
+
+def chat_tool(transcript, dry=False):
+    """Hybrid turn: ask the chat model with the enabled phone commands offered as tools. It either
+    calls an enabled, known tool through execute() or answers in words. Explicit LLM calls are
+    multilingual, so only the router fast path uses word-overlap grounding.
+    Returns (did_tool, said, calls). remember/execute are skipped on a dry run."""
+    tools = hybrid_tools()
+    enabled = {t["function"]["name"] for t in tools}
+    # No _live_facts here: injecting the date/battery preamble into the user turn derails tool
+    # selection (weak models echo it or pick phone_info). In hybrid the model has what_time_is_it /
+    # battery_status / phone_info tools for those facts instead. The system+tools prefix stays stable,
+    # so cache_prompt caches it across turns.
+    msgs = chat_messages(_chat_sys(), _chat_history(), transcript)
+    try:
+        res = M.chat.tool_chat(msgs, tools)
+    except Exception as e:
+        log("chat_tool error:", repr(e))
+        if M is None or M._slot_alive("chat"):
+            return False, CHAT_FAIL, []
+        try:
+            with LOCK:
+                M.ensure_chat()
+            res = M.chat.tool_chat(msgs, tools)
+        except Exception as e2:
+            log("chat_tool retry failed:", repr(e2))
+            return False, CHAT_FAIL, []
+    proposed = res.get("calls") or []
+    calls = []
+    # Validate the whole response before executing anything: malformed JSON must not become
+    # default arguments, and a bad later call must not crash after an earlier hardware action.
+    for c in proposed:
+        name = c.get("name")
+        reason = ("unknown" if TOOL_VOCAB.get(name) is None else
+                  "not enabled" if name not in enabled else
+                  "bad arguments" if not isinstance(c.get("arguments"), dict) else None)
+        if reason:
+            log("chat_tool rejected:", name, reason)
+        else:
+            calls.append(c)
+    if calls:
+        said = "" if dry else " ".join(a for a in (execute(c.get("name"), c.get("arguments"))
+                                                   for c in calls) if a)
+        if not dry:
+            _remember(transcript, said)
+        return True, said, calls
+    ans = clean_spoken(res.get("content") or "")
+    if not ans:
+        return False, CHAT_FAIL, []
+    if not dry:
+        _remember(transcript, ans)
+    return False, ans, []
 
 # ---------- off-topic / grounding gates ----------
 # Needle3 ALWAYS emits the closest tool for a full toolset (it says so in `reasoning`, e.g.
@@ -793,6 +894,7 @@ def _prune_stale_idx(keep):
                 pass
 
 class Needle:
+    scored = False              # its generated confidence is not a similarity score
     def __init__(self, tools):
         self.lib = ctypes.CDLL(NEEDLE_DIR + "/libneedle.so")
         self.lib.needle_load.argtypes = [ctypes.c_char_p, ctypes.c_uint64]; self.lib.needle_load.restype = ctypes.c_int
@@ -900,17 +1002,21 @@ class Models:
         self._vad_id = None
         self._vad_entry = None
         self._vad_warned = False
+        self._chat_prewarm_key = None
         self.loaded = {}             # slot -> actually-loaded manifest id (None = not loaded); /models truth
         self.rss_mb = {}             # slot -> best-effort RSS MB (daemon delta for in-process sherpa)
-        self.chat = self.router = self.asr = self.tts = None
+        self.chat = self.router = self.asr = self.tts = self.tts_alt = None
         self.play_proc = None        # last detached ack playback, awaited before the next mic capture
-        for slot in ("chat", "router", "asr", "tts", "vad"):
+        for slot in ("chat", "router", "asr", "tts", "tts_alt", "vad"):
             self._load_slot(slot, self._resolve(slot))
         self.build_kws()
 
     def _resolve(self, slot):
         """The id to load for a slot (configured -> default -> first installed). Raises if a required
-        slot has nothing installed; VAD may resolve to None (the energy-VAD fallback)."""
+        slot has nothing installed; vad and tts_alt may resolve to None (disabled)."""
+        if slot == "tts_alt":
+            want = CFG["TTS_MODEL_ALT"]                 # "" (off), or an id; never falls back/raises
+            return want if want in slot_ids("tts") else None
         ids = router_ids() if slot == "router" else slot_ids(slot)
         mid = resolve_id(FIELD_FOR_SLOT[slot], ids)
         if mid is None and slot != "vad":
@@ -936,10 +1042,11 @@ class Models:
         return so.VoiceActivityDetector(cfg, buffer_size_in_seconds=30)
 
     # ---------- per-slot load/close (used by __init__ and swap()) ----------
-    def _load_slot(self, slot, mid):
+    def _load_slot(self, slot, mid, strict=False):
         """Build the backend for `mid` and publish it (self.<slot>, loaded[slot], rss). Raises on
         failure with nothing published, so loaded[slot] is only set once the model is really up.
-        mid None is valid only for vad (energy-VAD fallback)."""
+        mid None is valid for vad and tts_alt. Optional voice failures are non-fatal except for
+        an explicit swap (strict), whose caller must see the error and roll back."""
         t = time.time(); before = _daemon_rss_mb()
         if slot == "vad":
             if mid is None:
@@ -950,6 +1057,7 @@ class Models:
                 self._vad_entry = entry; self._vad_id = entry["id"]; self._vad_threshold = th
                 self.rss_mb["vad"] = _rss_delta(before)
         elif slot == "chat":
+            self._chat_prewarm_key = None       # a new server has no cached prefix, even for the same id
             # The chat LLM, hosted by the daemon on 127.0.0.1:8771 so LLM_URL stays valid (retires
             # heytux-llm.service). -t 2, ctx 2048 per the brief.
             e = dict(REGISTRY[mid]); e["path"] = HB.resolve_gguf(e["path"], "chat")
@@ -968,11 +1076,47 @@ class Models:
         elif slot in ("asr", "tts"):
             setattr(self, slot, HB.load(REGISTRY[mid], threads=THREADS))
             self.rss_mb[slot] = _rss_delta(before)
+        elif slot == "tts_alt":
+            if mid:
+                try:
+                    self.tts_alt = HB.load(REGISTRY[mid], threads=THREADS)
+                    self.rss_mb["tts_alt"] = _rss_delta(before)
+                except Exception as e:
+                    self.tts_alt = None
+                    self.loaded["tts_alt"] = None
+                    self.rss_mb["tts_alt"] = None
+                    if strict:
+                        raise
+                    log("tts_alt load failed (non-fatal):", repr(e))
+                    return
+            else:
+                self.tts_alt = None                    # disabled: no second voice loaded
         self.loaded[slot] = mid
         log("%s (%s) loaded in %d ms%s" % (slot, mid, 1000 * (time.time() - t),
                                            " on :8771" if slot == "chat" else ""))
+        if slot == "chat" and CFG["ROUTE_MODE"] == "hybrid":
+            self._prewarm_chat()          # load / swap / crash-reload all funnel through here
+
+    def _prewarm_chat(self):
+        """Hybrid only: process the stable system+tools prefix once now, with cache_prompt, so the
+        user's first real turn reuses the cache instead of paying the full ~1200-token cold prefill
+        (20-60 s on this phone). Non-fatal - a failed prewarm just means the first turn is cold."""
+        system, tools = _chat_sys(), hybrid_tools()
+        key = (self.loaded.get("chat"), system, json.dumps(tools, sort_keys=True))
+        if key == self._chat_prewarm_key:
+            return
+        try:
+            t = time.time()
+            self.chat.tool_chat(chat_messages(system, [], "hi"), tools,
+                                max_tokens=1, cache_prompt=True, timeout=300)
+            self._chat_prewarm_key = key             # failed attempts remain retryable
+            log("chat prefix prewarmed in %d ms" % (1000 * (time.time() - t)))
+        except Exception as e:
+            log("chat prewarm failed (non-fatal):", repr(e))
 
     def _close_slot(self, slot):
+        if slot == "chat":
+            self._chat_prewarm_key = None
         if slot == "vad":
             self.vad = self._vad_entry = self._vad_id = self._vad_threshold = None
             return
@@ -1007,7 +1151,7 @@ class Models:
         self._close_slot(slot)
         self.loaded[slot] = None                 # not loaded until proven
         try:
-            self._load_slot(slot, new_id)
+            self._load_slot(slot, new_id, strict=True)
         except Exception:
             log("swap %s -> %s failed:\n%s" % (slot, new_id, traceback.format_exc()))
             if prev and prev != new_id:
@@ -1020,7 +1164,7 @@ class Models:
 
     def _slot_obj(self, slot):
         return {"chat": self.chat, "router": self.router, "asr": self.asr,
-                "tts": self.tts, "vad": self._vad_entry}[slot]
+                "tts": self.tts, "tts_alt": self.tts_alt, "vad": self._vad_entry}[slot]
 
     def _slot_alive(self, slot):
         """True if the slot is loaded AND (for subprocess slots) its process is still running. The one
@@ -1053,6 +1197,7 @@ class Models:
                  ("router", "ROUTER_MODEL", router_ids()),
                  ("asr", "ASR_MODEL", slot_ids("asr")),
                  ("tts", "TTS_MODEL", slot_ids("tts")),
+                 ("tts_alt", "TTS_MODEL_ALT", slot_ids("tts") + [""]),
                  ("vad", "VAD_MODEL", slot_ids("vad"))]
         out = {}
         for slot, field, ids in specs:
@@ -1108,8 +1253,11 @@ class Models:
 
     def speak(self, text):
         """Synthesize (the measured TTS cost) then play back detached so the HTTP response returns
-        immediately; playback duration is not on the request path."""
-        samples, sr = self.tts.synth(text, sid=0, speed=1.15)   # 1.15 shaves synth time, still natural
+        immediately; playback duration is not on the request path. When a Czech alt voice is loaded
+        and the reply text reads as Czech, speak it with that voice (English tool acks read as English
+        and stay on the main voice)."""
+        tts = self.tts_alt if (self.tts_alt is not None and is_czech(text)) else self.tts
+        samples, sr = tts.synth(text, sid=0, speed=1.15)   # 1.15 shaves synth time, still natural
         pcm = (np.asarray(samples, dtype=np.float32) * 32767).clip(-32768, 32767).astype("<i2")
         self._play(pcm, sr)
 
@@ -1322,12 +1470,59 @@ def _route_complete(transcript):
         log("router recovery failed, routing to chat:\n" + traceback.format_exc())
         return dict(_NO_ROUTE)
 
-def pipeline(transcript, ms, overlay=False, notif_id=0, dry=False):
-    """transcript already produced; needle -> execute -> speak. ms is mutated + returned. overlay
+# Route labels: TOOL_ROUTES ran a phone command (ends any follow-up window); ANSWER_ROUTES spoke a
+# chat answer (keeps the follow-up window open). "none" is a no-speech turn.
+TOOL_ROUTES = {"tool", "tool-fast", "llm-tool"}
+ANSWER_ROUTES = {"chat-tool", "chat-fallback", "llm-answer", "chat-followup"}
+
+def _exec_calls(calls, ms):
+    with timed(ms, "act"):
+        return " ".join(a for a in (execute(c.get("name"), c.get("arguments")) for c in calls) if a)
+
+def _decide_and_run(transcript, ms, dry, followup):
+    """Pick the route for one turn and carry it out (execute a tool, or run the chat model), minus the
+    speaking and overlay (pipeline does those). Returns (route, said, calls, conf, names).
+
+    ROUTE_MODE "router" is the original behaviour. "hybrid" keeps the fast router path only for a
+    grounded hit at >= HYBRID_FLOOR and sends everything else to the chat model with the enabled
+    tools. FOLLOWUP_ROUTE "chat" makes a follow-up turn skip the router entirely (plain chat in
+    router mode, chat-with-tools in hybrid)."""
+    hybrid = CFG["ROUTE_MODE"] == "hybrid"
+    skip = followup and CFG["FOLLOWUP_ROUTE"] == "chat"
+    conf, names = 0.0, []
+    # Only similarity-scored routers can clear HYBRID_FLOOR. Generative routers' synthetic
+    # confidence (e.g. GGUF's constant 1.0) must never bypass the hybrid chat model.
+    if not skip and (not hybrid or getattr(M.router, "scored", False)):
+        with timed(ms, "route"):
+            r = _route_complete(transcript)
+        route, calls, conf, names = decide_route(r, transcript)
+        if route == "tool" and (not hybrid or conf >= CFG["HYBRID_FLOOR"]):
+            said = "" if dry else _exec_calls(calls, ms)
+            if not dry:
+                _remember(transcript, said)                 # tool turns are context for follow-ups too
+            return ("tool-fast" if hybrid else "tool"), said, calls, conf, names
+        if not hybrid:                                      # router mode: fall to plain chat (today)
+            with timed(ms, "llm"):
+                ans = chat_llm(transcript, remember=not dry)   # ORIGINAL transcript, not needle's arg
+            return route, (ans or CHAT_FAIL), [], conf, names
+    # hybrid (fast path declined or skipped), OR a router-mode follow-up that skips the router:
+    if hybrid:
+        with timed(ms, "llm"):
+            did_tool, said, calls = chat_tool(transcript, dry)
+        if did_tool:
+            return "llm-tool", said, calls, conf, [c.get("name") for c in calls]
+        return ("chat-followup" if skip else "llm-answer"), said, [], conf, []
+    with timed(ms, "llm"):                                   # router mode, skip-router follow-up
+        ans = chat_llm(transcript, remember=not dry)
+    return "chat-followup", (ans or CHAT_FAIL), [], conf, []
+
+def pipeline(transcript, ms, overlay=False, notif_id=0, dry=False, followup=False):
+    """transcript already produced; route -> execute/chat -> speak. ms is mutated + returned. overlay
     is set only for audio-triggered turns (never /text). dry (POST /text {"dry":true}) decides the
-    route and runs the chat LLM if chat, but executes no tool and speaks nothing (said="")."""
+    route and runs the chat model if chat, but executes no tool and speaks nothing (said=""). followup
+    marks a no-wake-word follow-up turn (FOLLOWUP_ROUTE can route those straight to chat)."""
     global last_pipeline_end
-    for k in ("llm", "act", "tts"):
+    for k in ("route", "llm", "act", "tts"):
         ms.setdefault(k, 0)
     try:
         if not transcript:
@@ -1343,24 +1538,12 @@ def pipeline(transcript, ms, overlay=False, notif_id=0, dry=False):
             # Bounded (8 s), not never-expiring: needle+act is 130-500 ms so step 3 almost always
             # replaces this first, but a raised exception or notif_id 0 must not leave it forever.
             _notify_async('"%s"' % transcript, "thinking…", notif_id, 8000)
-        with timed(ms, "route"):
-            r = _route_complete(transcript)
-        route, calls, conf, names = decide_route(r, transcript)
-        if route == "tool":
-            if dry:
-                said = ""
-            else:
-                with timed(ms, "act"):
-                    said = " ".join(a for a in (execute(c.get("name"), c.get("arguments"))
-                                                for c in calls) if a)
-        else:
-            with timed(ms, "llm"):
-                ans = chat_llm(transcript, remember=not dry)   # ORIGINAL transcript, not needle's arg
-            said, calls = (ans if ans else CHAT_FAIL), []
-        log("route=%s conf=%.2f transcript=%r said=%r" % (route, conf, transcript, said))
+        route, said, calls, conf, names = _decide_and_run(transcript, ms, dry, followup)
+        lat = sum(ms.get(k, 0) for k in ("route", "llm", "act"))
+        log("route=%s conf=%.2f lat=%dms transcript=%r said=%r" % (route, conf, lat, transcript, said))
         if overlay and CFG["OVERLAY_ON"]:
             # confidence distinguishes a mis-hearing (right tool, wrong words) from a mis-routing.
-            action = "→ %s (%.2f)" % (names[0], conf) if route == "tool" and names else "→ chat"
+            action = "→ %s (%.2f)" % (names[0], conf) if route in TOOL_ROUTES and names else "→ chat"
             _notify_async(transcript, "%s\n%s" % (action, said), notif_id, 6000)
         if not dry:
             with timed(ms, "tts"):
@@ -1436,7 +1619,7 @@ def listen_and_run(src=None, skip_s=0.0, notif_id=0, drained_bytes=0, followup_s
         else:
             with timed(ms, "stt"):
                 tx = M.transcribe(pcm)
-            res = pipeline(tx, ms, overlay=True, notif_id=notif_id)
+            res = pipeline(tx, ms, overlay=True, notif_id=notif_id, followup=bool(followup_s))
         # Save every turn, including no-speech ones, so a "didn't catch that" can be diagnosed later.
         threading.Thread(target=save_capture, args=(pcm, res, drained_bytes, stats), daemon=True).start()
         return res
@@ -1520,7 +1703,7 @@ def kws_loop():
                     # Follow-up window: after a chat answer, listen again without the wake word on
                     # the SAME open stream (closing it ate the first word). A tool turn, silence for
                     # FOLLOWUP_S, or the wake word being switched off ends it -> back to spotting.
-                    while (res["route"].startswith("chat") and CFG["FOLLOWUP_S"] > 0
+                    while (res["route"] in ANSWER_ROUTES and CFG["FOLLOWUP_S"] > 0
                            and WAKE_ON.is_set()):
                         log("wake pipeline: transcript=%r said=%r" % (res.get("transcript"), res.get("said")))
                         M.await_playback()          # let our spoken answer finish...
@@ -1632,6 +1815,11 @@ class H(BaseHTTPRequestHandler):
                 if "KWS_TEXT" in clean:
                     sync_kws_text(CFG["KWS_TEXT"])
                 JC.save(JC.CONFIG_PATH, CFG)
+            # Swaps see the old CFG. Warm again against the final prefix (mode/system/language),
+            # with key-based dedup so an unchanged config never pays another long prefill.
+            with LOCK:
+                if CFG["ROUTE_MODE"] == "hybrid" and M._slot_alive("chat"):
+                    M._prewarm_chat()
         finally:
             if has_model:
                 SWAP_BUSY.clear(); SWAP_LOCK.release()

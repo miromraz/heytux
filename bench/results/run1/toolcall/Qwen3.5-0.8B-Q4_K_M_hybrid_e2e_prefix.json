@@ -1,0 +1,507 @@
+{
+ "id": "Qwen3.5-0.8B-Q4_K_M",
+ "mode": "hybrid-e2e",
+ "ts": "2026-10-24T21:29:24",
+ "summary": {
+  "n": 70,
+  "accuracy": 0.829,
+  "tool_accuracy": 0.762,
+  "none_accuracy": 0.929,
+  "fast_path": 28,
+  "fast_path_pct": 40,
+  "latency_ms_median": 1256,
+  "latency_ms_p90": 2298
+ },
+ "rows": [
+  {
+   "phrase": "turn on the flashlight",
+   "expected": "flashlight_on",
+   "route": "tool-fast",
+   "name": "flashlight_on",
+   "lat_ms": 29
+  },
+  {
+   "phrase": "turn off wifi",
+   "expected": "wifi_off",
+   "route": "tool-fast",
+   "name": "wifi_off",
+   "lat_ms": 30
+  },
+  {
+   "phrase": "enable bluetooth",
+   "expected": "bluetooth_on",
+   "route": "tool-fast",
+   "name": "bluetooth_on",
+   "lat_ms": 28
+  },
+  {
+   "phrase": "set the brightness to forty percent",
+   "expected": "set_brightness",
+   "route": "tool-fast",
+   "name": "set_brightness",
+   "lat_ms": 18
+  },
+  {
+   "phrase": "mute the volume",
+   "expected": "set_volume",
+   "route": "tool-fast",
+   "name": "set_volume",
+   "lat_ms": 28
+  },
+  {
+   "phrase": "what is the battery level",
+   "expected": "battery_status",
+   "route": "tool-fast",
+   "name": "battery_status",
+   "lat_ms": 19
+  },
+  {
+   "phrase": "set a timer for five minutes",
+   "expected": "set_timer",
+   "route": "tool-fast",
+   "name": "set_timer",
+   "lat_ms": 20
+  },
+  {
+   "phrase": "what time is it",
+   "expected": "what_time_is_it",
+   "route": "tool-fast",
+   "name": "what_time_is_it",
+   "lat_ms": 30
+  },
+  {
+   "phrase": "open the calculator",
+   "expected": "open_app",
+   "route": "tool-fast",
+   "name": "open_app",
+   "lat_ms": 29
+  },
+  {
+   "phrase": "take a selfie",
+   "expected": "take_selfie",
+   "route": "tool-fast",
+   "name": "take_selfie",
+   "lat_ms": 26
+  },
+  {
+   "phrase": "lock the screen",
+   "expected": "lock_screen",
+   "route": "tool-fast",
+   "name": "lock_screen",
+   "lat_ms": 16
+  },
+  {
+   "phrase": "pause the music",
+   "expected": "play_pause",
+   "route": "tool-fast",
+   "name": "play_pause",
+   "lat_ms": 17
+  },
+  {
+   "phrase": "skip to the next track",
+   "expected": "next_track",
+   "route": "tool-fast",
+   "name": "next_track",
+   "lat_ms": 17
+  },
+  {
+   "phrase": "find my phone",
+   "expected": "find_my_phone",
+   "route": "tool-fast",
+   "name": "find_my_phone",
+   "lat_ms": 19
+  },
+  {
+   "phrase": "give me the full phone status",
+   "expected": "phone_info",
+   "route": "tool-fast",
+   "name": "phone_info",
+   "lat_ms": 17
+  },
+  {
+   "phrase": "turn on the flashlight please",
+   "expected": "flashlight_on",
+   "route": "tool-fast",
+   "name": "flashlight_on",
+   "lat_ms": 17
+  },
+  {
+   "phrase": "what is the capital of France",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1157
+  },
+  {
+   "phrase": "tell me a joke",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 3063
+  },
+  {
+   "phrase": "how are you doing today",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1729
+  },
+  {
+   "phrase": "sing me a song",
+   "expected": null,
+   "route": "llm-tool",
+   "name": "next_track",
+   "lat_ms": 1692
+  },
+  {
+   "phrase": "open the weather app",
+   "expected": "open_app",
+   "route": "llm-tool",
+   "name": "open_app",
+   "lat_ms": 2612
+  },
+  {
+   "phrase": "turn off the flashlight",
+   "expected": "flashlight_off",
+   "route": "tool-fast",
+   "name": "flashlight_off",
+   "lat_ms": 30
+  },
+  {
+   "phrase": "set the volume to thirty percent",
+   "expected": "set_volume",
+   "route": "tool-fast",
+   "name": "set_volume",
+   "lat_ms": 32
+  },
+  {
+   "phrase": "next song",
+   "expected": "next_track",
+   "route": "tool-fast",
+   "name": "next_track",
+   "lat_ms": 29
+  },
+  {
+   "phrase": "where is my phone",
+   "expected": "find_my_phone",
+   "route": "tool-fast",
+   "name": "find_my_phone",
+   "lat_ms": 29
+  },
+  {
+   "phrase": "who are you",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 2104
+  },
+  {
+   "phrase": "explain how a battery works",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 5051
+  },
+  {
+   "phrase": "hmm",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1271
+  },
+  {
+   "phrase": "what do you think about the weather",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 2320
+  },
+  {
+   "phrase": "good morning",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 783
+  },
+  {
+   "phrase": "the",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1757
+  },
+  {
+   "phrase": "okay so anyway",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1304
+  },
+  {
+   "phrase": "when you please",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1301
+  },
+  {
+   "phrase": "uh thank you",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1300
+  },
+  {
+   "phrase": "how are you",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1392
+  },
+  {
+   "phrase": "what is your favorite color",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1845
+  },
+  {
+   "phrase": "say something nice",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1383
+  },
+  {
+   "phrase": "i am bored",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1903
+  },
+  {
+   "phrase": "what is love",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1983
+  },
+  {
+   "phrase": "count to three",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 811
+  },
+  {
+   "phrase": "whatever",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1253
+  },
+  {
+   "phrase": "turn on wifi",
+   "expected": "wifi_on",
+   "route": "tool-fast",
+   "name": "wifi_on",
+   "lat_ms": 31
+  },
+  {
+   "phrase": "turn off bluetooth",
+   "expected": "bluetooth_off",
+   "route": "tool-fast",
+   "name": "bluetooth_off",
+   "lat_ms": 30
+  },
+  {
+   "phrase": "set the brightness to 40 percent",
+   "expected": "set_brightness",
+   "route": "tool-fast",
+   "name": "set_brightness",
+   "lat_ms": 32
+  },
+  {
+   "phrase": "set the volume to 30 percent",
+   "expected": "set_volume",
+   "route": "tool-fast",
+   "name": "set_volume",
+   "lat_ms": 31
+  },
+  {
+   "phrase": "what is today's date",
+   "expected": null,
+   "route": "llm-tool",
+   "name": "what_time_is_it",
+   "lat_ms": 1921
+  },
+  {
+   "phrase": "open the settings",
+   "expected": "open_app",
+   "route": "tool-fast",
+   "name": "open_app",
+   "lat_ms": 25
+  },
+  {
+   "phrase": "take a photo",
+   "expected": "take_photo",
+   "route": "tool-fast",
+   "name": "take_photo",
+   "lat_ms": 26
+  },
+  {
+   "phrase": "lock the phone",
+   "expected": "lock_screen",
+   "route": "tool-fast",
+   "name": "lock_screen",
+   "lat_ms": 27
+  },
+  {
+   "phrase": "play the music",
+   "expected": "play_pause",
+   "route": "tool-fast",
+   "name": "play_pause",
+   "lat_ms": 26
+  },
+  {
+   "phrase": "When you please,",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1550
+  },
+  {
+   "phrase": "Uh, thank you.",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 765
+  },
+  {
+   "phrase": "How are you?",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1226
+  },
+  {
+   "phrase": "How is the other day?",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1468
+  },
+  {
+   "phrase": "rozsviť baterku",
+   "expected": "flashlight_on",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1783
+  },
+  {
+   "phrase": "zhasni baterku",
+   "expected": "flashlight_off",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1771
+  },
+  {
+   "phrase": "zapni wifi",
+   "expected": "wifi_on",
+   "route": "llm-tool",
+   "name": "wifi_on",
+   "lat_ms": 1769
+  },
+  {
+   "phrase": "vypni wifi",
+   "expected": "wifi_off",
+   "route": "llm-tool",
+   "name": "wifi_on",
+   "lat_ms": 1724
+  },
+  {
+   "phrase": "zapni bluetooth",
+   "expected": "bluetooth_on",
+   "route": "llm-tool",
+   "name": "bluetooth_on",
+   "lat_ms": 1824
+  },
+  {
+   "phrase": "nastav jas na čtyřicet procent",
+   "expected": "set_brightness",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 2911
+  },
+  {
+   "phrase": "ztlum hlasitost",
+   "expected": "set_volume",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 2898
+  },
+  {
+   "phrase": "jaký je stav baterie",
+   "expected": "battery_status",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1809
+  },
+  {
+   "phrase": "kolik je hodin",
+   "expected": "what_time_is_it",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 995
+  },
+  {
+   "phrase": "nastav časovač na pět minut",
+   "expected": "set_timer",
+   "route": "llm-tool",
+   "name": "set_timer",
+   "lat_ms": 3855
+  },
+  {
+   "phrase": "otevři kalkulačku",
+   "expected": "open_app",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1898
+  },
+  {
+   "phrase": "zamkni obrazovku",
+   "expected": "lock_screen",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1809
+  },
+  {
+   "phrase": "najdi můj telefon",
+   "expected": "find_my_phone",
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1789
+  },
+  {
+   "phrase": "jaké je hlavní město Francie",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1260
+  },
+  {
+   "phrase": "pověz mi vtip",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1395
+  },
+  {
+   "phrase": "jak se dnes máš",
+   "expected": null,
+   "route": "llm-answer",
+   "name": null,
+   "lat_ms": 1543
+  }
+ ]
+}

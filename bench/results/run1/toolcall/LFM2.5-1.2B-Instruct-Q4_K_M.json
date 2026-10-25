@@ -1,0 +1,405 @@
+{
+ "id": "LFM2.5-1.2B-Instruct-Q4_K_M",
+ "ts": "2026-10-24T19:42:44",
+ "n_phrases": 70,
+ "max_tokens": 48,
+ "n_tools": 19,
+ "load_s": 8.49,
+ "cold_prefill_s": 33.35,
+ "cold_prefill_prompt_ms": 33301.793,
+ "truncated_after": 20,
+ "rss_mb": 1567,
+ "metrics_heldout": {
+  "tool_accuracy": 0.812,
+  "tool_n": 16,
+  "none_recall": 1.0,
+  "none_precision": 0.571,
+  "none_n": 4
+ },
+ "metrics_czech": {
+  "tool_accuracy": null,
+  "tool_n": 0,
+  "none_recall": null,
+  "none_precision": null,
+  "none_n": 0
+ },
+ "metrics_all": {
+  "tool_accuracy": 0.812,
+  "tool_n": 16,
+  "none_recall": 1.0,
+  "none_precision": 0.571,
+  "none_n": 4
+ },
+ "latency": {
+  "first_turn_total_s": 16.82,
+  "cached_turn_total_s_median": 16.92,
+  "first_turn_prompt_ms": 15889.3,
+  "cached_turn_prompt_ms_median": 15862.9,
+  "prompt_tokens_first": 520,
+  "n_valid": 20,
+  "n_error": 0
+ },
+ "errors": [],
+ "rows": [
+  {
+   "phrase": "turn on the flashlight",
+   "expected": "flashlight_on",
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 16.82,
+   "timings": {
+    "cache_n": 620,
+    "prompt_n": 520,
+    "prompt_ms": 15889.284,
+    "prompt_per_token_ms": 30.556315384615385,
+    "prompt_per_second": 32.72645891407064,
+    "predicted_n": 10,
+    "predicted_ms": 849.665,
+    "predicted_per_token_ms": 94.40722222222222,
+    "predicted_per_second": 10.592409949803747
+   }
+  },
+  {
+   "phrase": "turn off wifi",
+   "expected": "wifi_off",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.34,
+   "timings": {
+    "cache_n": 624,
+    "prompt_n": 515,
+    "prompt_ms": 15840.816,
+    "prompt_per_token_ms": 30.75886601941748,
+    "prompt_per_second": 32.510951456036096,
+    "predicted_n": 48,
+    "predicted_ms": 4436.678,
+    "predicted_per_token_ms": 94.39740425531915,
+    "predicted_per_second": 10.593511631901166
+   }
+  },
+  {
+   "phrase": "enable bluetooth",
+   "expected": "bluetooth_on",
+   "pred": "bluetooth_on",
+   "group": "heldout",
+   "latency_s": 16.83,
+   "timings": {
+    "cache_n": 624,
+    "prompt_n": 514,
+    "prompt_ms": 16046.516,
+    "prompt_per_token_ms": 31.218902723735408,
+    "prompt_per_second": 32.03187533044556,
+    "predicted_n": 9,
+    "predicted_ms": 757.409,
+    "predicted_per_token_ms": 94.676125,
+    "predicted_per_second": 10.562324978974372
+   }
+  },
+  {
+   "phrase": "set the brightness to forty percent",
+   "expected": "set_brightness",
+   "pred": "set_brightness",
+   "group": "heldout",
+   "latency_s": 17.14,
+   "timings": {
+    "cache_n": 624,
+    "prompt_n": 517,
+    "prompt_ms": 15847.089,
+    "prompt_per_token_ms": 30.652009671179883,
+    "prompt_per_second": 32.62428828411325,
+    "predicted_n": 14,
+    "predicted_ms": 1210.377,
+    "predicted_per_token_ms": 93.10592307692308,
+    "predicted_per_second": 10.74045524658846
+   }
+  },
+  {
+   "phrase": "mute the volume",
+   "expected": "set_volume",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.4,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 514,
+    "prompt_ms": 15947.989,
+    "prompt_per_token_ms": 31.027215953307394,
+    "prompt_per_second": 32.2297689069136,
+    "predicted_n": 48,
+    "predicted_ms": 4387.771,
+    "predicted_per_token_ms": 93.35682978723403,
+    "predicted_per_second": 10.711589096149275
+   }
+  },
+  {
+   "phrase": "what is the battery level",
+   "expected": "battery_status",
+   "pred": "battery_status",
+   "group": "heldout",
+   "latency_s": 16.74,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 515,
+    "prompt_ms": 15967.249,
+    "prompt_per_token_ms": 31.004366990291263,
+    "prompt_per_second": 32.25352094152224,
+    "predicted_n": 9,
+    "predicted_ms": 748.342,
+    "predicted_per_token_ms": 93.54275,
+    "predicted_per_second": 10.690299355107692
+   }
+  },
+  {
+   "phrase": "set a timer for five minutes",
+   "expected": "set_timer",
+   "pred": "set_timer",
+   "group": "heldout",
+   "latency_s": 16.98,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 516,
+    "prompt_ms": 15839.655,
+    "prompt_per_token_ms": 30.69700581395349,
+    "prompt_per_second": 32.57646710108269,
+    "predicted_n": 13,
+    "predicted_ms": 1116.265,
+    "predicted_per_token_ms": 93.02208333333334,
+    "predicted_per_second": 10.750135496499485
+   }
+  },
+  {
+   "phrase": "what time is it",
+   "expected": "what_time_is_it",
+   "pred": "what_time_is_it",
+   "group": "heldout",
+   "latency_s": 16.92,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 514,
+    "prompt_ms": 15905.179,
+    "prompt_per_token_ms": 30.943928015564204,
+    "prompt_per_second": 32.316517783295616,
+    "predicted_n": 11,
+    "predicted_ms": 931.112,
+    "predicted_per_token_ms": 93.1112,
+    "predicted_per_second": 10.739846549072507
+   }
+  },
+  {
+   "phrase": "open the calculator",
+   "expected": "open_app",
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.21,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 513,
+    "prompt_ms": 15731.679,
+    "prompt_per_token_ms": 30.666040935672516,
+    "prompt_per_second": 32.60936102243124,
+    "predicted_n": 48,
+    "predicted_ms": 4392.514,
+    "predicted_per_token_ms": 93.45774468085106,
+    "predicted_per_second": 10.700022811537995
+   }
+  },
+  {
+   "phrase": "take a selfie",
+   "expected": "take_selfie",
+   "pred": "take_selfie",
+   "group": "heldout",
+   "latency_s": 16.91,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 514,
+    "prompt_ms": 15986.781,
+    "prompt_per_token_ms": 31.10268677042802,
+    "prompt_per_second": 32.151563219637524,
+    "predicted_n": 10,
+    "predicted_ms": 842.92,
+    "predicted_per_token_ms": 93.65777777777777,
+    "predicted_per_second": 10.677169838181559
+   }
+  },
+  {
+   "phrase": "lock the screen",
+   "expected": "lock_screen",
+   "pred": "lock_screen",
+   "group": "heldout",
+   "latency_s": 16.6,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 513,
+    "prompt_ms": 15774.825,
+    "prompt_per_token_ms": 30.75014619883041,
+    "prompt_per_second": 32.520170588263255,
+    "predicted_n": 9,
+    "predicted_ms": 752.062,
+    "predicted_per_token_ms": 94.00775,
+    "predicted_per_second": 10.637420850940481
+   }
+  },
+  {
+   "phrase": "pause the music",
+   "expected": "play_pause",
+   "pred": "play_pause",
+   "group": "heldout",
+   "latency_s": 16.68,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 514,
+    "prompt_ms": 15880.573,
+    "prompt_per_token_ms": 30.896056420233464,
+    "prompt_per_second": 32.36659029872537,
+    "predicted_n": 9,
+    "predicted_ms": 734.22,
+    "predicted_per_token_ms": 91.7775,
+    "predicted_per_second": 10.895916755195989
+   }
+  },
+  {
+   "phrase": "skip to the next track",
+   "expected": "next_track",
+   "pred": "next_track",
+   "group": "heldout",
+   "latency_s": 16.63,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 515,
+    "prompt_ms": 15809.216,
+    "prompt_per_token_ms": 30.697506796116507,
+    "prompt_per_second": 32.57593545435776,
+    "predicted_n": 9,
+    "predicted_ms": 746.78,
+    "predicted_per_token_ms": 93.3475,
+    "predicted_per_second": 10.71265968558344
+   }
+  },
+  {
+   "phrase": "find my phone",
+   "expected": "find_my_phone",
+   "pred": "find_my_phone",
+   "group": "heldout",
+   "latency_s": 16.7,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 513,
+    "prompt_ms": 15684.587,
+    "prompt_per_token_ms": 30.574243664717347,
+    "prompt_per_second": 32.70726860707266,
+    "predicted_n": 11,
+    "predicted_ms": 934.604,
+    "predicted_per_token_ms": 93.4604,
+    "predicted_per_second": 10.699718811389635
+   }
+  },
+  {
+   "phrase": "give me the full phone status",
+   "expected": "phone_info",
+   "pred": "phone_info",
+   "group": "heldout",
+   "latency_s": 16.58,
+   "timings": {
+    "cache_n": 625,
+    "prompt_n": 517,
+    "prompt_ms": 15862.899,
+    "prompt_per_token_ms": 30.68258994197292,
+    "prompt_per_second": 32.59177279008081,
+    "predicted_n": 8,
+    "predicted_ms": 656.271,
+    "predicted_per_token_ms": 93.753,
+    "predicted_per_second": 10.66632534425565
+   }
+  },
+  {
+   "phrase": "turn on the flashlight please",
+   "expected": "flashlight_on",
+   "pred": "flashlight_on",
+   "group": "heldout",
+   "latency_s": 16.68,
+   "timings": {
+    "cache_n": 626,
+    "prompt_n": 515,
+    "prompt_ms": 15767.028,
+    "prompt_per_token_ms": 30.615588349514564,
+    "prompt_per_second": 32.66309922199669,
+    "predicted_n": 10,
+    "predicted_ms": 837.601,
+    "predicted_per_token_ms": 93.06677777777777,
+    "predicted_per_second": 10.744972845065849
+   }
+  },
+  {
+   "phrase": "what is the capital of France",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.08,
+   "timings": {
+    "cache_n": 626,
+    "prompt_n": 515,
+    "prompt_ms": 15824.099,
+    "prompt_per_token_ms": 30.72640582524272,
+    "prompt_per_second": 32.545296891785114,
+    "predicted_n": 46,
+    "predicted_ms": 4173.625,
+    "predicted_per_token_ms": 92.74722222222222,
+    "predicted_per_second": 10.781994069903261
+   }
+  },
+  {
+   "phrase": "tell me a joke",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.36,
+   "timings": {
+    "cache_n": 626,
+    "prompt_n": 514,
+    "prompt_ms": 16029.145,
+    "prompt_per_token_ms": 31.18510700389105,
+    "prompt_per_second": 32.06658870451293,
+    "predicted_n": 47,
+    "predicted_ms": 4281.451,
+    "predicted_per_token_ms": 93.07502173913043,
+    "predicted_per_second": 10.74402112741685
+   }
+  },
+  {
+   "phrase": "how are you doing today",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.43,
+   "timings": {
+    "cache_n": 626,
+    "prompt_n": 514,
+    "prompt_ms": 16008.216,
+    "prompt_per_token_ms": 31.144389105058366,
+    "prompt_per_second": 32.108512278944765,
+    "predicted_n": 48,
+    "predicted_ms": 4403.298,
+    "predicted_per_token_ms": 93.6871914893617,
+    "predicted_per_second": 10.673817670300762
+   }
+  },
+  {
+   "phrase": "sing me a song",
+   "expected": null,
+   "pred": "none",
+   "group": "heldout",
+   "latency_s": 20.37,
+   "timings": {
+    "cache_n": 626,
+    "prompt_n": 513,
+    "prompt_ms": 15909.761,
+    "prompt_per_token_ms": 31.01317933723197,
+    "prompt_per_second": 32.2443561534331,
+    "predicted_n": 48,
+    "predicted_ms": 4398.401,
+    "predicted_per_token_ms": 93.583,
+    "predicted_per_second": 10.68570146287253
+   }
+  }
+ ]
+}

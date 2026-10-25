@@ -83,6 +83,11 @@ SCHEMA = [
        "After a chat answer, keep listening this long for a follow-up question without the wake "
        "word. Ends silently if you say nothing, or after any phone command. 0 disables.",
        "wake", "live", min=0.0, max=15.0, step=0.5),
+    _f("FOLLOWUP_ROUTE", "enum", "normal", "Follow-up routing",
+       "How a follow-up turn (inside the window above) is handled. \"normal\" routes it like any "
+       "other turn. \"chat\" skips the command router entirely and sends it straight to the chat "
+       "model (with tools when the route mode is hybrid), so a conversation is not interrupted by "
+       "the router.", "wake", "live", values=["normal", "chat"]),
     _f("CONF_FLOOR", "float", 0.5, "Confidence floor",
        "Below this the Needle router's answer is discarded and the question goes to the chat model. "
        "Applies only to Needle3: the embedding router uses its own similarity floor, and a "
@@ -91,6 +96,20 @@ SCHEMA = [
     _f("GROUNDING_ON", "bool", True, "Require lexical grounding",
        "Reject a tool call that shares no meaningful word with what you said (the router "
        "confabulating a match) and send it to chat instead.", "routing", "live"),
+    _f("ROUTE_MODE", "enum", "router", "Routing mode",
+       "\"router\" runs every turn through the fast command router and falls to chat only when it "
+       "declines. \"hybrid\" keeps that fast path for a confident, grounded router hit, but sends "
+       "everything else to the chat model with the phone commands offered as tools, so the chat "
+       "model can both answer and operate the phone.", "routing", "live",
+       values=["router", "hybrid"]),
+    _f("HYBRID_FLOOR", "float", 0.75, "Hybrid fast-path floor",
+       "In hybrid mode, a router tool hit at or above this confidence (and grounded) is executed "
+       "directly; anything less confident goes to the chat model with tools. Higher sends more "
+       "turns to the slower-but-smarter chat model.", "routing", "live", min=0.0, max=1.0, step=0.05),
+    _f("LANG_AUTO", "bool", True, "Match reply language",
+       "Tell the chat model to answer in whatever language you spoke, and speak the reply with the "
+       "alternate voice below when the answer is in Czech. Tool acknowledgements stay in English.",
+       "routing", "live"),
     _f("LLM_SYS", "text",
        "You are a voice assistant running on a phone. Reply in one or two short spoken "
        "sentences, no lists, no markdown, no emoji.",
@@ -125,6 +144,10 @@ SCHEMA = [
     _f("TTS_MODEL", "enum", "vits-piper-en_US-lessac-low-int8", "Voice",
        "Speech synthesis voice used for spoken answers and acknowledgements.",
        "models", "live", values=[]),
+    _f("TTS_MODEL_ALT", "enum", "vits-piper-cs_CZ-jirka-medium", "Alternate (Czech) voice",
+       "A second voice, loaded only when set, used to speak a reply detected as Czech (the chat "
+       "model picks the language, this voice follows). Empty disables it and every reply uses the "
+       "main voice above.", "models", "live", values=[]),
     _f("VAD_MODEL", "enum", "silero_vad", "Voice activity detector",
        "The model that decides, frame by frame, when you are speaking. Silero is the baseline; "
        "TEN is an alternative. Takes effect from the next recording on.",
